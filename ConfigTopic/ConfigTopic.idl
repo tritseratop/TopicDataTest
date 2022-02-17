@@ -1,0 +1,6 @@
+struct ConfigTopic
+{
+    short subscriber_id;
+    unsigned short vector_size;
+    string topictype_name;
+};

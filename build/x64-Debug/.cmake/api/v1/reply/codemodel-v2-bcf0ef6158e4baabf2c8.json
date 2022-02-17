@@ -1,0 +1,123 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "PublisherProject",
+					"jsonFile" : "directory-PublisherProject-Debug-c7f438101dd1f5b56f2d.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "PublisherProject",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "SubscriberProject",
+					"jsonFile" : "directory-SubscriberProject-Debug-5eb5fe3e715a2990d988.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 2,
+					"source" : "SubscriberProject",
+					"targetIndexes" : 
+					[
+						1
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "TopicDataTest"
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "PublisherProject",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "SubscriberProject",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 1,
+					"id" : "PublisherProject::@0e0f59fa1084dc9d1444",
+					"jsonFile" : "target-PublisherProject-Debug-814b4518915b1bc19950.json",
+					"name" : "PublisherProject",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "SubscriberProject::@4caa563675bb1bb70593",
+					"jsonFile" : "target-SubscriberProject-Debug-cf133c096a09ea05751d.json",
+					"name" : "SubscriberProject",
+					"projectIndex" : 2
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/alina/Develop/VS2022/TopicDataTest/build/x64-Debug",
+		"source" : "C:/Users/alina/Develop/VS2022/TopicDataTest"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}
