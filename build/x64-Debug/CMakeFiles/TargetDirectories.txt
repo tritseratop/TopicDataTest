@@ -1,8 +1,0 @@
-C:/Users/alina/Develop/VS2022/TopicDataTest/build/x64-Debug/CMakeFiles/edit_cache.dir
-C:/Users/alina/Develop/VS2022/TopicDataTest/build/x64-Debug/CMakeFiles/rebuild_cache.dir
-C:/Users/alina/Develop/VS2022/TopicDataTest/build/x64-Debug/PublisherProject/CMakeFiles/PublisherProject.dir
-C:/Users/alina/Develop/VS2022/TopicDataTest/build/x64-Debug/PublisherProject/CMakeFiles/edit_cache.dir
-C:/Users/alina/Develop/VS2022/TopicDataTest/build/x64-Debug/PublisherProject/CMakeFiles/rebuild_cache.dir
-C:/Users/alina/Develop/VS2022/TopicDataTest/build/x64-Debug/SubscriberProject/CMakeFiles/edit_cache.dir
-C:/Users/alina/Develop/VS2022/TopicDataTest/build/x64-Debug/SubscriberProject/CMakeFiles/SubscriberProject.dir
-C:/Users/alina/Develop/VS2022/TopicDataTest/build/x64-Debug/SubscriberProject/CMakeFiles/rebuild_cache.dir
