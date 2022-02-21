@@ -10,7 +10,7 @@ int main(
     DdsPublisher* mypub = new DdsPublisher();
     if (mypub->init())
     {
-        mypub->run(static_cast<uint32_t>(samples), 1000);
+        mypub->runData(static_cast<uint32_t>(samples), 1000);
     }
 
     delete mypub;

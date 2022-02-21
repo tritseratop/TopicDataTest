@@ -1,18 +1,11 @@
+#include <mutex>
+
 #include <fastdds/dds/domain/DomainParticipantFactory.hpp>
 
 #include "DdsSubscriber.h"
 
 using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
-
-#define TEST_MODE
-
-#ifdef TEST_MODE
-
-std::vector<SubscriberConfiguration> configs({
-		{0, 10000, "DDSData1", "DDSData"}
-	});
-#endif
 
 DdsSubscriber::DdsSubscriber()
 	: participant_(nullptr)
@@ -29,23 +22,19 @@ DdsSubscriber::DdsSubscriber()
 DdsSubscriber::~DdsSubscriber()
 {
 	// TODO: вынести в другую функцию удаление подписчиков
-	for (const auto& it : readers_)
+	for (auto& sub : subscribers_)
 	{
-		it.first->delete_datareader(it.second);
+		delete sub;
 	}
-	for (const auto& it : topics_)
-	{
-		participant_->delete_topic(it.second);
-		participant_->delete_subscriber(it.first);
-	}
-	readers_.clear();
-	topics_.clear();
 	subscribers_.clear();
 
 	// TODO: надо ли проверять на nullptr??
 	participant_->delete_topic(config_topic_);
-	//config_subscriber_->delete_datareader(config_reader_);
-	//participant_->delete_subscriber(config_subscriber_);
+	if (config_subscriber_ != nullptr)
+	{
+		config_subscriber_->delete_datareader(config_reader_);
+	}
+	participant_->delete_subscriber(config_subscriber_);
 
 	DomainParticipantFactory::get_instance()->delete_participant(participant_);
 }
@@ -97,38 +86,6 @@ void DdsSubscriber::runConfigSubscriber(uint32_t samples)
 	}
 }
 
-bool DdsSubscriber::initSubscribersFromConfig()
-{
-	if (participant_ == nullptr)
-	{
-		DomainParticipantQos participantQos;
-		participantQos.name("Participant_subscriber");
-		participant_ = DomainParticipantFactory::get_instance()->create_participant(0, participantQos);
-	}
-	if (participant_ == nullptr)
-	{
-		return false;
-	}
-
-	if (!configs.empty())
-	{
-		for (const auto& config : configs)
-		{
-			// Определяем новый тип топика
-			// Установка размеров векторов нового топика
-			dds_subscribers_.push_back(ddsDataSubscriberCreator->createSubscriber(participant_, config));
-			dds_subscribers_.back()->init();
-		}
-	}
-	else
-	{
-		std::cout << "Configuration for subscribers is not found" << std::endl;
-		return false;
-	}
-
-	return true;
-}
-
 DdsSubscriber::ConfigSubscriberListener::ConfigSubscriberListener(
 	DdsSubscriber* subscriber)
 	: subscriber_(subscriber)
@@ -159,11 +116,63 @@ void DdsSubscriber::ConfigSubscriberListener::on_data_available(
 
 }
 
-void DdsSubscriber::createNewSubscriber(const ConfigTopic& config)
+bool DdsSubscriber::createParticipant()
+{
+	if (participant_ == nullptr)
+	{
+		DomainParticipantQos participantQos;
+		participantQos.name("Participant_subscriber");
+		participant_ = DomainParticipantFactory::get_instance()->create_participant(0, participantQos);
+	}
+	if (participant_ == nullptr)
+	{
+		return false;
+	}
+	return true;
+}
+
+bool DdsSubscriber::initSubscribers(const std::vector<SubscriberConfiguration>& configs)
+{
+	createParticipant();
+	if (!configs.empty())
+	{
+		for (const auto& config : configs)
+		{
+			createNewSubscriber(config);
+		}
+	}
+	else
+	{
+		std::cout << "Configuration for subscribers is not found" << std::endl;
+		return false;
+	}
+	for (auto& sub : subscribers_)
+	{
+		sub->init();
+	}
+	return true;
+}
+
+bool DdsSubscriber::createNewSubscriber(const SubscriberConfiguration& config)
 {
 	// TODO: узнать че менять в SUBSCRIBER_QOS_DEFAULT
-	subscribers_.push_back(participant_->create_subscriber(SUBSCRIBER_QOS_DEFAULT, nullptr));
+	AbstractDdsSubscriber* sub = factory_.createSubscriber(participant_, config);
+	if (sub == nullptr)
+	{
+		return false;
+	}
 
+	std::lock_guard<std::mutex> guard(std::mutex());
+	subscribers_.push_back(sub);
+	return true;
+}
+
+void DdsSubscriber::runSubscribers()
+{
+	for (auto& sub : subscribers_)
+	{
+		sub->run(1);
+	}
 }
 
 void DdsSubscriber::ConfigSubscriberListener::on_subscription_matched(

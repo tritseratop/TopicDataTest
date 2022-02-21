@@ -21,14 +21,16 @@ public:
 	bool initConfigSubscriber();
 	void runConfigSubscriber(uint32_t samples);
 
-	bool initSubscribersFromConfig();
-
-	void createNewSubscriber(const ConfigTopic& config);
+	bool createParticipant();
+	bool initSubscribers(const std::vector<SubscriberConfiguration>& configs);
+	bool createNewSubscriber(const SubscriberConfiguration& config);
+	void runSubscribers();
 
 private:
-	// ‘абрики
-	DDSDataSubscriberCreator* ddsDataSubscriberCreator;
-	DDSDataExSubscriberCreator* ddsDataExSubscriberCreator;
+	SubscriberFactory factory_;
+
+	//  онтейнеры с пользовательскими типам
+	std::vector<AbstractDdsSubscriber*> subscribers_;
 
 	eprosima::fastdds::dds::DomainParticipant* participant_;
 	eprosima::fastdds::dds::Subscriber* config_subscriber_;
@@ -36,19 +38,6 @@ private:
 	eprosima::fastdds::dds::Topic* config_topic_; 
 	eprosima::fastdds::dds::TypeSupport config_type_; // TODO не нужна как поле ?
 	ConfigTopic config_;
-
-	//  онтейнеры с пользовательскими типам
-	std::vector<AbstractDdsSubscriber*> dds_subscribers_;
-
-	//  онтейнеры с топиками
-	std::vector<eprosima::fastdds::dds::Subscriber*> subscribers_; // TODO: подумать надо ли их будет часто удал€ть
-	std::unordered_map<
-		eprosima::fastdds::dds::Subscriber*, 
-		eprosima::fastdds::dds::DataReader*> readers_;
-	std::unordered_map<
-		eprosima::fastdds::dds::Subscriber*, 
-		eprosima::fastdds::dds::Topic*> topics_;
-	//std::unordered_map<eprosima::fastdds::dds::Subscriber*, eprosima::fastdds::dds::TypeSupport> subscribers_;
 
 	class ConfigSubscriberListener : public eprosima::fastdds::dds::DataReaderListener
 	{
@@ -68,6 +57,20 @@ private:
 		uint32_t samples_; // TODO atomic??
 		DdsSubscriber* subscriber_;
 	} config_listener_;
+
+	//  онтейнеры с топиками
+	std::vector<eprosima::fastdds::dds::Subscriber*> dds_subs_; // TODO: подумать надо ли их будет часто удал€ть
+	std::unordered_map<
+		eprosima::fastdds::dds::Subscriber*,
+		eprosima::fastdds::dds::DataReader*> readers_;
+	std::unordered_map<
+		eprosima::fastdds::dds::Subscriber*,
+		eprosima::fastdds::dds::Topic*> topics_;
+	//std::unordered_map<eprosima::fastdds::dds::Subscriber*, eprosima::fastdds::dds::TypeSupport> subscribers_;
+
+	// ‘абрики
+	DDSDataSubscriberCreator* ddsDataSubscriberCreator;
+	DDSDataExSubscriberCreator* ddsDataExSubscriberCreator;
 };
 
 // TODO: сделать макрос?

@@ -1,5 +1,15 @@
 #include "DdsSubscriber.h"
 
+
+#define TEST_MODE
+
+#ifdef TEST_MODE
+
+std::vector<SubscriberConfiguration> configs({
+        {0, 10000, "DDSData", "DDSData", TopicType::DDS_DATA}
+    });
+#endif
+
 int main(
     int argc,
     char** argv)
@@ -8,9 +18,9 @@ int main(
     int samples = 10;
 
     DdsSubscriber* mysub = new DdsSubscriber();
-    if (mysub->initSubscribersFromConfig())
+    if (mysub->initSubscribers(configs))
     {
-        //mysub->(static_cast<uint32_t>(samples));
+        mysub->runSubscribers();
     }
 
     delete mysub;
