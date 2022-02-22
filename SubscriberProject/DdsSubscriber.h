@@ -9,9 +9,25 @@
 #include <fastdds/dds/subscriber/DataReader.hpp>
 #include <fastdds/dds/subscriber/DataReaderListener.hpp>
 
+#include <fastrtps/attributes/ParticipantAttributes.h>
+
 #include "../ConfigTopic/ConfigTopicPubSubTypes.h"
 #include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "SubscriberFactory.h"
+
+struct ServiceConfig
+{
+	// participant params
+	std::string participant_name;
+
+	// TCP params
+	std::string ip;
+	uint16_t port = 4042;
+	std::vector<std::string> whitelist;
+
+	// subscribers params
+	std::vector<SubscriberConfig> sub_configs;
+};
 
 class DdsSubscriber {
 public:
@@ -22,11 +38,15 @@ public:
 	void runConfigSubscriber(uint32_t samples);
 
 	bool createParticipant();
-	bool initSubscribers(const std::vector<SubscriberConfiguration>& configs);
-	bool createNewSubscriber(const SubscriberConfiguration& config);
+	eprosima::fastdds::dds::DomainParticipantQos getParticipantQos();
+	bool initSubscribers(const ServiceConfig& config);
+	bool createNewSubscriber(const SubscriberConfig& config);
 	void runSubscribers();
 
 private:
+
+	ServiceConfig config_;
+
 	SubscriberFactory factory_;
 
 	// Контейнеры с пользовательскими типам
@@ -37,7 +57,7 @@ private:
 	eprosima::fastdds::dds::DataReader* config_reader_;
 	eprosima::fastdds::dds::Topic* config_topic_; 
 	eprosima::fastdds::dds::TypeSupport config_type_; // TODO не нужна как поле ?
-	ConfigTopic config_;
+	ConfigTopic config_topic_data_;
 
 	class ConfigSubscriberListener : public eprosima::fastdds::dds::DataReaderListener
 	{

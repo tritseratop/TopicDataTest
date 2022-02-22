@@ -2,6 +2,10 @@
 
 #include <fastdds/dds/domain/DomainParticipantFactory.hpp>
 
+#include <fastrtps/Domain.h>
+#include <fastrtps/transport/TCPv4TransportDescriptor.h>
+#include <fastrtps/utils/IPLocator.h>
+
 #include "DdsSubscriber.h"
 
 using namespace eprosima::fastdds::dds;
@@ -33,8 +37,8 @@ DdsSubscriber::~DdsSubscriber()
 	if (config_subscriber_ != nullptr)
 	{
 		config_subscriber_->delete_datareader(config_reader_);
+		participant_->delete_subscriber(config_subscriber_);
 	}
-	participant_->delete_subscriber(config_subscriber_);
 
 	DomainParticipantFactory::get_instance()->delete_participant(participant_);
 }
@@ -101,14 +105,14 @@ void DdsSubscriber::ConfigSubscriberListener::on_data_available(
 	eprosima::fastdds::dds::DataReader* reader)
 {
 	SampleInfo info;
-	if (reader->take_next_sample(&(subscriber_->config_), &info) == ReturnCode_t::RETCODE_OK)
+	if (reader->take_next_sample(&(subscriber_->config_topic_data_), &info) == ReturnCode_t::RETCODE_OK)
 	{
 		if (info.valid_data)
 		{
 			samples_++;
-			std::cout << "Subscriber id: " << subscriber_->config_.subscriber_id() 
-				<< " with vector size: " << subscriber_->config_.vector_size()
-				<< " with topic type name: " << subscriber_->config_.topictype_name()
+			std::cout << "Subscriber id: " << subscriber_->config_topic_data_.subscriber_id() 
+				<< " with vector size: " << subscriber_->config_topic_data_.vector_size()
+				<< " with topic type name: " << subscriber_->config_topic_data_.topictype_name()
 				<< " RECEIVED." << std::endl;
 		}
 	}
@@ -120,9 +124,7 @@ bool DdsSubscriber::createParticipant()
 {
 	if (participant_ == nullptr)
 	{
-		DomainParticipantQos participantQos;
-		participantQos.name("Participant_subscriber");
-		participant_ = DomainParticipantFactory::get_instance()->create_participant(0, participantQos);
+		participant_ = DomainParticipantFactory::get_instance()->create_participant(0, getParticipantQos());
 	}
 	if (participant_ == nullptr)
 	{
@@ -131,12 +133,47 @@ bool DdsSubscriber::createParticipant()
 	return true;
 }
 
-bool DdsSubscriber::initSubscribers(const std::vector<SubscriberConfiguration>& configs)
+
+DomainParticipantQos DdsSubscriber::getParticipantQos()
 {
-	createParticipant();
-	if (!configs.empty())
+	using namespace eprosima::fastrtps;
+	using namespace eprosima::fastrtps::rtps;
+
+	DomainParticipantQos qos;
+
+	Locator_t initial_peer_locator;
+	initial_peer_locator.kind = LOCATOR_KIND_TCPv4;
+	initial_peer_locator.port = config_.port;
+
+	std::shared_ptr<TCPv4TransportDescriptor> descriptor = std::make_shared<TCPv4TransportDescriptor>();
+
+	for (std::string ip : config_.whitelist)
 	{
-		for (const auto& config : configs)
+		descriptor->interfaceWhiteList.push_back(ip);
+		std::cout << "Whitelisted " << ip << std::endl;
+	}
+	IPLocator::setIPv4(initial_peer_locator, config_.ip);
+	qos.wire_protocol().builtin.initialPeersList.push_back(initial_peer_locator); // Publisher's meta channel
+
+	qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
+	qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(5, 0);
+	qos.name("Participant_sub"); // TODO хз откуда брать имя
+	
+
+	qos.transport().use_builtin_transports = false;
+
+	qos.transport().user_transports.push_back(descriptor);
+
+	return qos;
+}
+
+bool DdsSubscriber::initSubscribers(const ServiceConfig& config)
+{
+	config_ = config;
+	createParticipant();
+	if (!config.sub_configs.empty())
+	{
+		for (const auto& config : config.sub_configs)
 		{
 			createNewSubscriber(config);
 		}
@@ -153,7 +190,7 @@ bool DdsSubscriber::initSubscribers(const std::vector<SubscriberConfiguration>& 
 	return true;
 }
 
-bool DdsSubscriber::createNewSubscriber(const SubscriberConfiguration& config)
+bool DdsSubscriber::createNewSubscriber(const SubscriberConfig& config)
 {
 	// TODO: узнать че менять в SUBSCRIBER_QOS_DEFAULT
 	AbstractDdsSubscriber* sub = factory_.createSubscriber(participant_, config);

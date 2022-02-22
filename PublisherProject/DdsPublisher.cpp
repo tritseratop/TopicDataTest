@@ -1,5 +1,7 @@
 #include <fastdds/dds/domain/DomainParticipantFactory.hpp>
 
+#include <fastrtps/transport/TCPv4TransportDescriptor.h>
+
 #include "DdsPublisher.h"
 
 using namespace eprosima::fastdds::dds;
@@ -34,16 +36,43 @@ DdsPublisher::~DdsPublisher()
 
 bool DdsPublisher::init()
 {
-	config_.subscriber_id(0);
-	config_.vector_size(10000);
-	config_.topictype_name("FirstType");
+	using namespace eprosima::fastrtps;
+	using namespace eprosima::fastrtps::rtps;
+
+	config_topic_data_.subscriber_id(0);
+	config_topic_data_.vector_size(10000);
+	config_topic_data_.topictype_name("FirstType");
 
 	data_.time_service(8888);
 	data_.time_source(1111);
 
-	DomainParticipantQos participantQos;
-	participantQos.name("Participant_publisher");
-	participant_ = DomainParticipantFactory::get_instance()->create_participant(0, participantQos);
+	DomainParticipantQos qos;
+	qos.name("Participant_pub");
+
+	qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
+	qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(5, 0);
+
+	qos.transport().use_builtin_transports = false;
+
+	std::shared_ptr<TCPv4TransportDescriptor> descriptor = std::make_shared<TCPv4TransportDescriptor>();
+
+	std::vector<std::string> whitelist({ "127.0.0.1" });
+	for (std::string ip : whitelist)
+	{
+		descriptor->interfaceWhiteList.push_back(ip);
+		std::cout << "Whitelisted " << ip << std::endl;
+	}
+
+	descriptor->sendBufferSize = 0;
+	descriptor->receiveBufferSize = 0;
+
+	descriptor->set_WAN_address("127.0.0.1");
+
+	descriptor->add_listener_port(4042);
+
+	qos.transport().user_transports.push_back(descriptor);
+
+	participant_ = DomainParticipantFactory::get_instance()->create_participant(0, qos);
 	if (participant_ == nullptr)
 	{
 		return false;
@@ -100,9 +129,9 @@ void DdsPublisher::run(
 		if (publish(writer_, &listener_, samples_sent))
 		{
 			samples_sent++;
-			std::cout << "Subscriber id: " << config_.subscriber_id()
-				<< " with vector size: " << config_.vector_size()
-				<< " with topic type name: " << config_.topictype_name()
+			std::cout << "Subscriber id: " << config_topic_data_.subscriber_id()
+				<< " with vector size: " << config_topic_data_.vector_size()
+				<< " with topic type name: " << config_topic_data_.topictype_name()
 				<< " SENDED." << std::endl;
 			break;
 		}
@@ -134,7 +163,7 @@ bool DdsPublisher::publish(DataWriter* writer, const DdsPublisherListener* liste
 	//std::lock_guard<std::mutex> guard(std::mutex());
 	if (listener > 0 && listener_.first_connected_)
 	{
-		writer->write(&config_);
+		writer->write(&config_topic_data_);
 		return true;
 	}
 	return false;

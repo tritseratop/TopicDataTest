@@ -8,7 +8,7 @@ using namespace eprosima::fastdds::dds;
 
 DDSDataSubscriber::DDSDataSubscriber(
 	DomainParticipant* participant,
-	const SubscriberConfiguration& config)
+	const SubscriberConfig& config)
 	: participant_(participant)
 	, subscriber_(nullptr)
 	, reader_(nullptr)
@@ -31,12 +31,6 @@ bool DDSDataSubscriber::init()
 	}
 
 	support_type_.register_type(participant_);
-
-	topic_ = participant_->create_topic(config_.topic_name, config_.topic_type_name, TOPIC_QOS_DEFAULT);
-	if (topic_ == nullptr)
-	{
-		return false;
-	}
 
 	topic_ = participant_->create_topic(config_.topic_name, config_.topic_type_name, TOPIC_QOS_DEFAULT);
 	if (topic_ == nullptr)
@@ -68,6 +62,11 @@ void DDSDataSubscriber::run(uint32_t samples)
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
+}
+
+void DDSDataSubscriber::setConfig(const SubscriberConfig& config)
+{
+	config_ = config;
 }
 
 DDSDataSubscriber::DDSDataSubscriberListener::DDSDataSubscriberListener(
@@ -120,7 +119,7 @@ void DDSDataSubscriber::DDSDataSubscriberListener::on_subscription_matched(
 
 DDSDataExSubscriber::DDSDataExSubscriber(
 	DomainParticipant* participant,
-	const SubscriberConfiguration& config)
+	const SubscriberConfig& config)
 	: participant_(participant)
 	, subscriber_(nullptr)
 	, reader_(nullptr)
@@ -174,9 +173,14 @@ void DDSDataExSubscriber::run(uint32_t samples)
 
 }
 
+void DDSDataExSubscriber::setConfig(const SubscriberConfig& config)
+{
+
+}
+
 AbstractDdsSubscriber* SubscriberFactory::createSubscriber(
 	eprosima::fastdds::dds::DomainParticipant* participant,
-	const SubscriberConfiguration& config) const
+	const SubscriberConfig& config) const
 {
 	switch (config.topic_type)
 	{
@@ -196,7 +200,7 @@ AbstractDdsSubscriber* SubscriberFactory::createSubscriber(
 
 AbstractDdsSubscriber* DDSDataSubscriberCreator::createSubscriber(
 	DomainParticipant* participant,
-	const SubscriberConfiguration& config) const
+	const SubscriberConfig& config) const
 {
 
 	return new DDSDataSubscriber(participant, config);
@@ -204,7 +208,7 @@ AbstractDdsSubscriber* DDSDataSubscriberCreator::createSubscriber(
 
 AbstractDdsSubscriber* DDSDataExSubscriberCreator::createSubscriber(
 	DomainParticipant* participant,
-	const SubscriberConfiguration& config) const
+	const SubscriberConfig& config) const
 {
 	return new DDSDataExSubscriber(participant, config);
 }

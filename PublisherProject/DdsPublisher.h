@@ -33,7 +33,7 @@ public:
 private:
     DDSData data_;
 
-    ConfigTopic config_;
+    ConfigTopic config_topic_data_;
     eprosima::fastdds::dds::DomainParticipant* participant_;
     eprosima::fastdds::dds::Publisher* publisher_;
     eprosima::fastdds::dds::Topic* topic_;

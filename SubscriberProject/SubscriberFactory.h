@@ -19,7 +19,7 @@ enum TopicType
 	UNKNOWN
 };
 
-struct SubscriberConfiguration
+struct SubscriberConfig
 {
 	int16_t subscriber_id = 0;
 	uint16_t vector_size = 0;
@@ -34,6 +34,7 @@ public:
 	virtual ~AbstractDdsSubscriber() {};
 	virtual bool init() = 0;
 	virtual void run(uint32_t samples) = 0;
+	virtual void setConfig(const SubscriberConfig& config) = 0;
 protected:
 };
 
@@ -42,11 +43,12 @@ class DDSDataSubscriber : public AbstractDdsSubscriber
 public:
 	DDSDataSubscriber(
 		eprosima::fastdds::dds::DomainParticipant* participant,
-		const SubscriberConfiguration& config);
+		const SubscriberConfig& config);
 	~DDSDataSubscriber() override;
 
 	bool init() override;
 	void run(uint32_t samples) override;
+	void setConfig(const SubscriberConfig& config) override;
 
 private:
 	// Принимает только данные в этом формате
@@ -57,7 +59,7 @@ private:
 	eprosima::fastdds::dds::DataReader* reader_;
 	eprosima::fastdds::dds::Topic* topic_;
 	eprosima::fastdds::dds::TypeSupport support_type_; // TODO не нужна как поле ?
-	SubscriberConfiguration config_;
+	SubscriberConfig config_;
 
 	class DDSDataSubscriberListener : public eprosima::fastdds::dds::DataReaderListener
 	{
@@ -85,11 +87,12 @@ class DDSDataExSubscriber : public AbstractDdsSubscriber
 public:
 	DDSDataExSubscriber(
 		eprosima::fastdds::dds::DomainParticipant* participant,
-		const SubscriberConfiguration& config);
+		const SubscriberConfig& config);
 	~DDSDataExSubscriber() override;
 
 	bool init() override;
 	void run(uint32_t samples) override;
+	void setConfig(const SubscriberConfig& config) override;
 
 private:
 	// Принимает только данные в этом формате
@@ -100,7 +103,7 @@ private:
 	eprosima::fastdds::dds::DataReader* reader_;
 	eprosima::fastdds::dds::Topic* topic_;
 	eprosima::fastdds::dds::TypeSupport support_type_; // TODO не нужна как поле ?
-	SubscriberConfiguration config_;
+	SubscriberConfig config_;
 
 	class DDSDataExSubscriberListener : public eprosima::fastdds::dds::DataReaderListener
 	{
@@ -129,7 +132,7 @@ public:
 	virtual ~SubscriberFactory() {}
 	AbstractDdsSubscriber* createSubscriber(
 		eprosima::fastdds::dds::DomainParticipant* participant,
-		const SubscriberConfiguration& config) const;
+		const SubscriberConfig& config) const;
 protected:
 
 };
@@ -140,7 +143,7 @@ public:
 	virtual ~AbscractSubscriberFactory() {}
 	virtual AbstractDdsSubscriber* createSubscriber(
 		eprosima::fastdds::dds::DomainParticipant* participant,
-		const SubscriberConfiguration& config) const = 0;
+		const SubscriberConfig& config) const = 0;
 protected:
 
 };
@@ -150,7 +153,7 @@ class DDSDataSubscriberCreator : public AbscractSubscriberFactory
 public:
 	AbstractDdsSubscriber* createSubscriber(
 		eprosima::fastdds::dds::DomainParticipant* participant,
-		const SubscriberConfiguration& config) const override;
+		const SubscriberConfig& config) const override;
 };
 
 class DDSDataExSubscriberCreator : public AbscractSubscriberFactory
@@ -158,7 +161,7 @@ class DDSDataExSubscriberCreator : public AbscractSubscriberFactory
 public:
 	AbstractDdsSubscriber* createSubscriber(
 		eprosima::fastdds::dds::DomainParticipant* participant,
-		const SubscriberConfiguration& config) const override;
+		const SubscriberConfig& config) const override;
 };
 
 TopicType string2TopicType(std::string type_name);
