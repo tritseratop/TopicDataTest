@@ -39,10 +39,10 @@ protected:
 };
 
 template <class T>
-class DDSDataSubscriber : public AbstractDdsSubscriber
+class ConcreteSubscriber : public AbstractDdsSubscriber
 {
 public:
-	DDSDataSubscriber(
+	ConcreteSubscriber(
 		eprosima::fastdds::dds::DomainParticipant* participant,
 		const SubscriberConfig& config)
 		: participant_(participant)
@@ -54,7 +54,7 @@ public:
 		, listener_(this)
 	{
 	}
-	~DDSDataSubscriber() override
+	~ConcreteSubscriber() override
 	{}
 
 	bool init() override
@@ -117,7 +117,7 @@ private:
 	{
 	public:
 		DDSDataSubscriberListener(
-			DDSDataSubscriber* subscriber)
+			ConcreteSubscriber* subscriber)
 			: matched_(0)
 			, samples_(0)
 			, sub_(subscriber)
@@ -150,15 +150,15 @@ private:
 		{
 			if (info.current_count_change == 1)
 			{
-				std::cout << "DDSDataSubscriber matched." << std::endl;
+				std::cout << "ConcreteSubscriber matched." << std::endl;
 			}
 			else if (info.current_count_change == -1)
 			{
-				std::cout << "DDSDataSubscriber unmatched." << std::endl;
+				std::cout << "ConcreteSubscriber unmatched." << std::endl;
 			}
 			else
 			{
-				std::cout << "DDSDataSubscriber: " << info.current_count_change
+				std::cout << "ConcreteSubscriber: " << info.current_count_change
 					<< " is not a valid value for SubscriptionMatchedStatus current count change" << std::endl;
 			}
 		}
@@ -166,51 +166,7 @@ private:
 		T data_;
 		int matched_;
 		uint32_t samples_; // TODO atomic??
-		DDSDataSubscriber* sub_;
-	} listener_;
-};
-
-class DDSDataExSubscriber : public AbstractDdsSubscriber
-{
-public:
-	DDSDataExSubscriber(
-		eprosima::fastdds::dds::DomainParticipant* participant,
-		const SubscriberConfig& config);
-	~DDSDataExSubscriber() override;
-
-	bool init() override;
-	void run(uint32_t samples) override;
-	void setConfig(const SubscriberConfig& config) override;
-
-private:
-	// Принимает только данные в этом формате
-	std::deque<DDSDataEx> data_;
-
-	eprosima::fastdds::dds::DomainParticipant* participant_;
-	eprosima::fastdds::dds::Subscriber* subscriber_;
-	eprosima::fastdds::dds::DataReader* reader_;
-	eprosima::fastdds::dds::Topic* topic_;
-	eprosima::fastdds::dds::TypeSupport support_type_; // TODO не нужна как поле ?
-	SubscriberConfig config_;
-
-	class DDSDataExSubscriberListener : public eprosima::fastdds::dds::DataReaderListener
-	{
-	public:
-		DDSDataExSubscriberListener(
-			DDSDataExSubscriber* subscriber) {};
-		~DDSDataExSubscriberListener() override {};
-
-		void on_data_available(
-			eprosima::fastdds::dds::DataReader* reader) override {};
-
-		void on_subscription_matched(
-			eprosima::fastdds::dds::DataReader* reader,
-			const eprosima::fastdds::dds::SubscriptionMatchedStatus& info) override {};
-
-		DDSDataEx data_;
-		int matched_;
-		uint32_t samples_; // TODO atomic??
-		DDSDataExSubscriber* sub_;
+		ConcreteSubscriber* sub_;
 	} listener_;
 };
 
@@ -224,33 +180,6 @@ public:
 protected:
 
 };
-
-class AbscractSubscriberFactory
-{
-public:
-	virtual ~AbscractSubscriberFactory() {}
-	virtual AbstractDdsSubscriber* createSubscriber(
-		eprosima::fastdds::dds::DomainParticipant* participant,
-		const SubscriberConfig& config) const = 0;
-protected:
-
-};
-
-//class DDSDataSubscriberCreator : public AbscractSubscriberFactory
-//{
-//public:
-//	AbstractDdsSubscriber* createSubscriber(
-//		eprosima::fastdds::dds::DomainParticipant* participant,
-//		const SubscriberConfig& config) const override;
-//};
-//
-//class DDSDataExSubscriberCreator : public AbscractSubscriberFactory
-//{
-//public:
-//	AbstractDdsSubscriber* createSubscriber(
-//		eprosima::fastdds::dds::DomainParticipant* participant,
-//		const SubscriberConfig& config) const override;
-//};
 
 TopicType string2TopicType(std::string type_name);
 
