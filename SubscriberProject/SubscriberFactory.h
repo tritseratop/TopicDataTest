@@ -38,21 +38,73 @@ public:
 protected:
 };
 
+template <class T>
 class DDSDataSubscriber : public AbstractDdsSubscriber
 {
 public:
 	DDSDataSubscriber(
 		eprosima::fastdds::dds::DomainParticipant* participant,
-		const SubscriberConfig& config);
-	~DDSDataSubscriber() override;
+		const SubscriberConfig& config)
+		: participant_(participant)
+		, subscriber_(nullptr)
+		, reader_(nullptr)
+		, topic_(nullptr)
+		, support_type_(new DDSDataPubSubType())
+		, config_(config)
+		, listener_(this)
+	{
+	}
+	~DDSDataSubscriber() override
+	{}
 
-	bool init() override;
-	void run(uint32_t samples) override;
-	void setConfig(const SubscriberConfig& config) override;
+	bool init() override
+	{
+		if (participant_ == nullptr)
+		{
+			return false;
+		}
+
+		support_type_.register_type(participant_);
+
+		topic_ = participant_->create_topic(config_.topic_name, config_.topic_type_name, TOPIC_QOS_DEFAULT);
+		if (topic_ == nullptr)
+		{
+			return false;
+		}
+
+		subscriber_ = participant_->create_subscriber(SUBSCRIBER_QOS_DEFAULT, nullptr);
+		if (subscriber_ == nullptr)
+		{
+			return false;
+		}
+
+		reader_ = subscriber_->create_datareader(
+			topic_,
+			DATAREADER_QOS_DEFAULT,
+			&listener_);
+		if (reader_ == nullptr)
+		{
+			return false;
+		}
+
+		return true;
+	}
+	void run(uint32_t samples) override
+	{
+		while (listener_.samples_ < samples)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		}
+	}
+
+	void setConfig(const SubscriberConfig& config) override
+	{
+		config_ = config;
+	}
 
 private:
 	// ѕринимает только данные в этом формате
-	std::deque<DDSData> data_;
+	std::deque<T> data_;
 
 	eprosima::fastdds::dds::DomainParticipant* participant_;
 	eprosima::fastdds::dds::Subscriber* subscriber_;
@@ -65,17 +117,53 @@ private:
 	{
 	public:
 		DDSDataSubscriberListener(
-			DDSDataSubscriber* subscriber);
-		~DDSDataSubscriberListener() override;
+			DDSDataSubscriber* subscriber)
+			: matched_(0)
+			, samples_(0)
+			, sub_(subscriber)
+		{
+		}
+		~DDSDataSubscriberListener() override
+		{
+		}
 
 		void on_data_available(
-			eprosima::fastdds::dds::DataReader* reader) override;
+			eprosima::fastdds::dds::DataReader* reader) override
+		{
+			SampleInfo info;
+			if (reader->take_next_sample(&data_, &info) == ReturnCode_t::RETCODE_OK)
+			{
+				if (info.valid_data)
+				{
+					samples_++;
+					/*std::cout << "time_service: " << data_.time_service()
+						<< " with time_source: " << data_.time_source()
+						<< " RECEIVED." << std::endl;*/
+					sub_->data_.push_back(data_);
+				}
+			}
+		}
 
 		void on_subscription_matched(
 			eprosima::fastdds::dds::DataReader* reader,
-			const eprosima::fastdds::dds::SubscriptionMatchedStatus& info) override;
+			const eprosima::fastdds::dds::SubscriptionMatchedStatus& info) override
+		{
+			if (info.current_count_change == 1)
+			{
+				std::cout << "DDSDataSubscriber matched." << std::endl;
+			}
+			else if (info.current_count_change == -1)
+			{
+				std::cout << "DDSDataSubscriber unmatched." << std::endl;
+			}
+			else
+			{
+				std::cout << "DDSDataSubscriber: " << info.current_count_change
+					<< " is not a valid value for SubscriptionMatchedStatus current count change" << std::endl;
+			}
+		}
 
-		DDSData data_;
+		T data_;
 		int matched_;
 		uint32_t samples_; // TODO atomic??
 		DDSDataSubscriber* sub_;
@@ -148,21 +236,21 @@ protected:
 
 };
 
-class DDSDataSubscriberCreator : public AbscractSubscriberFactory
-{
-public:
-	AbstractDdsSubscriber* createSubscriber(
-		eprosima::fastdds::dds::DomainParticipant* participant,
-		const SubscriberConfig& config) const override;
-};
-
-class DDSDataExSubscriberCreator : public AbscractSubscriberFactory
-{
-public:
-	AbstractDdsSubscriber* createSubscriber(
-		eprosima::fastdds::dds::DomainParticipant* participant,
-		const SubscriberConfig& config) const override;
-};
+//class DDSDataSubscriberCreator : public AbscractSubscriberFactory
+//{
+//public:
+//	AbstractDdsSubscriber* createSubscriber(
+//		eprosima::fastdds::dds::DomainParticipant* participant,
+//		const SubscriberConfig& config) const override;
+//};
+//
+//class DDSDataExSubscriberCreator : public AbscractSubscriberFactory
+//{
+//public:
+//	AbstractDdsSubscriber* createSubscriber(
+//		eprosima::fastdds::dds::DomainParticipant* participant,
+//		const SubscriberConfig& config) const override;
+//};
 
 TopicType string2TopicType(std::string type_name);
 

@@ -89,8 +89,8 @@ private:
 	//std::unordered_map<eprosima::fastdds::dds::Subscriber*, eprosima::fastdds::dds::TypeSupport> subscribers_;
 
 	// Фабрики
-	DDSDataSubscriberCreator* ddsDataSubscriberCreator;
-	DDSDataExSubscriberCreator* ddsDataExSubscriberCreator;
+	//DDSDataSubscriberCreator* ddsDataSubscriberCreator;
+	//DDSDataExSubscriberCreator* ddsDataExSubscriberCreator;
 };
 
 // TODO: сделать макрос?

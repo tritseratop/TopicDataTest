@@ -17,8 +17,8 @@ DdsSubscriber::DdsSubscriber()
 	, config_reader_(nullptr)
 	, config_topic_(nullptr)
 	, config_type_(new ConfigTopicPubSubType())
-	, ddsDataSubscriberCreator(new DDSDataSubscriberCreator())
-	, ddsDataExSubscriberCreator(new DDSDataExSubscriberCreator())
+	//, ddsDataSubscriberCreator(new DDSDataSubscriberCreator())
+	//, ddsDataExSubscriberCreator(new DDSDataExSubscriberCreator())
 	, config_listener_(this)
 {
 }
