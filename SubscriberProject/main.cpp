@@ -27,7 +27,8 @@ int main(
     int samples = 10;
 
     DdsSubscriber* mysub = new DdsSubscriber();
-    if (mysub->initSubscribers(config))
+    mysub->changeSubsConfig(config);
+    if (mysub->initSubscribers())
     {
         mysub->runSubscribers();
     }

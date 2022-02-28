@@ -26,6 +26,8 @@ struct SubscriberConfig
 	std::string topic_name = "";
 	std::string topic_type_name = "";
 	TopicType topic_type = TopicType::UNKNOWN;
+
+	friend bool operator==(const SubscriberConfig& lhs, const SubscriberConfig& rhs);
 };
 
 class AbstractDdsSubscriber

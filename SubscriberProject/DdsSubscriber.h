@@ -27,19 +27,37 @@ struct ServiceConfig
 
 	// subscribers params
 	std::vector<SubscriberConfig> sub_configs;
+
+	// vector_size
+	size_t MaxSizeDataCollectionInt = 0;
+	size_t MaxSizeDataCollectionFloat = 0;
+	size_t MaxSizeDataCollectionDouble = 0;
+	size_t MaxSizeDataCollectionChar = 0;
+
+	size_t MaxSizeDDSDataExVectorInt = 0;
+	size_t MaxSizeDDSDataExVectorFloat = 0;
+	size_t MaxSizeDDSDataExVectorDouble = 0;
+	size_t MaxSizeDDSDataExVectorChar = 0;
+
+	size_t MaxSizeDDSAlarmVectorAlarm = 0;
+	size_t MaxSizeDDSExVectorAlarms = 0;
+
+	friend bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs);
 };
 
 class DdsSubscriber {
-public:
+public: 
 	DdsSubscriber();
 	virtual ~DdsSubscriber();
 
 	bool initConfigSubscriber();
 	void runConfigSubscriber(uint32_t samples);
 
+	void changeSubsConfig(const ServiceConfig& config);
+
 	bool createParticipant();
 	eprosima::fastdds::dds::DomainParticipantQos getParticipantQos();
-	bool initSubscribers(const ServiceConfig& config);
+	bool initSubscribers();
 	bool createNewSubscriber(const SubscriberConfig& config);
 	void runSubscribers();
 
@@ -78,18 +96,7 @@ private:
 		DdsSubscriber* subscriber_;
 	} config_listener_;
 
-	// Контейнеры с топиками
-	std::vector<eprosima::fastdds::dds::Subscriber*> dds_subs_; // TODO: подумать надо ли их будет часто удалять
-	std::unordered_map<
-		eprosima::fastdds::dds::Subscriber*,
-		eprosima::fastdds::dds::DataReader*> readers_;
-	std::unordered_map<
-		eprosima::fastdds::dds::Subscriber*,
-		eprosima::fastdds::dds::Topic*> topics_;
-	//std::unordered_map<eprosima::fastdds::dds::Subscriber*, eprosima::fastdds::dds::TypeSupport> subscribers_;
+	void setVectorSizesInDataTopic();
 };
-
-// TODO: сделать макрос?
-eprosima::fastdds::dds::TypeSupport initTypeSupportByTopic(std::string topic_name, uint16_t vector_size);
 
 #endif //!DDS_SUBSCRIBER_H_

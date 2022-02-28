@@ -11,6 +11,15 @@
 using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
 
+bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs)
+{
+	return lhs.participant_name == rhs.participant_name
+		&& lhs.ip == rhs.ip
+		&& lhs.port == rhs.port
+		&& lhs.whitelist == rhs.whitelist
+		&& lhs.sub_configs == rhs.sub_configs;
+}
+
 DdsSubscriber::DdsSubscriber()
 	: participant_(nullptr)
 	, config_subscriber_(nullptr)
@@ -88,6 +97,19 @@ void DdsSubscriber::runConfigSubscriber(uint32_t samples)
 	}
 }
 
+void DdsSubscriber::changeSubsConfig(const ServiceConfig& config)
+{
+	if (config_ == config)
+	{
+		std::cout << "This subscriber's configuration has been already run" << std::endl;
+	}
+	else
+	{
+		config_ = config;
+		initSubscribers();
+	}
+}
+
 DdsSubscriber::ConfigSubscriberListener::ConfigSubscriberListener(
 	DdsSubscriber* subscriber)
 	: subscriber_(subscriber)
@@ -114,8 +136,6 @@ void DdsSubscriber::ConfigSubscriberListener::on_data_available(
 				<< " RECEIVED." << std::endl;
 		}
 	}
-	// TODO: Создавать подписчиков по принятой инфе
-
 }
 
 bool DdsSubscriber::createParticipant()
@@ -165,13 +185,12 @@ DomainParticipantQos DdsSubscriber::getParticipantQos()
 	return qos;
 }
 
-bool DdsSubscriber::initSubscribers(const ServiceConfig& config)
+bool DdsSubscriber::initSubscribers()
 {
-	config_ = config;
 	createParticipant();
-	if (!config.sub_configs.empty())
+	if (!config_.sub_configs.empty())
 	{
-		for (const auto& config : config.sub_configs)
+		for (const auto& config : config_.sub_configs)
 		{
 			createNewSubscriber(config);
 		}
@@ -230,37 +249,19 @@ void DdsSubscriber::ConfigSubscriberListener::on_subscription_matched(
 }
 
 // TODO: сделать макрос?
-TypeSupport initTypeSupportByTopic(std::string topic_name, uint16_t vector_size)
+void DdsSubscriber::setVectorSizesInDataTopic()
 {
-	if (topic_name == "DDSData")
-	{
-		scada_ate::typetopics::SetMaxSizeDataCollectionInt(vector_size);
-		scada_ate::typetopics::SetMaxSizeDataCollectionFloat(vector_size);
-		scada_ate::typetopics::SetMaxSizeDataCollectionDouble(vector_size);
-		scada_ate::typetopics::SetMaxSizeDataCollectionChar(vector_size);
-		return TypeSupport(new DDSDataPubSubType());
-	}
-	else if (topic_name == "DDSDataEx")
-	{
-		scada_ate::typetopics::SetMaxSizeDDSDataExVectorInt(vector_size);
-		scada_ate::typetopics::SetMaxSizeDDSDataExVectorFloat(vector_size);
-		scada_ate::typetopics::SetMaxSizeDDSDataExVectorDouble(vector_size);
-		scada_ate::typetopics::SetMaxSizeDDSDataExVectorChar(vector_size);
-		return TypeSupport(new DDSDataExPubSubType());
-	}
-	else if (topic_name == "DDSAlarm")
-	{
-		//scada_ate::typetopics::SetMaxSizeDDSAlarmAlarms(vector_size);
-		return TypeSupport(new DDSAlarmPubSubType());
-	}
-	else if (topic_name == "DDSExAlarm")
-	{
-		scada_ate::typetopics::SetMaxSizeDDSExVectorAlarms(vector_size);
-		return TypeSupport(new DDSExAlarmPubSubType());
-	}
-	else
-	{
-		std::cout << "Topic name " << topic_name << " is not found" << std::endl;
-		return TypeSupport(nullptr);
-	}
+	scada_ate::typetopics::SetMaxSizeDataCollectionInt(config_.MaxSizeDataCollectionInt);
+	scada_ate::typetopics::SetMaxSizeDataCollectionFloat(config_.MaxSizeDataCollectionFloat);
+	scada_ate::typetopics::SetMaxSizeDataCollectionDouble(config_.MaxSizeDataCollectionDouble);
+	scada_ate::typetopics::SetMaxSizeDataCollectionChar(config_.MaxSizeDataCollectionChar);
+
+	scada_ate::typetopics::SetMaxSizeDDSDataExVectorInt(config_.MaxSizeDDSDataExVectorInt);
+	scada_ate::typetopics::SetMaxSizeDDSDataExVectorFloat(config_.MaxSizeDDSDataExVectorFloat);
+	scada_ate::typetopics::SetMaxSizeDDSDataExVectorDouble(config_.MaxSizeDDSDataExVectorDouble);
+	scada_ate::typetopics::SetMaxSizeDDSDataExVectorChar(config_.MaxSizeDDSDataExVectorChar);
+
+	//scada_ate::typetopics::SetMaxSizeDDSAlarmAlarms(config_.MaxSizeDDSAlarmVectorAlarm);
+
+	scada_ate::typetopics::SetMaxSizeDDSExVectorAlarms(config_.MaxSizeDDSExVectorAlarms);
 }
