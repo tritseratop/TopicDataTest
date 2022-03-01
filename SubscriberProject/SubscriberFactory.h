@@ -156,6 +156,7 @@ private:
 				{
 					samples_++;
 					sub_->data_.push_back(data_);
+					std::cout << "Sub #" << sub_->config_.subscriber_id << " get data" << std::endl;
 				}
 			}
 		}

@@ -54,7 +54,7 @@ bool DdsPublisher::initConfigPub()
 	config_topic_data_.topictype_name("FirstType");
 
 	DomainParticipantQos qos;
-	qos.name("Participant_pub");
+	qos.name(config_.participant_name);
 
 	qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
 	qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(5, 0);
@@ -141,7 +141,7 @@ bool DdsPublisher::initPublishers()
 	using namespace eprosima::fastrtps::rtps;
 
 	DomainParticipantQos qos;
-	qos.name("Participant_pub");
+	qos.name(config_.participant_name);
 
 	qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
 	qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(5, 0);
@@ -195,9 +195,14 @@ bool DdsPublisher::initPublishers()
 }
 void DdsPublisher::runPublishers()
 {
+	std::vector<std::thread> threads;
 	for (auto& pub : publishers_)
 	{
-		pub->run();
+		threads.push_back(std::thread([&](){pub->run();}));
+	}
+	for (auto& t : threads)
+	{
+		t.join();
 	}
 }
 
@@ -257,4 +262,21 @@ void DdsPublisher::DdsPublisherListener::on_publication_matched(
 		std::cout << info.current_count_change
 			<< " is not a valid value for PublicationMatchedStatus current count change" << std::endl;
 	}
+}
+
+void DdsPublisher::setVectorSizesInDataTopic()
+{
+	scada_ate::typetopics::SetMaxSizeDataCollectionInt(config_.MaxSizeDataCollectionInt);
+	scada_ate::typetopics::SetMaxSizeDataCollectionFloat(config_.MaxSizeDataCollectionFloat);
+	scada_ate::typetopics::SetMaxSizeDataCollectionDouble(config_.MaxSizeDataCollectionDouble);
+	scada_ate::typetopics::SetMaxSizeDataCollectionChar(config_.MaxSizeDataCollectionChar);
+
+	scada_ate::typetopics::SetMaxSizeDDSDataExVectorInt(config_.MaxSizeDDSDataExVectorInt);
+	scada_ate::typetopics::SetMaxSizeDDSDataExVectorFloat(config_.MaxSizeDDSDataExVectorFloat);
+	scada_ate::typetopics::SetMaxSizeDDSDataExVectorDouble(config_.MaxSizeDDSDataExVectorDouble);
+	scada_ate::typetopics::SetMaxSizeDDSDataExVectorChar(config_.MaxSizeDDSDataExVectorChar);
+
+	//scada_ate::typetopics::SetMaxSizeDDSAlarmAlarms(config_.MaxSizeDDSAlarmVectorAlarm);
+
+	scada_ate::typetopics::SetMaxSizeDDSExVectorAlarms(config_.MaxSizeDDSExVectorAlarms);
 }

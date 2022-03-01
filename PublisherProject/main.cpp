@@ -6,7 +6,8 @@
 #ifdef TEST_MODE
 
 std::vector<PublisherConfig> configs({
-        {0, 10000, "DDSData", "DDSData", TopicType::DDS_DATA, 10, 1000}
+        {0, 10000, "DDSData", "DDSData", TopicType::DDS_DATA, 10, 1000}, 
+        {1, 10000, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, 10, 1000}
     });
 
 ServiceConfig config({
@@ -14,7 +15,17 @@ ServiceConfig config({
     "127.0.0.1",
     4042,
     {"127.0.0.1"},
-    configs
+    configs,
+    1000, 
+    1000,
+    1000,
+    1000,
+    1000,
+    1000,
+    1000,
+    1000,
+    1000,
+    1000
     });
 
 #endif

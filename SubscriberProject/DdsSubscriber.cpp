@@ -188,6 +188,7 @@ DomainParticipantQos DdsSubscriber::getParticipantQos()
 
 bool DdsSubscriber::initSubscribers()
 {
+	setVectorSizesInDataTopic();
 	createParticipant();
 	if (!config_.sub_configs.empty())
 	{
@@ -224,9 +225,14 @@ bool DdsSubscriber::createNewSubscriber(const SubscriberConfig& config)
 
 void DdsSubscriber::runSubscribers()
 {
+	std::vector<std::thread> threads;
 	for (auto& sub : subscribers_)
 	{
-		sub->run();
+		threads.push_back( std::thread([&](){sub->run(); }) );
+	}
+	for (auto& t : threads)
+	{
+		t.join();
 	}
 }
 

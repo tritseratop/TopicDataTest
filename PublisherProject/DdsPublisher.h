@@ -105,6 +105,8 @@ private:
         uint32_t number,
         uint32_t sleep);
 
+    void setVectorSizesInDataTopic();
+
 public:
     bool publish(
         eprosima::fastdds::dds::DataWriter* writer,
