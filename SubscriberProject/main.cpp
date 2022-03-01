@@ -1,6 +1,5 @@
 #include "DdsSubscriber.h"
 
-
 #define TEST_MODE
 
 #ifdef TEST_MODE
@@ -26,8 +25,7 @@ int main(
     std::cout << "Starting subscriber." << std::endl;
     int samples = 10;
 
-    DdsSubscriber* mysub = new DdsSubscriber();
-    mysub->changeSubsConfig(config);
+    DdsSubscriber* mysub = new DdsSubscriber(config);
     if (mysub->initSubscribers())
     {
         mysub->runSubscribers();

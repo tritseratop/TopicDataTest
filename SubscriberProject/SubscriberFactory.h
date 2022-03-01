@@ -40,7 +40,7 @@ public:
 protected:
 };
 
-template <class T>
+template <class T, class TPubSubType>
 class ConcreteSubscriber : public AbstractDdsSubscriber
 {
 public:
@@ -51,13 +51,26 @@ public:
 		, subscriber_(nullptr)
 		, reader_(nullptr)
 		, topic_(nullptr)
-		, support_type_(new DDSDataPubSubType())
 		, config_(config)
 		, listener_(this)
+		, support_type_(new TPubSubType())
 	{
 	}
 	~ConcreteSubscriber() override
-	{}
+	{
+		if (reader_ != nullptr)
+		{
+			subscriber_->delete_datareader(reader_);
+		}
+		if (subscriber_ != nullptr)
+		{
+			participant_->delete_subscriber(subscriber_);
+		}
+		if (topic_ != nullptr)
+		{
+			participant_->delete_topic(topic_);
+		}
+	}
 
 	bool init() override
 	{
@@ -138,9 +151,6 @@ private:
 				if (info.valid_data)
 				{
 					samples_++;
-					/*std::cout << "time_service: " << data_.time_service()
-						<< " with time_source: " << data_.time_source()
-						<< " RECEIVED." << std::endl;*/
 					sub_->data_.push_back(data_);
 				}
 			}

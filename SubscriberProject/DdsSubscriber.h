@@ -47,7 +47,7 @@ struct ServiceConfig
 
 class DdsSubscriber {
 public: 
-	DdsSubscriber();
+	DdsSubscriber(const ServiceConfig& config);
 	virtual ~DdsSubscriber();
 
 	bool initConfigSubscriber();

@@ -12,34 +12,69 @@
 
 #include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "../ConfigTopic/ConfigTopicPubSubTypes.h"
+#include "PublisherFactory.h"
+
+struct ServiceConfig
+{
+    // participant params
+    std::string participant_name;
+
+    // TCP params
+    std::string ip;
+    uint16_t port = 4042;
+    std::vector<std::string> whitelist;
+
+    // subscribers params
+    std::vector<PublisherConfig> pub_configs;
+
+    // vector_size
+    size_t MaxSizeDataCollectionInt = 0;
+    size_t MaxSizeDataCollectionFloat = 0;
+    size_t MaxSizeDataCollectionDouble = 0;
+    size_t MaxSizeDataCollectionChar = 0;
+
+    size_t MaxSizeDDSDataExVectorInt = 0;
+    size_t MaxSizeDDSDataExVectorFloat = 0;
+    size_t MaxSizeDDSDataExVectorDouble = 0;
+    size_t MaxSizeDDSDataExVectorChar = 0;
+
+    size_t MaxSizeDDSAlarmVectorAlarm = 0;
+    size_t MaxSizeDDSExVectorAlarms = 0;
+
+    friend bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs);
+};
 
 class DdsPublisher
 {
 public:
 
-    DdsPublisher();
+    DdsPublisher(const ServiceConfig& config);
     virtual ~DdsPublisher();
 
-    bool init();
-
-    void run(
+    bool initConfigPub();
+    void runConfigPub(
         uint32_t number,
         uint32_t sleep);
 
-    void runData(
+    bool initPublishers();
+    void runPublishers(
         uint32_t number,
         uint32_t sleep);
+    void changeSubsConfig(const ServiceConfig& config);
+
+    bool createNewPublisher(const PublisherConfig& config);
 
 private:
-    DDSData data_;
+    ServiceConfig config_;
+
+    PublisherFactory factory_;
+    std::vector<AbstractDdsPublisher*> publishers_;
 
     ConfigTopic config_topic_data_;
     eprosima::fastdds::dds::DomainParticipant* participant_;
     eprosima::fastdds::dds::Publisher* publisher_;
     eprosima::fastdds::dds::Topic* topic_;
-    eprosima::fastdds::dds::Topic* data_topic_;
     eprosima::fastdds::dds::DataWriter* writer_;
-    eprosima::fastdds::dds::DataWriter* data_writer_;
 
     eprosima::fastdds::dds::TypeSupport type_;
 
@@ -68,31 +103,6 @@ private:
 
     } listener_;
 
-    class DDSDataListener : public eprosima::fastdds::dds::DataWriterListener
-    {
-    public:
-
-        DDSDataListener(DdsPublisher* publisher)
-            : matched_(0)
-            , first_connected_(false)
-            , pub_(publisher)
-        {
-        }
-
-        ~DDSDataListener() override
-        {
-        }
-
-        void on_publication_matched(
-            eprosima::fastdds::dds::DataWriter* writer,
-            const eprosima::fastdds::dds::PublicationMatchedStatus& info) override;
-
-        DdsPublisher* pub_;
-        int matched_;
-        bool first_connected_;
-
-    } data_listener_;
-
     void runThread(
         uint32_t number,
         uint32_t sleep);
@@ -101,11 +111,6 @@ public:
     bool publish(
         eprosima::fastdds::dds::DataWriter* writer,
         const DdsPublisherListener* listener,
-        uint32_t samples_sent);
-
-    bool publishData(
-        eprosima::fastdds::dds::DataWriter* writer,
-        const DDSDataListener* listener,
         uint32_t samples_sent);
 };
 

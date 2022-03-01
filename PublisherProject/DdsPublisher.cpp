@@ -7,13 +7,23 @@
 using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
 
-DdsPublisher::DdsPublisher()
+bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs)
+{
+	return lhs.participant_name == rhs.participant_name
+		&& lhs.ip == rhs.ip
+		&& lhs.port == rhs.port
+		&& lhs.whitelist == rhs.whitelist
+		&& lhs.pub_configs == rhs.pub_configs;
+}
+
+DdsPublisher::DdsPublisher(const ServiceConfig& config)
 	: participant_(nullptr)
+	, config_(config)
 	, publisher_(nullptr)
 	, topic_(nullptr)
 	, writer_(nullptr)
 	, type_(new ConfigTopicPubSubType())
-	, data_listener_(this)
+	, stop(false)
 {
 }
 
@@ -34,7 +44,7 @@ DdsPublisher::~DdsPublisher()
 	DomainParticipantFactory::get_instance()->delete_participant(participant_);
 }
 
-bool DdsPublisher::init()
+bool DdsPublisher::initConfigPub()
 {
 	using namespace eprosima::fastrtps;
 	using namespace eprosima::fastrtps::rtps;
@@ -42,9 +52,6 @@ bool DdsPublisher::init()
 	config_topic_data_.subscriber_id(0);
 	config_topic_data_.vector_size(10000);
 	config_topic_data_.topictype_name("FirstType");
-
-	data_.time_service(8888);
-	data_.time_source(1111);
 
 	DomainParticipantQos qos;
 	qos.name("Participant_pub");
@@ -91,12 +98,6 @@ bool DdsPublisher::init()
 		return false;
 	}
 
-	data_topic_ = participant_->create_topic("DDSData", "DDSData", TOPIC_QOS_DEFAULT);
-	if (data_topic_ == nullptr)
-	{
-		return false;
-	}
-
 	// Create the Publisher
 	publisher_ = participant_->create_publisher(PUBLISHER_QOS_DEFAULT, nullptr);
 	if (publisher_ == nullptr)
@@ -110,16 +111,11 @@ bool DdsPublisher::init()
 	{
 		return false;
 	}
-	data_writer_ = publisher_->create_datawriter(data_topic_, DATAWRITER_QOS_DEFAULT, &data_listener_);
-	if (data_writer_ == nullptr)
-	{
-		return false;
-	}
 
 	return true;
 }
 
-void DdsPublisher::run(
+void DdsPublisher::runConfigPub(
 	uint32_t number,
 	uint32_t sleep = 1000)
 {
@@ -139,23 +135,99 @@ void DdsPublisher::run(
 	}
 }
 
-void DdsPublisher::runData(
-	uint32_t number,
-	uint32_t sleep = 1000)
+bool DdsPublisher::initPublishers()
 {
-	uint32_t samples_sent = 0;
-	while (samples_sent < number)
+	using namespace eprosima::fastrtps;
+	using namespace eprosima::fastrtps::rtps;
+
+	DomainParticipantQos qos;
+	qos.name("Participant_pub");
+
+	qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
+	qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(5, 0);
+
+	qos.transport().use_builtin_transports = false;
+
+	std::shared_ptr<TCPv4TransportDescriptor> descriptor = std::make_shared<TCPv4TransportDescriptor>();
+
+	std::vector<std::string> whitelist({ "127.0.0.1" });
+	for (std::string ip : whitelist)
 	{
-		if (publishData(data_writer_, &data_listener_, samples_sent))
-		{
-			samples_sent++;
-			std::cout << "time_service: " << data_.time_service()
-				<< " with time_source: " << data_.time_source()
-				<< " RECEIVED." << std::endl;
-			break;
-		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
+		descriptor->interfaceWhiteList.push_back(ip);
+		std::cout << "Whitelisted " << ip << std::endl;
 	}
+
+	descriptor->sendBufferSize = 0;
+	descriptor->receiveBufferSize = 0;
+
+	descriptor->set_WAN_address("127.0.0.1");
+
+	descriptor->add_listener_port(4042);
+
+	qos.transport().user_transports.push_back(descriptor);
+
+	if (participant_ == nullptr)
+	{
+		participant_ = DomainParticipantFactory::get_instance()->create_participant(0, qos);
+	}
+	if (participant_ == nullptr)
+	{
+		return false;
+	}
+
+	if (!config_.pub_configs.empty())
+	{
+		for (const auto& config : config_.pub_configs)
+		{
+			createNewPublisher(config);
+		}
+	}
+	else
+	{
+		std::cout << "Configuration for subscribers is not found" << std::endl;
+		return false;
+	}
+	for (auto& pub : publishers_)
+	{
+		pub->init();
+	}
+	return true;
+}
+void DdsPublisher::runPublishers(
+	uint32_t number,
+	uint32_t sleep)
+{
+	for (auto& pub : publishers_)
+	{
+		pub->run(10, 1000);
+	}
+}
+
+void DdsPublisher::changeSubsConfig(const ServiceConfig& config)
+{
+	if (config_ == config)
+	{
+		std::cout << "This subscriber's configuration has been already runConfigPub" << std::endl;
+	}
+	else
+	{
+		config_ = config;
+		initPublishers();
+	}
+}
+
+bool DdsPublisher::createNewPublisher(const PublisherConfig& config)
+{
+	// TODO: узнать че менять в SUBSCRIBER_QOS_DEFAULT
+	AbstractDdsPublisher* pub = factory_.createPublisher(participant_, config);
+	if (pub == nullptr)
+	{
+		return false;
+	}
+
+	std::lock_guard<std::mutex> guard(std::mutex());
+	publishers_.push_back(pub);
+	return true;
 }
 
 bool DdsPublisher::publish(DataWriter* writer, const DdsPublisherListener* listener, uint32_t samples_sent)
@@ -169,38 +241,7 @@ bool DdsPublisher::publish(DataWriter* writer, const DdsPublisherListener* liste
 	return false;
 }
 
-bool DdsPublisher::publishData(DataWriter* writer, const DDSDataListener* listener, uint32_t samples_sent)
-{
-	//std::lock_guard<std::mutex> guard(std::mutex());
-	if (listener > 0 && listener->first_connected_)
-	{
-		writer->write(&data_);
-		return true;
-	}
-	return false;
-}
-
 void DdsPublisher::DdsPublisherListener::on_publication_matched(
-	eprosima::fastdds::dds::DataWriter* reader,
-	const eprosima::fastdds::dds::PublicationMatchedStatus& info)
-{
-	if (info.current_count_change == 1)
-	{
-		std::cout << "Publisher matched." << std::endl;
-		first_connected_ = true;
-	}
-	else if (info.current_count_change == -1)
-	{
-		std::cout << "Publisher unmatched." << std::endl;
-	}
-	else
-	{
-		std::cout << info.current_count_change
-			<< " is not a valid value for PublicationMatchedStatus current count change" << std::endl;
-	}
-}
-
-void DdsPublisher::DDSDataListener::on_publication_matched(
 	eprosima::fastdds::dds::DataWriter* reader,
 	const eprosima::fastdds::dds::PublicationMatchedStatus& info)
 {

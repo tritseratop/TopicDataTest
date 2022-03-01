@@ -20,8 +20,9 @@ bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs)
 		&& lhs.sub_configs == rhs.sub_configs;
 }
 
-DdsSubscriber::DdsSubscriber()
+DdsSubscriber::DdsSubscriber(const ServiceConfig& config)
 	: participant_(nullptr)
+	, config_(config)
 	, config_subscriber_(nullptr)
 	, config_reader_(nullptr)
 	, config_topic_(nullptr)
@@ -101,7 +102,7 @@ void DdsSubscriber::changeSubsConfig(const ServiceConfig& config)
 {
 	if (config_ == config)
 	{
-		std::cout << "This subscriber's configuration has been already run" << std::endl;
+		std::cout << "This subscriber's configuration has been already runConfigPub" << std::endl;
 	}
 	else
 	{
@@ -225,7 +226,7 @@ void DdsSubscriber::runSubscribers()
 {
 	for (auto& sub : subscribers_)
 	{
-		sub->run(1);
+		sub->run(10);
 	}
 }
 
