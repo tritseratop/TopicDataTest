@@ -57,9 +57,7 @@ public:
         uint32_t sleep);
 
     bool initPublishers();
-    void runPublishers(
-        uint32_t number,
-        uint32_t sleep);
+    void runPublishers();
     void changeSubsConfig(const ServiceConfig& config);
 
     bool createNewPublisher(const PublisherConfig& config);

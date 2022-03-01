@@ -1,11 +1,12 @@
 #include "DdsPublisher.h"
+#include "../include/test_runner.h"
 
 #define TEST_MODE
 
 #ifdef TEST_MODE
 
 std::vector<PublisherConfig> configs({
-        {0, 10000, "DDSData", "DDSData", TopicType::DDS_DATA}
+        {0, 10000, "DDSData", "DDSData", TopicType::DDS_DATA, 10, 1000}
     });
 
 ServiceConfig config({
@@ -18,17 +19,25 @@ ServiceConfig config({
 
 #endif
 
+void TestPubsCreation()
+{
+
+}
+
 int main(
     int argc,
     char** argv)
 {
+    TestRunner tr;
+    RUN_TEST(tr, TestPubsCreation);
+
+
     std::cout << "Starting publisher." << std::endl;
-    int samples = 10;
 
     DdsPublisher* mypub = new DdsPublisher(config);
     if (mypub->initPublishers())
     {
-        mypub->runPublishers(static_cast<uint32_t>(samples), 1000);
+        mypub->runPublishers();
     }
 
     delete mypub;

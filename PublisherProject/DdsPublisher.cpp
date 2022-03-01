@@ -193,13 +193,11 @@ bool DdsPublisher::initPublishers()
 	}
 	return true;
 }
-void DdsPublisher::runPublishers(
-	uint32_t number,
-	uint32_t sleep)
+void DdsPublisher::runPublishers()
 {
 	for (auto& pub : publishers_)
 	{
-		pub->run(10, 1000);
+		pub->run();
 	}
 }
 

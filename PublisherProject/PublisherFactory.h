@@ -31,6 +31,10 @@ struct PublisherConfig
 	std::string topic_type_name = "";
 	TopicType topic_type = TopicType::UNKNOWN;
 
+	// listener settings
+	uint32_t samples = 10;
+	uint32_t sleep = 1000;
+
 	friend bool operator==(const PublisherConfig& lhs, const PublisherConfig& rhs);
 };
 
@@ -39,7 +43,7 @@ class AbstractDdsPublisher
 public:
 	virtual ~AbstractDdsPublisher() {};
 	virtual bool init() = 0;
-	virtual void run(uint32_t samples, uint32_t sleep) = 0;
+	virtual void run() = 0;
 	//virtual void setConfig(const SubscriberConfig& config) = 0;
 protected:
 };
@@ -104,16 +108,16 @@ public:
 		return true;
 	}
 
-	void run(uint32_t samples, uint32_t sleep = 1000) override
+	void run() override
 	{
 		uint32_t samples_sent = 0;
-		while (samples_sent < samples)
+		while (samples_sent < config_.samples)
 		{
 			if (publish(writer_, &listener_, samples_sent))
 			{
 				samples_sent++;
 			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
+			std::this_thread::sleep_for(std::chrono::milliseconds(config_.sleep));
 		}
 	}
 

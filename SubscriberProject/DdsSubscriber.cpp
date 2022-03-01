@@ -226,7 +226,7 @@ void DdsSubscriber::runSubscribers()
 {
 	for (auto& sub : subscribers_)
 	{
-		sub->run(10);
+		sub->run();
 	}
 }
 

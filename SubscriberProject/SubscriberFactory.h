@@ -27,6 +27,10 @@ struct SubscriberConfig
 	std::string topic_type_name = "";
 	TopicType topic_type = TopicType::UNKNOWN;
 
+	// listener settings
+	uint32_t samples = 10;
+	uint32_t sleep = 1000;
+
 	friend bool operator==(const SubscriberConfig& lhs, const SubscriberConfig& rhs);
 };
 
@@ -35,7 +39,7 @@ class AbstractDdsSubscriber
 public:
 	virtual ~AbstractDdsSubscriber() {};
 	virtual bool init() = 0;
-	virtual void run(uint32_t samples) = 0;
+	virtual void run() = 0;
 	virtual void setConfig(const SubscriberConfig& config) = 0;
 protected:
 };
@@ -104,11 +108,11 @@ public:
 
 		return true;
 	}
-	void run(uint32_t samples) override
+	void run() override
 	{
-		while (listener_.samples_ < samples)
+		while (listener_.samples_ < config_.samples)
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			std::this_thread::sleep_for(std::chrono::milliseconds(config_.sleep));
 		}
 	}
 
