@@ -44,6 +44,8 @@ public:
 	virtual ~AbstractDdsPublisher() {};
 	virtual bool init() = 0;
 	virtual void run() = 0;
+	virtual void setData(void* data, size_t size) = 0;
+	virtual TopicType getTopicType() = 0;
 	//virtual void setConfig(const SubscriberConfig& config) = 0;
 protected:
 };
@@ -63,6 +65,7 @@ public:
 		, writer_(nullptr)
 		, type_(new TPubSubType())
 		, listener_(this)
+		, topic_type_(config.topic_type)
 	{
 	}
 
@@ -80,6 +83,13 @@ public:
 		{
 			participant_->delete_topic(topic_);
 		}
+	}
+
+	void setData(void* data, size_t size) override
+	{
+		//T* data_p;
+		std::memcpy(&data_, data, size);
+		//data_ = *(data_p);
 	}
 
 	bool init() override
@@ -121,9 +131,15 @@ public:
 		}
 	}
 
+	TopicType getTopicType() override
+	{
+		return topic_type_;
+	}
+
 private:
 	// ѕринимает только данные в этом формате
 	T data_;
+	const TopicType topic_type_;
 
 	PublisherConfig config_;
 
@@ -180,6 +196,7 @@ private:
 		if (listener > 0 && listener->first_connected_)
 		{
 			writer->write(&data_);
+			data_.time_service(data_.time_service() + 1);
 			return true;
 		}
 		return false;

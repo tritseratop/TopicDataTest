@@ -45,10 +45,10 @@ struct ServiceConfig
 	friend bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs);
 };
 
-class DdsSubscriber {
+class SubscriberService {
 public: 
-	DdsSubscriber(const ServiceConfig& config);
-	virtual ~DdsSubscriber();
+	SubscriberService(const ServiceConfig& config);
+	virtual ~SubscriberService();
 
 	bool initConfigSubscriber();
 	void runConfigSubscriber(uint32_t samples);
@@ -60,6 +60,8 @@ public:
 	bool initSubscribers();
 	bool createNewSubscriber(const SubscriberConfig& config);
 	void runSubscribers();
+	std::vector<AbstractDdsSubscriber*> getSubscribers();
+	void setVectorSizesInDataTopic();
 
 private:
 
@@ -81,7 +83,7 @@ private:
 	{
 	public:
 		ConfigSubscriberListener(
-			DdsSubscriber* subscriber);
+			SubscriberService* subscriber);
 		~ConfigSubscriberListener() override;
 
 		void on_data_available(
@@ -93,10 +95,9 @@ private:
 
 		int matched_;
 		uint32_t samples_; // TODO atomic??
-		DdsSubscriber* subscriber_;
+		SubscriberService* subscriber_;
 	} config_listener_;
 
-	void setVectorSizesInDataTopic();
 };
 
 #endif //!DDS_SUBSCRIBER_H_

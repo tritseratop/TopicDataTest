@@ -16,7 +16,7 @@ bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs)
 		&& lhs.pub_configs == rhs.pub_configs;
 }
 
-DdsPublisher::DdsPublisher(const ServiceConfig& config)
+PublisherService::PublisherService(const ServiceConfig& config)
 	: participant_(nullptr)
 	, config_(config)
 	, publisher_(nullptr)
@@ -27,7 +27,7 @@ DdsPublisher::DdsPublisher(const ServiceConfig& config)
 {
 }
 
-DdsPublisher::~DdsPublisher()
+PublisherService::~PublisherService()
 {
 	if (writer_ != nullptr)
 	{
@@ -44,7 +44,7 @@ DdsPublisher::~DdsPublisher()
 	DomainParticipantFactory::get_instance()->delete_participant(participant_);
 }
 
-bool DdsPublisher::initConfigPub()
+bool PublisherService::initConfigPub()
 {
 	using namespace eprosima::fastrtps;
 	using namespace eprosima::fastrtps::rtps;
@@ -115,7 +115,7 @@ bool DdsPublisher::initConfigPub()
 	return true;
 }
 
-void DdsPublisher::runConfigPub(
+void PublisherService::runConfigPub(
 	uint32_t number,
 	uint32_t sleep = 1000)
 {
@@ -135,7 +135,7 @@ void DdsPublisher::runConfigPub(
 	}
 }
 
-bool DdsPublisher::initPublishers()
+bool PublisherService::initPublishers()
 {
 	using namespace eprosima::fastrtps;
 	using namespace eprosima::fastrtps::rtps;
@@ -193,7 +193,7 @@ bool DdsPublisher::initPublishers()
 	}
 	return true;
 }
-void DdsPublisher::runPublishers()
+void PublisherService::runPublishers()
 {
 	std::vector<std::thread> threads;
 	for (auto& pub : publishers_)
@@ -206,7 +206,7 @@ void DdsPublisher::runPublishers()
 	}
 }
 
-void DdsPublisher::changeSubsConfig(const ServiceConfig& config)
+void PublisherService::changeSubsConfig(const ServiceConfig& config)
 {
 	if (config_ == config)
 	{
@@ -219,7 +219,29 @@ void DdsPublisher::changeSubsConfig(const ServiceConfig& config)
 	}
 }
 
-bool DdsPublisher::createNewPublisher(const PublisherConfig& config)
+void PublisherService::setDdsData(DDSData* data, size_t size)
+{
+	for (auto pub : publishers_)
+	{
+		if (pub->getTopicType() == TopicType::DDS_DATA)
+		{
+			pub->setData(static_cast<void*>(data), size);
+		}
+	}
+}
+
+void PublisherService::setDdsDataEx(DDSDataEx* data, size_t size)
+{
+	for (auto pub : publishers_)
+	{
+		if (pub->getTopicType() == TopicType::DDS_DATA_EX)
+		{
+			pub->setData(static_cast<void*>(data), size);
+		}
+	}
+}
+
+bool PublisherService::createNewPublisher(const PublisherConfig& config)
 {
 	// TODO: узнать че менять в SUBSCRIBER_QOS_DEFAULT
 	AbstractDdsPublisher* pub = factory_.createPublisher(participant_, config);
@@ -233,7 +255,7 @@ bool DdsPublisher::createNewPublisher(const PublisherConfig& config)
 	return true;
 }
 
-bool DdsPublisher::publish(DataWriter* writer, const DdsPublisherListener* listener, uint32_t samples_sent)
+bool PublisherService::publish(DataWriter* writer, const DdsPublisherListener* listener, uint32_t samples_sent)
 {
 	//std::lock_guard<std::mutex> guard(std::mutex());
 	if (listener > 0 && listener_.first_connected_)
@@ -244,7 +266,7 @@ bool DdsPublisher::publish(DataWriter* writer, const DdsPublisherListener* liste
 	return false;
 }
 
-void DdsPublisher::DdsPublisherListener::on_publication_matched(
+void PublisherService::DdsPublisherListener::on_publication_matched(
 	eprosima::fastdds::dds::DataWriter* reader,
 	const eprosima::fastdds::dds::PublicationMatchedStatus& info)
 {
@@ -264,7 +286,7 @@ void DdsPublisher::DdsPublisherListener::on_publication_matched(
 	}
 }
 
-void DdsPublisher::setVectorSizesInDataTopic()
+void PublisherService::setVectorSizesInDataTopic()
 {
 	scada_ate::typetopics::SetMaxSizeDataCollectionInt(config_.MaxSizeDataCollectionInt);
 	scada_ate::typetopics::SetMaxSizeDataCollectionFloat(config_.MaxSizeDataCollectionFloat);

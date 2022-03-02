@@ -1,12 +1,13 @@
 #include "DdsSubscriber.h"
+#include "../include/test_runner.h"
 
 #define TEST_MODE
 
 #ifdef TEST_MODE
 
 std::vector<SubscriberConfig> configs({
-        {0, 10000, "DDSData", "DDSData", TopicType::DDS_DATA, 10, 1000},
-        {1, 10000, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, 10, 1000}
+        {0, 10000, "DDSData1", "DDSData", TopicType::DDS_DATA, 10, 1000},
+        {1, 10000, "DDSData2", "DDSData", TopicType::DDS_DATA, 10, 1000}
     });
 
 ServiceConfig config({
@@ -29,19 +30,28 @@ ServiceConfig config({
 
 #endif
 
-int main(
-    int argc,
-    char** argv)
+void TestDataTransition()
 {
     std::cout << "Starting subscriber." << std::endl;
-    int samples = 10;
-
-    DdsSubscriber* mysub = new DdsSubscriber(config);
+    SubscriberService* mysub = new SubscriberService(config);
+    mysub->setVectorSizesInDataTopic();
     if (mysub->initSubscribers())
     {
         mysub->runSubscribers();
     }
 
+    std::vector<AbstractDdsSubscriber*> subs = mysub->getSubscribers();
+    std::deque<DDSData>* ddsData = static_cast<std::deque<DDSData>*>(subs[0]->getData());
+
     delete mysub;
+}
+
+int main(
+    int argc,
+    char** argv)
+{
+    TestRunner tr;
+    RUN_TEST(tr, TestDataTransition);
+    
     return 0;
 }

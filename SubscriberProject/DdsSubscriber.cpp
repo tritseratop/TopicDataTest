@@ -20,7 +20,7 @@ bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs)
 		&& lhs.sub_configs == rhs.sub_configs;
 }
 
-DdsSubscriber::DdsSubscriber(const ServiceConfig& config)
+SubscriberService::SubscriberService(const ServiceConfig& config)
 	: participant_(nullptr)
 	, config_(config)
 	, config_subscriber_(nullptr)
@@ -31,7 +31,7 @@ DdsSubscriber::DdsSubscriber(const ServiceConfig& config)
 {
 }
 
-DdsSubscriber::~DdsSubscriber()
+SubscriberService::~SubscriberService()
 {
 	// TODO: вынести в другую функцию удаление подписчиков
 	for (auto& sub : subscribers_)
@@ -51,7 +51,7 @@ DdsSubscriber::~DdsSubscriber()
 	DomainParticipantFactory::get_instance()->delete_participant(participant_);
 }
 
-bool DdsSubscriber::initConfigSubscriber()
+bool SubscriberService::initConfigSubscriber()
 {
 	if (participant_ == nullptr)
 	{
@@ -90,7 +90,7 @@ bool DdsSubscriber::initConfigSubscriber()
 	return true;
 }
 
-void DdsSubscriber::runConfigSubscriber(uint32_t samples)
+void SubscriberService::runConfigSubscriber(uint32_t samples)
 {
 	while (config_listener_.samples_ < samples)
 	{
@@ -98,7 +98,7 @@ void DdsSubscriber::runConfigSubscriber(uint32_t samples)
 	}
 }
 
-void DdsSubscriber::changeSubsConfig(const ServiceConfig& config)
+void SubscriberService::changeSubsConfig(const ServiceConfig& config)
 {
 	if (config_ == config)
 	{
@@ -111,18 +111,18 @@ void DdsSubscriber::changeSubsConfig(const ServiceConfig& config)
 	}
 }
 
-DdsSubscriber::ConfigSubscriberListener::ConfigSubscriberListener(
-	DdsSubscriber* subscriber)
+SubscriberService::ConfigSubscriberListener::ConfigSubscriberListener(
+	SubscriberService* subscriber)
 	: subscriber_(subscriber)
 	, samples_(0)
 	, matched_(0)
 {
 }
-DdsSubscriber::ConfigSubscriberListener::~ConfigSubscriberListener()
+SubscriberService::ConfigSubscriberListener::~ConfigSubscriberListener()
 {
 }
 
-void DdsSubscriber::ConfigSubscriberListener::on_data_available(
+void SubscriberService::ConfigSubscriberListener::on_data_available(
 	eprosima::fastdds::dds::DataReader* reader)
 {
 	SampleInfo info;
@@ -139,7 +139,7 @@ void DdsSubscriber::ConfigSubscriberListener::on_data_available(
 	}
 }
 
-bool DdsSubscriber::createParticipant()
+bool SubscriberService::createParticipant()
 {
 	if (participant_ == nullptr)
 	{
@@ -153,7 +153,7 @@ bool DdsSubscriber::createParticipant()
 }
 
 
-DomainParticipantQos DdsSubscriber::getParticipantQos()
+DomainParticipantQos SubscriberService::getParticipantQos()
 {
 	using namespace eprosima::fastrtps;
 	using namespace eprosima::fastrtps::rtps;
@@ -186,9 +186,8 @@ DomainParticipantQos DdsSubscriber::getParticipantQos()
 	return qos;
 }
 
-bool DdsSubscriber::initSubscribers()
+bool SubscriberService::initSubscribers()
 {
-	setVectorSizesInDataTopic();
 	createParticipant();
 	if (!config_.sub_configs.empty())
 	{
@@ -209,7 +208,7 @@ bool DdsSubscriber::initSubscribers()
 	return true;
 }
 
-bool DdsSubscriber::createNewSubscriber(const SubscriberConfig& config)
+bool SubscriberService::createNewSubscriber(const SubscriberConfig& config)
 {
 	// TODO: узнать че менять в SUBSCRIBER_QOS_DEFAULT
 	AbstractDdsSubscriber* sub = factory_.createSubscriber(participant_, config);
@@ -223,7 +222,7 @@ bool DdsSubscriber::createNewSubscriber(const SubscriberConfig& config)
 	return true;
 }
 
-void DdsSubscriber::runSubscribers()
+void SubscriberService::runSubscribers()
 {
 	std::vector<std::thread> threads;
 	for (auto& sub : subscribers_)
@@ -236,7 +235,12 @@ void DdsSubscriber::runSubscribers()
 	}
 }
 
-void DdsSubscriber::ConfigSubscriberListener::on_subscription_matched(
+std::vector<AbstractDdsSubscriber*> SubscriberService::getSubscribers()
+{
+	return subscribers_;
+}
+
+void SubscriberService::ConfigSubscriberListener::on_subscription_matched(
 	eprosima::fastdds::dds::DataReader* reader,
 	const eprosima::fastdds::dds::SubscriptionMatchedStatus& info)
 {
@@ -256,7 +260,7 @@ void DdsSubscriber::ConfigSubscriberListener::on_subscription_matched(
 }
 
 // TODO: сделать макрос?
-void DdsSubscriber::setVectorSizesInDataTopic()
+void SubscriberService::setVectorSizesInDataTopic()
 {
 	scada_ate::typetopics::SetMaxSizeDataCollectionInt(config_.MaxSizeDataCollectionInt);
 	scada_ate::typetopics::SetMaxSizeDataCollectionFloat(config_.MaxSizeDataCollectionFloat);

@@ -34,6 +34,16 @@ struct SubscriberConfig
 	friend bool operator==(const SubscriberConfig& lhs, const SubscriberConfig& rhs);
 };
 
+template <class T>
+class DataMapper
+{
+	std::deque<T> data_;
+	void setData(const std::deque<T>& data)
+	{
+		data_ = data;
+	}
+};
+
 class AbstractDdsSubscriber
 {
 public:
@@ -41,6 +51,7 @@ public:
 	virtual bool init() = 0;
 	virtual void run() = 0;
 	virtual void setConfig(const SubscriberConfig& config) = 0;
+	virtual void* getData() = 0;
 protected:
 };
 
@@ -59,6 +70,7 @@ public:
 		, listener_(this)
 		, support_type_(new TPubSubType())
 	{
+		setDataSize();
 	}
 	~ConcreteSubscriber() override
 	{
@@ -85,13 +97,13 @@ public:
 
 		support_type_.register_type(participant_);
 
-		topic_ = participant_->create_topic(config_.topic_name, config_.topic_type_name, TOPIC_QOS_DEFAULT);
+		topic_ = participant_->create_topic(config_.topic_name, config_.topic_type_name, eprosima::fastdds::dds::TOPIC_QOS_DEFAULT);
 		if (topic_ == nullptr)
 		{
 			return false;
 		}
 
-		subscriber_ = participant_->create_subscriber(SUBSCRIBER_QOS_DEFAULT, nullptr);
+		subscriber_ = participant_->create_subscriber(eprosima::fastdds::dds::SUBSCRIBER_QOS_DEFAULT, nullptr);
 		if (subscriber_ == nullptr)
 		{
 			return false;
@@ -99,7 +111,7 @@ public:
 
 		reader_ = subscriber_->create_datareader(
 			topic_,
-			DATAREADER_QOS_DEFAULT,
+			eprosima::fastdds::dds::DATAREADER_QOS_DEFAULT,
 			&listener_);
 		if (reader_ == nullptr)
 		{
@@ -120,10 +132,15 @@ public:
 	{
 		config_ = config;
 	}
+	void* getData() override
+	{
+		return &data_;
+	}
 
 private:
 	// Принимает только данные в этом формате
 	std::deque<T> data_;
+	T data_sample_;
 
 	eprosima::fastdds::dds::DomainParticipant* participant_;
 	eprosima::fastdds::dds::Subscriber* subscriber_;
@@ -131,6 +148,8 @@ private:
 	eprosima::fastdds::dds::Topic* topic_;
 	eprosima::fastdds::dds::TypeSupport support_type_; // TODO не нужна как поле ?
 	SubscriberConfig config_;
+
+	void setDataSize() {};
 
 	class DDSDataSubscriberListener : public eprosima::fastdds::dds::DataReaderListener
 	{
@@ -149,13 +168,13 @@ private:
 		void on_data_available(
 			eprosima::fastdds::dds::DataReader* reader) override
 		{
-			SampleInfo info;
-			if (reader->take_next_sample(&data_, &info) == ReturnCode_t::RETCODE_OK)
+			eprosima::fastdds::dds::SampleInfo info;
+			if (reader->take_next_sample(&sub_->data_sample_, &info) == ReturnCode_t::RETCODE_OK)
 			{
 				if (info.valid_data)
 				{
 					samples_++;
-					sub_->data_.push_back(data_);
+					sub_->data_.push_back(sub_->data_sample_);
 					std::cout << "Sub #" << sub_->config_.subscriber_id << " get data" << std::endl;
 				}
 			}
@@ -186,6 +205,15 @@ private:
 		ConcreteSubscriber* sub_;
 	} listener_;
 };
+
+template<>
+void ConcreteSubscriber<DDSData, DDSDataPubSubType>::setDataSize()
+{
+	std::vector<int> v(10, 0);
+	DataCollectionInt dataCollectionInt;
+	dataCollectionInt.value(v);
+	data_sample_.data_int(dataCollectionInt);
+}
 
 class SubscriberFactory
 {

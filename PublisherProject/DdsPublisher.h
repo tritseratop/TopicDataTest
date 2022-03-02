@@ -44,12 +44,12 @@ struct ServiceConfig
     friend bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs);
 };
 
-class DdsPublisher
+class PublisherService
 {
 public:
 
-    DdsPublisher(const ServiceConfig& config);
-    virtual ~DdsPublisher();
+    PublisherService(const ServiceConfig& config);
+    virtual ~PublisherService();
 
     bool initConfigPub();
     void runConfigPub(
@@ -59,6 +59,9 @@ public:
     bool initPublishers();
     void runPublishers();
     void changeSubsConfig(const ServiceConfig& config);
+
+    void setDdsData(DDSData* data, size_t size);
+    void setDdsDataEx(DDSDataEx* data, size_t size);
 
     bool createNewPublisher(const PublisherConfig& config);
 
