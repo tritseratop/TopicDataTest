@@ -211,7 +211,7 @@ bool SubscriberService::initSubscribers()
 bool SubscriberService::createNewSubscriber(const SubscriberConfig& config)
 {
 	// TODO: узнать че менять в SUBSCRIBER_QOS_DEFAULT
-	AbstractDdsSubscriber* sub = factory_.createSubscriber(participant_, config);
+	AbstractDdsSubscriber* sub = factory_.createSubscriber(participant_, config, &observer_);
 	if (sub == nullptr)
 	{
 		return false;

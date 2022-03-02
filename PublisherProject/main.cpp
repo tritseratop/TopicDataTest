@@ -5,8 +5,8 @@
 #ifdef TEST_MODE
 
 std::vector<PublisherConfig> configs({
-        {0, 10000, "DDSData1", "DDSData", TopicType::DDS_DATA, 10, 1000}, 
-        {1, 10000, "DDSData2", "DDSData", TopicType::DDS_DATA, 10, 1000}
+        {0, 10000, "DDSData1", "DDSData", TopicType::DDS_DATA, 100, 2000}, 
+        {1, 10000, "DDSData2", "DDSData", TopicType::DDS_DATA, 100, 2000}
     });
 
 ServiceConfig config({

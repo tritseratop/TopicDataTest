@@ -68,6 +68,7 @@ private:
 	ServiceConfig config_;
 
 	SubscriberFactory factory_;
+	DataObserver observer_;
 
 	//  онтейнеры с пользовательскими типам
 	std::vector<AbstractDdsSubscriber*> subscribers_;

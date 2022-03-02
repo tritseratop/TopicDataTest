@@ -2,12 +2,14 @@
 #define SUBSCRIBER_FACTORY_H_
 
 #include <deque>
+#include <mutex>
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/subscriber/Subscriber.hpp>
 #include <fastdds/dds/subscriber/DataReader.hpp>
 #include <fastdds/dds/subscriber/DataReaderListener.hpp>
 
+#include "DataObserver.h"
 #include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 
 enum TopicType
@@ -34,16 +36,6 @@ struct SubscriberConfig
 	friend bool operator==(const SubscriberConfig& lhs, const SubscriberConfig& rhs);
 };
 
-template <class T>
-class DataMapper
-{
-	std::deque<T> data_;
-	void setData(const std::deque<T>& data)
-	{
-		data_ = data;
-	}
-};
-
 class AbstractDdsSubscriber
 {
 public:
@@ -61,7 +53,8 @@ class ConcreteSubscriber : public AbstractDdsSubscriber
 public:
 	ConcreteSubscriber(
 		eprosima::fastdds::dds::DomainParticipant* participant,
-		const SubscriberConfig& config)
+		const SubscriberConfig& config,
+		DataObserver* observer)
 		: participant_(participant)
 		, subscriber_(nullptr)
 		, reader_(nullptr)
@@ -69,6 +62,8 @@ public:
 		, config_(config)
 		, listener_(this)
 		, support_type_(new TPubSubType())
+		, observer_(observer)
+		, stop_(false)
 	{
 		setDataSize();
 	}
@@ -122,7 +117,7 @@ public:
 	}
 	void run() override
 	{
-		while (listener_.samples_ < config_.samples)
+		while (!stop_)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(config_.sleep));
 		}
@@ -142,6 +137,10 @@ private:
 	std::deque<T> data_;
 	T data_sample_;
 
+	DataObserver* observer_;
+
+	bool stop_;
+
 	eprosima::fastdds::dds::DomainParticipant* participant_;
 	eprosima::fastdds::dds::Subscriber* subscriber_;
 	eprosima::fastdds::dds::DataReader* reader_;
@@ -150,6 +149,8 @@ private:
 	SubscriberConfig config_;
 
 	void setDataSize() {};
+
+	void update() {};
 
 	class DDSDataSubscriberListener : public eprosima::fastdds::dds::DataReaderListener
 	{
@@ -174,7 +175,15 @@ private:
 				if (info.valid_data)
 				{
 					samples_++;
-					sub_->data_.push_back(sub_->data_sample_);
+					{
+						std::lock_guard<std::mutex> guard(std::mutex());
+						sub_->data_.push_back(sub_->data_sample_);
+					}
+					if (samples_ == sub_->config_.samples)
+					{
+						sub_->update();
+						samples_ = 0;
+					}
 					std::cout << "Sub #" << sub_->config_.subscriber_id << " get data" << std::endl;
 				}
 			}
@@ -215,13 +224,24 @@ void ConcreteSubscriber<DDSData, DDSDataPubSubType>::setDataSize()
 	data_sample_.data_int(dataCollectionInt);
 }
 
+template<>
+void ConcreteSubscriber<DDSData, DDSDataPubSubType>::update()
+{
+	std::lock_guard<std::mutex> guard(std::mutex());
+	observer_->handleDdsData({ 
+		std::make_move_iterator(data_.begin()), 
+		std::make_move_iterator(data_.end()) 
+	});
+}
+
 class SubscriberFactory
 {
 public:
 	virtual ~SubscriberFactory() {}
 	AbstractDdsSubscriber* createSubscriber(
 		eprosima::fastdds::dds::DomainParticipant* participant,
-		const SubscriberConfig& config) const;
+		const SubscriberConfig& config,
+		DataObserver* observer) const;
 protected:
 
 };

@@ -29,7 +29,7 @@ message(STATUS "Configuring HelloWorld example...")
 file(GLOB DDS_SUBSCRIBER_CPP "SubscriberFactory.cpp" "*.cpp" "../ConfigTopic/*.cxx" "../TypeTopicsDDS/*.cxx")
 
 # Add source to this project's executable.
-add_executable (SubscriberProject  ${DDS_SUBSCRIBER_CPP})
+add_executable (SubscriberProject  ${DDS_SUBSCRIBER_CPP} "DataObserver.h" "DataObserver.cpp")
 target_link_libraries(SubscriberProject fastrtps fastcdr)
 
 # TODO: Add tests and install targets if needed.

@@ -6,8 +6,8 @@
 #ifdef TEST_MODE
 
 std::vector<SubscriberConfig> configs({
-        {0, 10000, "DDSData1", "DDSData", TopicType::DDS_DATA, 10, 1000},
-        {1, 10000, "DDSData2", "DDSData", TopicType::DDS_DATA, 10, 1000}
+        {0, 10000, "DDSData1", "DDSData", TopicType::DDS_DATA, 2, 1000},
+        {1, 10000, "DDSData2", "DDSData", TopicType::DDS_DATA, 2, 1000}
     });
 
 ServiceConfig config({

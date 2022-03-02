@@ -17,18 +17,19 @@ bool operator==(const SubscriberConfig& lhs, const SubscriberConfig& rhs)
 
 AbstractDdsSubscriber* SubscriberFactory::createSubscriber(
 	eprosima::fastdds::dds::DomainParticipant* participant,
-	const SubscriberConfig& config) const
+	const SubscriberConfig& config,
+	DataObserver* observer) const
 {
 	switch (config.topic_type)
 	{
 	case TopicType::DDS_DATA:
-		return new ConcreteSubscriber<DDSData, DDSDataPubSubType>(participant, config);
+		return new ConcreteSubscriber<DDSData, DDSDataPubSubType>(participant, config, observer);
 	case TopicType::DDS_DATA_EX:
-		return new ConcreteSubscriber<DDSDataEx, DDSDataExPubSubType>(participant, config);
+		return new ConcreteSubscriber<DDSDataEx, DDSDataExPubSubType>(participant, config, observer);
 	case TopicType::DDS_ALARM:
-		return new ConcreteSubscriber<DDSAlarm, DDSAlarmPubSubType>(participant, config);
+		return new ConcreteSubscriber<DDSAlarm, DDSAlarmPubSubType>(participant, config, observer);
 	case TopicType::DDS_EX_ALARM:
-		return new ConcreteSubscriber<DDSExAlarm, DDSExAlarmPubSubType>(participant, config);
+		return new ConcreteSubscriber<DDSExAlarm, DDSExAlarmPubSubType>(participant, config, observer);
 	default:
 		std::cout << "Topic type " << config.topic_type_name << " is not found" << std::endl;
 		return nullptr;
