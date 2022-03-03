@@ -37,6 +37,7 @@ void WsSocketListener::onAfterCreate_NonBlocking(const std::shared_ptr<ClientLis
 	//TODO mutex
 	auto client = std::make_shared<ClientListener>(socket, this, id);
 	socket->setListener(client);
+	client->sendMessageAsync("Connected");
 	addClient(client);
 }
 

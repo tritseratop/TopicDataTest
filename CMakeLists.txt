@@ -8,5 +8,6 @@ project ("TopicDataTest")
 # Include sub-projects.
 add_subdirectory ("PublisherProject")
 add_subdirectory ("SubscriberProject")
+add_subdirectory ("WsClient")
 
 # target_include_directories(SubscriberProject ${SOURCE_DIR}/src ${SOURCE_DIR} src)
