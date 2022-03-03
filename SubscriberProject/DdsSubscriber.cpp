@@ -20,7 +20,7 @@ bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs)
 		&& lhs.sub_configs == rhs.sub_configs;
 }
 
-SubscriberService::SubscriberService(const ServiceConfig& config)
+SubscriberService::SubscriberService(const ServiceConfig& config, IServer* server)
 	: participant_(nullptr)
 	, config_(config)
 	, config_subscriber_(nullptr)
@@ -28,6 +28,7 @@ SubscriberService::SubscriberService(const ServiceConfig& config)
 	, config_topic_(nullptr)
 	, config_type_(new ConfigTopicPubSubType())
 	, config_listener_(this)
+	, observer_(server)
 {
 }
 

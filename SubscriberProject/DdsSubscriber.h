@@ -47,7 +47,7 @@ struct ServiceConfig
 
 class SubscriberService {
 public: 
-	SubscriberService(const ServiceConfig& config);
+	SubscriberService(const ServiceConfig& config, IServer* server);
 	virtual ~SubscriberService();
 
 	bool initConfigSubscriber();

@@ -4,16 +4,7 @@
 #include <deque>
 
 #include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-
-struct DataDto
-{
-	uint64_t time_service;
-};
-
-struct AlarmDto
-{
-	uint64_t time_service;
-};
+#include "../include/CommonClasses.h"
 
 class DataMapper
 {
@@ -27,6 +18,7 @@ public:
 class DataObserver
 {
 public:
+	DataObserver(IServer* server);
 	void handleDdsData(std::deque<DDSData> data);
 	void handleDdsDataEx(std::deque<DDSDataEx> data);
 	void handleDdsAlarm(std::deque<DDSAlarm> data);
@@ -34,6 +26,7 @@ public:
 
 private:
 	DataMapper mapper_;
+	IServer* server_;
 };
 
 #endif//!DATA_OBSERVER_H_

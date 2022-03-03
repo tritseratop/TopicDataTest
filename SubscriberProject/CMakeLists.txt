@@ -24,12 +24,21 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANG OR
     endif()
 endif()
 
+find_package(oatpp REQUIRED)
+find_package(oatpp-websocket REQUIRED)
+
 message(STATUS "Configuring HelloWorld example...")
 
-file(GLOB DDS_SUBSCRIBER_CPP "SubscriberFactory.cpp" "*.cpp" "../ConfigTopic/*.cxx" "../TypeTopicsDDS/*.cxx")
+file(GLOB DDS_SUBSCRIBER_CPP "SubscriberFactory.cpp" "*.cpp" "../ConfigTopic/*.cxx" "../TypeTopicsDDS/*.cxx" "WsService/*.cpp")
 
 # Add source to this project's executable.
 add_executable (SubscriberProject  ${DDS_SUBSCRIBER_CPP} "DataObserver.h" "DataObserver.cpp")
-target_link_libraries(SubscriberProject fastrtps fastcdr)
+target_link_libraries(SubscriberProject 
+        PUBLIC fastrtps 
+        PUBLIC fastcdr
+        PUBLIC oatpp::oatpp
+        PUBLIC oatpp::oatpp-test
+        PUBLIC oatpp::oatpp-websocket
+)
 
 # TODO: Add tests and install targets if needed.

@@ -24,12 +24,24 @@ AlarmDto DataMapper::mapDdsExAlarm(DDSExAlarm data)
 	return result;
 }
 
+DataObserver::DataObserver(IServer* server)
+	: server_(server)
+{
+}
+
 void DataObserver::handleDdsData(std::deque<DDSData> data)
 {
 	std::deque<DataDto> dtos;
-	for (const auto& d : data)
+	for (auto d : data)
 	{
 		dtos.push_back(mapper_.mapDdsData(std::move(d)));
+	}
+	for (const auto& d : dtos)
+	{
+		if (server_ != nullptr)
+		{
+			server_->sendData(d);
+		}
 	}
 }
 
