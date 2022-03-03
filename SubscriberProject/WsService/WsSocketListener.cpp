@@ -6,25 +6,27 @@ WsSocketListener::WsSocketListener()
 
 void WsSocketListener::addClient(const std::shared_ptr<ClientListener>& client)
 {
-	idToClient[client->getClientId()] = client;
+	std::lock_guard<std::mutex> guard(m_change_clients_);
+	clients_[client->getClientId()] = client;
 }
 
 void WsSocketListener::removeClientById(v_int64 id) {
-	if (idToClient.count(id) != 0) {
-		idToClient.erase(id);
+	if (clients_.count(id) != 0) {
+		std::lock_guard<std::mutex> guard(m_change_clients_);
+		clients_.erase(id);
 	}
 }
 
 std::shared_ptr<ClientListener> WsSocketListener::getClientById(v_int64 id) {
-	if (idToClient.count(id) != 0) {
-		return idToClient[id];
+	if (clients_.count(id) != 0) {
+		return clients_[id];
 	}
 	return nullptr;
 }
 
 void WsSocketListener::sendMessageToAllAsync(const oatpp::String& message) {
-	std::lock_guard<std::mutex> m(m_writeMessage);
-	for (auto& pair : idToClient) {
+	std::lock_guard<std::mutex> m(m_write_message_);
+	for (auto& pair : clients_) {
 		pair.second->sendMessageAsync(message);
 	}
 }
@@ -33,9 +35,8 @@ std::atomic<v_int32> WsSocketListener::SOCKETS(0);
 
 void WsSocketListener::onAfterCreate_NonBlocking(const std::shared_ptr<ClientListener::AsyncWebSocket>& socket, const std::shared_ptr<const ParameterMap>& params) {
 	//TODO initialize
-	int id;
-	//TODO mutex
-	auto client = std::make_shared<ClientListener>(socket, this, id);
+	auto client = std::make_shared<ClientListener>(socket, this, SOCKETS);
+	++SOCKETS;
 	socket->setListener(client);
 	client->sendMessageAsync("Connected");
 	addClient(client);

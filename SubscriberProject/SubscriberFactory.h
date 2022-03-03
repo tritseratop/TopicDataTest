@@ -166,6 +166,7 @@ private:
 		{
 		}
 
+		// TODO может ли вызываться в разных потоках?
 		void on_data_available(
 			eprosima::fastdds::dds::DataReader* reader) override
 		{

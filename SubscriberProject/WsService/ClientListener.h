@@ -14,21 +14,21 @@ class ClientListener : public oatpp::websocket::AsyncWebSocket::Listener {
 private:
 	static constexpr const char* TAG = "Server_ClientListener";
 private:
-	std::shared_ptr<AsyncWebSocket> m_socket;
+	std::shared_ptr<AsyncWebSocket> socket_;
 	WsSocketListener* sock_listener_;
-	v_int64 clientId;
-	oatpp::data::stream::ChunkedBuffer m_messageBuffer;
-	oatpp::async::Lock m_writeLock;
+	v_int64 client_id_;
+	oatpp::data::stream::ChunkedBuffer message_buffer_;
+	oatpp::async::Lock write_lock_;
 private:
-	OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, m_asyncExecutor);
-	OATPP_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>, m_serverConnectionProvider);
+	OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, async_executor_);
+	OATPP_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>, server_connection_provider_);
 public:
 	ClientListener(const std::shared_ptr<AsyncWebSocket>& socket, 
 		WsSocketListener* sock_listener,
 		v_int64 id)
-		: m_socket(socket)
+		: socket_(socket)
 		, sock_listener_(sock_listener)
-		, clientId(id)
+		, client_id_(id)
 	{}
 	v_int64 getClientId();
 	CoroutineStarter onPing(const std::shared_ptr<AsyncWebSocket>& socket, const oatpp::String& message) override;

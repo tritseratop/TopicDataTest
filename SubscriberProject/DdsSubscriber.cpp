@@ -34,12 +34,7 @@ SubscriberService::SubscriberService(const ServiceConfig& config, IServer* serve
 
 SubscriberService::~SubscriberService()
 {
-	// TODO: вынести в другую функцию удаление подписчиков
-	for (auto& sub : subscribers_)
-	{
-		delete sub;
-	}
-	subscribers_.clear();
+	deleteSubscribers();
 
 	// TODO: надо ли проверять на nullptr??
 	participant_->delete_topic(config_topic_);
@@ -108,6 +103,7 @@ void SubscriberService::changeSubsConfig(const ServiceConfig& config)
 	else
 	{
 		config_ = config;
+		deleteSubscribers();
 		initSubscribers();
 	}
 }
@@ -177,7 +173,7 @@ DomainParticipantQos SubscriberService::getParticipantQos()
 
 	qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
 	qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(5, 0);
-	qos.name("Participant_sub"); // TODO хз откуда брать имя
+	qos.name(config_.participant_name);
 	
 
 	qos.transport().use_builtin_transports = false;
@@ -258,6 +254,15 @@ void SubscriberService::ConfigSubscriberListener::on_subscription_matched(
 		std::cout << info.current_count_change
 			<< " is not a valid value for SubscriptionMatchedStatus current count change" << std::endl;
 	}
+}
+
+void SubscriberService::deleteSubscribers()
+{
+	for (auto& sub : subscribers_)
+	{
+		delete sub;
+	}
+	subscribers_.clear();
 }
 
 // TODO: сделать макрос?

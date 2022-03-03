@@ -11,8 +11,9 @@ class WsSocketListener : public oatpp::websocket::AsyncConnectionHandler::Socket
 private:
 	static constexpr const char* TAG = "Server_WSInstanceListener";
 
-	std::map<v_int64, std::shared_ptr<ClientListener>> idToClient;
-	std::mutex m_writeMessage;
+	std::map<v_int64, std::shared_ptr<ClientListener>> clients_;
+	std::mutex m_write_message_;
+	std::mutex m_change_clients_;
 
 public:
 	static std::atomic<v_int32> SOCKETS; // for id generation

@@ -99,6 +99,8 @@ private:
 		SubscriberService* subscriber_;
 	} config_listener_;
 
+	void deleteSubscribers();
+
 };
 
 #endif //!DDS_SUBSCRIBER_H_
