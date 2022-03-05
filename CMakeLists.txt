@@ -9,5 +9,6 @@ project ("TopicDataTest")
 add_subdirectory ("PublisherProject")
 add_subdirectory ("SubscriberProject")
 add_subdirectory ("WsClient")
+add_subdirectory ("TestService")
 
 # target_include_directories(SubscriberProject ${SOURCE_DIR}/src ${SOURCE_DIR} src)

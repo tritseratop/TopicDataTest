@@ -2,6 +2,7 @@
 #include "WsService/WsServer.h"
 #include "../include/test_runner.h"
 
+
 #define TEST_MODE
 
 #ifdef TEST_MODE
@@ -48,31 +49,31 @@ void TestDataTransition()
     oatpp::base::Environment::destroy();
 }
 
-int main(
-    int argc,
-    char** argv)
-{
-    //TestRunner tr;
-    //RUN_TEST(tr, TestDataTransition);
-
-    oatpp::base::Environment::init();
-
-    Configure conf;
-    WebsockServer server(conf);
-    SubscriberService* mysub = new SubscriberService(config, &server);
-
-    std::thread tcp_thread([](SubscriberService* mysub) {
-        mysub->setVectorSizesInDataTopic();
-        if (mysub->initSubscribers())
-        {
-            mysub->runSubscribers();
-        }
-        }, mysub);
-    
-    server.run();
-
-    delete mysub;
-    oatpp::base::Environment::destroy();
-    
-    return 0;
-}
+//int main(
+//    int argc,
+//    char** argv)
+//{
+//    //TestRunner tr;
+//    //RUN_TEST(tr, TestDataTransition);
+//
+//    oatpp::base::Environment::init();
+//
+//    Configure conf;
+//    WebsockServer server(conf);
+//    SubscriberService* mysub = new SubscriberService(config, &server);
+//
+//    std::thread tcp_thread([](SubscriberService* mysub) {
+//        mysub->setVectorSizesInDataTopic();
+//        if (mysub->initSubscribers())
+//        {
+//            mysub->runSubscribers();
+//        }
+//        }, mysub);
+//    
+//    server.run();
+//
+//    delete mysub;
+//    oatpp::base::Environment::destroy();
+//    
+//    return 0;
+//}
