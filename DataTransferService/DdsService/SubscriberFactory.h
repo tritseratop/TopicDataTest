@@ -43,7 +43,7 @@ public:
 	virtual bool init() = 0;
 	virtual void run() = 0;
 	virtual void setConfig(const SubscriberConfig& config) = 0;
-	virtual void* getData() = 0;
+	virtual const void* getData() const = 0;
 protected:
 };
 
@@ -127,7 +127,8 @@ public:
 	{
 		config_ = config;
 	}
-	void* getData() override
+
+	const void* getData() const override
 	{
 		return &data_;
 	}
@@ -216,25 +217,6 @@ private:
 	} listener_;
 };
 
-template<>
-void ConcreteSubscriber<DDSData, DDSDataPubSubType>::setDataSize()
-{
-	std::vector<int> v(10, 0);
-	DataCollectionInt dataCollectionInt;
-	dataCollectionInt.value(v);
-	data_sample_.data_int(dataCollectionInt);
-}
-
-template<>
-void ConcreteSubscriber<DDSData, DDSDataPubSubType>::update()
-{
-	std::lock_guard<std::mutex> guard(std::mutex());
-	observer_->handleDdsData({ 
-		std::make_move_iterator(data_.begin()), 
-		std::make_move_iterator(data_.end()) 
-	});
-}
-
 class SubscriberFactory
 {
 public:
@@ -247,7 +229,7 @@ protected:
 
 };
 
-TopicType string2TopicType(std::string type_name);
+TopicType string2TopicType(const std::string& type_name);
 
 std::string TopicType2string(TopicType type);
 

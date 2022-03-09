@@ -43,7 +43,7 @@ void TestDataTransition()
     }
 
     std::vector<AbstractDdsSubscriber*> subs = mysub->getSubscribers();
-    std::deque<DDSData>* ddsData = static_cast<std::deque<DDSData>*>(subs[0]->getData());
+    const std::deque<DDSData>* ddsData = static_cast<const std::deque<DDSData>*>(subs[0]->getData());
 
     delete mysub;
     oatpp::base::Environment::destroy();

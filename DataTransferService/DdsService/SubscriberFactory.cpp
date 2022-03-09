@@ -15,6 +15,22 @@ bool operator==(const SubscriberConfig& lhs, const SubscriberConfig& rhs)
 		&& lhs.topic_type == rhs.topic_type;
 }
 
+template<>
+void ConcreteSubscriber<DDSData, DDSDataPubSubType>::setDataSize()
+{
+	std::vector<int> v(10, 0);
+	DataCollectionInt dataCollectionInt;
+	dataCollectionInt.value(v);
+	data_sample_.data_int(dataCollectionInt);
+}
+
+template<>
+void ConcreteSubscriber<DDSData, DDSDataPubSubType>::update()
+{
+	std::lock_guard<std::mutex> guard(std::mutex());
+	observer_->handleDdsData(data_);
+}
+
 AbstractDdsSubscriber* SubscriberFactory::createSubscriber(
 	eprosima::fastdds::dds::DomainParticipant* participant,
 	const SubscriberConfig& config,
@@ -37,7 +53,7 @@ AbstractDdsSubscriber* SubscriberFactory::createSubscriber(
 }
 
 
-TopicType string2TopicType(std::string type_name)
+TopicType string2TopicType(const std::string type_name)
 {
 	if (type_name == "DDSData")
 	{

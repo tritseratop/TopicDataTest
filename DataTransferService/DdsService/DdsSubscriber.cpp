@@ -232,7 +232,7 @@ void SubscriberService::runSubscribers()
 	}
 }
 
-std::vector<AbstractDdsSubscriber*> SubscriberService::getSubscribers()
+std::vector<AbstractDdsSubscriber*> SubscriberService::getSubscribers() const
 {
 	return subscribers_;
 }

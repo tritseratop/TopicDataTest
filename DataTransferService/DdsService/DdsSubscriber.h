@@ -60,7 +60,7 @@ public:
 	bool initSubscribers();
 	bool createNewSubscriber(const SubscriberConfig& config);
 	void runSubscribers();
-	std::vector<AbstractDdsSubscriber*> getSubscribers();
+	std::vector<AbstractDdsSubscriber*> getSubscribers() const;
 	void setVectorSizesInDataTopic();
 
 private:
