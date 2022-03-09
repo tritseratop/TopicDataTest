@@ -29,12 +29,12 @@ DataObserver::DataObserver(IServer* server)
 {
 }
 
-void DataObserver::handleDdsData(std::deque<DDSData> data)
+void DataObserver::handleDdsData(ThreadSafeQueue<DDSData> data)
 {
-	std::deque<DataDto> dtos;
-	for (auto d : data)
+	ThreadSafeQueue<DataDto> dtos;
+	/*for (auto d : data)
 	{
-		dtos.push_back(mapper_.mapDdsData(std::move(d)));
+		dtos.push(mapper_.mapDdsData(std::move(d)));
 	}
 	for (const auto& d : dtos)
 	{
@@ -42,20 +42,20 @@ void DataObserver::handleDdsData(std::deque<DDSData> data)
 		{
 			server_->sendData(d);
 		}
-	}
+	}*/
 }
 
-void DataObserver::handleDdsDataEx(std::deque<DDSDataEx> data)
+void DataObserver::handleDdsDataEx(ThreadSafeQueue<DDSDataEx> data)
 {
 
 }
 
-void DataObserver::handleDdsAlarm(std::deque<DDSAlarm> data)
+void DataObserver::handleDdsAlarm(ThreadSafeQueue<DDSAlarm> data)
 {
 
 }
 
-void DataObserver::handleDdsExAlarm(std::deque<DDSExAlarm> data)
+void DataObserver::handleDdsExAlarm(ThreadSafeQueue<DDSExAlarm> data)
 {
 
 }

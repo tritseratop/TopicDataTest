@@ -27,8 +27,7 @@ void ConcreteSubscriber<DDSData, DDSDataPubSubType>::setDataSize()
 template<>
 void ConcreteSubscriber<DDSData, DDSDataPubSubType>::update()
 {
-	std::lock_guard<std::mutex> guard(std::mutex());
-	observer_->handleDdsData(data_);
+	observer_->handleDdsData(std::move(data_));
 }
 
 AbstractDdsSubscriber* SubscriberFactory::createSubscriber(

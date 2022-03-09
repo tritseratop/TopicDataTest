@@ -1,7 +1,7 @@
 #ifndef SUBSCRIBER_FACTORY_H_
 #define SUBSCRIBER_FACTORY_H_
 
-#include <deque>
+//#include <deque>
 #include <mutex>
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
@@ -10,6 +10,7 @@
 #include <fastdds/dds/subscriber/DataReaderListener.hpp>
 
 #include "DataObserver.h"
+#include "../ThreadSafeQueue/ThreadSafeQueue.h"
 #include "../../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 
 enum TopicType
@@ -135,7 +136,7 @@ public:
 
 private:
 	// ѕринимает только данные в этом формате
-	std::deque<T> data_;
+	ThreadSafeQueue<T> data_;
 	T data_sample_;
 
 	DataObserver* observer_;
@@ -179,7 +180,7 @@ private:
 					samples_++;
 					{
 						std::lock_guard<std::mutex> guard(std::mutex());
-						sub_->data_.push_back(sub_->data_sample_);
+						sub_->data_.push(sub_->data_sample_);
 					}
 					if (samples_ == sub_->config_.samples)
 					{
@@ -210,7 +211,6 @@ private:
 			}
 		}
 
-		T data_;
 		int matched_;
 		uint32_t samples_; // TODO atomic??
 		ConcreteSubscriber* sub_;
