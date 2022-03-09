@@ -1,5 +1,5 @@
-#include "../SubscriberProject/DdsSubscriber.h"
-#include "../SubscriberProject/WsService/WsServer.h"
+#include "../DataTransferService/DdsService/DdsSubscriber.h"
+#include "../DataTransferService/WsService/WsServer.h"
 #include <gtest/gtest.h>
 //#include "../include/test_runner.h"
 

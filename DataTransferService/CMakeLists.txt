@@ -3,7 +3,7 @@
 #
 cmake_minimum_required (VERSION 3.8)
 
-project(SubscriberProject)
+project(DataTransferService)
 
 # Find requirements
 if(NOT fastcdr_FOUND)
@@ -29,11 +29,11 @@ find_package(oatpp-websocket REQUIRED)
 
 message(STATUS "Configuring HelloWorld example...")
 
-file(GLOB DDS_SUBSCRIBER_CPP "SubscriberFactory.cpp" "*.cpp" "../ConfigTopic/*.cxx" "../TypeTopicsDDS/*.cxx" "WsService/*.cpp")
+file(GLOB DATA_TRANSFER_PROJECT_CPP "DdsService/*.cpp" "../ConfigTopic/*.cxx" "../TypeTopicsDDS/*.cxx" "WsService/*.cpp")
 
 # Add source to this project's executable.
-add_library (SubscriberProject  ${DDS_SUBSCRIBER_CPP} "DataObserver.h" "DataObserver.cpp")
-target_link_libraries(SubscriberProject 
+add_library (DataTransferService  ${DATA_TRANSFER_PROJECT_CPP})
+target_link_libraries(DataTransferService 
         PUBLIC fastrtps 
         PUBLIC fastcdr
         PUBLIC oatpp::oatpp

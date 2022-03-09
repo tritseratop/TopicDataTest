@@ -7,7 +7,7 @@ project ("TopicDataTest")
 
 # Include sub-projects.
 add_subdirectory ("PublisherProject")
-add_subdirectory ("SubscriberProject")
+add_subdirectory ("DataTransferService")
 add_subdirectory ("WsClient")
 add_subdirectory ("TestService")
 

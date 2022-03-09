@@ -10,7 +10,7 @@
 #include <fastdds/dds/subscriber/DataReaderListener.hpp>
 
 #include "DataObserver.h"
-#include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "../../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 
 enum TopicType
 {

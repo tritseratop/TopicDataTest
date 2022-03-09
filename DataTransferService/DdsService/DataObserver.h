@@ -3,8 +3,8 @@
 
 #include <deque>
 
-#include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "../include/CommonClasses.h"
+#include "../../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "../../include/CommonClasses.h"
 
 class DataMapper
 {

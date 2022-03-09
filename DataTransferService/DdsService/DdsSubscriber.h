@@ -11,8 +11,8 @@
 
 #include <fastrtps/attributes/ParticipantAttributes.h>
 
-#include "../ConfigTopic/ConfigTopicPubSubTypes.h"
-#include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "../../ConfigTopic/ConfigTopicPubSubTypes.h"
+#include "../../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "SubscriberFactory.h"
 
 struct ServiceConfig

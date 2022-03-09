@@ -1,6 +1,6 @@
 #include "DdsSubscriber.h"
-#include "WsService/WsServer.h"
-#include "../include/test_runner.h"
+#include "../WsService/WsServer.h"
+#include "../../include/test_runner.h"
 
 
 #define TEST_MODE
