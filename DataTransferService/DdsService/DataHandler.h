@@ -11,9 +11,12 @@ class DataMapper
 {
 public:
 	DataDto mapDdsData(DDSData data);
-	DataDto mapDdsDataEx(DDSDataEx data);
+	DataDto mapDdsDataEx(const DDSDataEx& data_ex, DataDto data);
 	AlarmDto mapDdsAlarm(DDSAlarm data);
-	AlarmDto mapDdsAlarmEx(DDSAlarmEx data);
+	AlarmDto mapDdsAlarmEx(const DDSAlarmEx& data_ex, AlarmDto dto);
+
+	template<class DtoDataCollection, class DdsData>
+	void fillChanged(DtoDataCollection& next, const std::vector<DdsData>& prev);
 };
 
 class DataHandler
