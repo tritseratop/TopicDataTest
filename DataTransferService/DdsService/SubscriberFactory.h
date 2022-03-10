@@ -9,7 +9,7 @@
 #include <fastdds/dds/subscriber/DataReader.hpp>
 #include <fastdds/dds/subscriber/DataReaderListener.hpp>
 
-#include "DataObserver.h"
+#include "DataHandler.h"
 #include "../ThreadSafeQueue/ThreadSafeQueue.h"
 #include "../../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 
@@ -55,7 +55,7 @@ public:
 	ConcreteSubscriber(
 		eprosima::fastdds::dds::DomainParticipant* participant,
 		const SubscriberConfig& config,
-		DataObserver* observer)
+		DataHandler* observer)
 		: participant_(participant)
 		, subscriber_(nullptr)
 		, reader_(nullptr)
@@ -136,10 +136,10 @@ public:
 
 private:
 	// ѕринимает только данные в этом формате
-	ThreadSafeQueue<T> data_;
+	std::deque<T> data_;
 	T data_sample_;
 
-	DataObserver* observer_;
+	DataHandler* observer_;
 
 	bool stop_;
 
@@ -152,7 +152,9 @@ private:
 
 	void setDataSize() {};
 
-	void update() {};
+	void cacheData(const T& data_) {};
+
+	void runDataSending();
 
 	class DDSDataSubscriberListener : public eprosima::fastdds::dds::DataReaderListener
 	{
@@ -178,15 +180,7 @@ private:
 				if (info.valid_data)
 				{
 					samples_++;
-					{
-						std::lock_guard<std::mutex> guard(std::mutex());
-						sub_->data_.push(sub_->data_sample_);
-					}
-					if (samples_ == sub_->config_.samples)
-					{
-						sub_->update();
-						samples_ = 0;
-					}
+					sub_->cacheData(sub_->data_sample_);
 					std::cout << "Sub #" << sub_->config_.subscriber_id << " get data" << std::endl;
 				}
 			}
@@ -224,7 +218,7 @@ public:
 	AbstractDdsSubscriber* createSubscriber(
 		eprosima::fastdds::dds::DomainParticipant* participant,
 		const SubscriberConfig& config,
-		DataObserver* observer) const;
+		DataHandler* observer) const;
 protected:
 
 };

@@ -25,15 +25,20 @@ void ConcreteSubscriber<DDSData, DDSDataPubSubType>::setDataSize()
 }
 
 template<>
-void ConcreteSubscriber<DDSData, DDSDataPubSubType>::update()
+void ConcreteSubscriber<DDSData, DDSDataPubSubType>::cacheData(const DDSData& data_)
 {
-	observer_->handleDdsData(std::move(data_));
+	observer_->cacheDdsData(data_);
+}
+
+template<>
+void ConcreteSubscriber<DDSData, DDSDataPubSubType>::runDataSending()
+{
 }
 
 AbstractDdsSubscriber* SubscriberFactory::createSubscriber(
 	eprosima::fastdds::dds::DomainParticipant* participant,
 	const SubscriberConfig& config,
-	DataObserver* observer) const
+	DataHandler* observer) const
 {
 	switch (config.topic_type)
 	{
@@ -44,7 +49,7 @@ AbstractDdsSubscriber* SubscriberFactory::createSubscriber(
 	case TopicType::DDS_ALARM:
 		return new ConcreteSubscriber<DDSAlarm, DDSAlarmPubSubType>(participant, config, observer);
 	case TopicType::DDS_EX_ALARM:
-		return new ConcreteSubscriber<DDSExAlarm, DDSExAlarmPubSubType>(participant, config, observer);
+		return new ConcreteSubscriber<DDSAlarmEx, DDSAlarmExPubSubType>(participant, config, observer);
 	default:
 		std::cout << "Topic type " << config.topic_type_name << " is not found" << std::endl;
 		return nullptr;
@@ -66,7 +71,7 @@ TopicType string2TopicType(const std::string type_name)
 	{
 		return TopicType::DDS_ALARM;
 	}
-	else if (type_name == "DDSExAlarm")
+	else if (type_name == "DDSAlarmEx")
 	{
 		return TopicType::DDS_EX_ALARM;
 	}
@@ -87,7 +92,7 @@ std::string TopicType2string(TopicType type)
 	case TopicType::DDS_ALARM:
 		return "DDSAlarm";
 	case TopicType::DDS_EX_ALARM:
-		return "DDSExAlarm";
+		return "DDSAlarmEx";
 	default:
 		return "";
 	}

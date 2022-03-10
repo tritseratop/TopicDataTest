@@ -26,7 +26,15 @@ endif()
 
 message(STATUS "Configuring HelloWorld example...")
 
-file(GLOB DDS_PUBLISHER_CPP "PublisherFactory.cpp" "*.cpp" "../ConfigTopic/*.cxx" "../TypeTopicsDDS/*.cxx")
+file(GLOB DDS_PUBLISHER_CPP 
+        "PublisherFactory.cpp" 
+        "*.cpp" 
+        "../ConfigTopic/*.cxx" 
+        "../TypeTopicsDDS/DDSAlarm/*.cxx" 
+        "../TypeTopicsDDS/DDSAlarmEx/*.cxx" 
+        "../TypeTopicsDDS/DDSData/*.cxx" 
+        "../TypeTopicsDDS/DDSDataEx/*.cxx" 
+)
 
 # Add source to this project's executable.
 add_executable (PublisherProject  ${DDS_PUBLISHER_CPP})

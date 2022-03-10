@@ -1,0 +1,12 @@
+/// <summary>
+/// Topic alarms
+/// </summary>
+
+struct DDSAlarm
+{
+	long long time_source;
+	long long time_service;
+	sequence<unsigned long> alarms;
+	sequence<unsigned long> quality;
+};
+

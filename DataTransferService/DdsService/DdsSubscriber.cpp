@@ -221,11 +221,14 @@ bool SubscriberService::createNewSubscriber(const SubscriberConfig& config)
 
 void SubscriberService::runSubscribers()
 {
+	std::thread obs_t([this]() { observer_.sendingDdsData(config_.ws_data_sleep); });
+	obs_t.detach();
 	std::vector<std::thread> threads;
 	for (auto& sub : subscribers_)
 	{
 		threads.push_back( std::thread([&](){sub->run(); }) );
 	}
+
 	for (auto& t : threads)
 	{
 		t.join();
@@ -280,5 +283,5 @@ void SubscriberService::setVectorSizesInDataTopic()
 
 	//scada_ate::typetopics::SetMaxSizeDDSAlarmAlarms(config_.MaxSizeDDSAlarmVectorAlarm);
 
-	scada_ate::typetopics::SetMaxSizeDDSExVectorAlarms(config_.MaxSizeDDSExVectorAlarms);
+	//scada_ate::typetopics::SetMaxSizeDDSExVectorAlarms(config_.MaxSizeDDSExVectorAlarms);
 }

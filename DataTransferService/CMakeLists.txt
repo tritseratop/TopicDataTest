@@ -31,10 +31,15 @@ message(STATUS "Configuring HelloWorld example...")
 
 file(GLOB DATA_TRANSFER_PROJECT_CPP 
         "DdsService/*.cpp" 
+        "DdsService/*.h" 
         "ThreadSafeQueue/*.h" 
         "WsService/*.cpp"
+        "WsService/*.h"
         "../ConfigTopic/*.cxx" 
-        "../TypeTopicsDDS/*.cxx" 
+        "../TypeTopicsDDS/DDSAlarm/*.cxx" 
+        "../TypeTopicsDDS/DDSAlarmEx/*.cxx" 
+        "../TypeTopicsDDS/DDSData/*.cxx" 
+        "../TypeTopicsDDS/DDSDataEx/*.cxx" 
 )
 
 # Add source to this project's executable.

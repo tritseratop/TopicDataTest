@@ -300,5 +300,5 @@ void PublisherService::setVectorSizesInDataTopic()
 
 	//scada_ate::typetopics::SetMaxSizeDDSAlarmAlarms(config_.MaxSizeDDSAlarmVectorAlarm);
 
-	scada_ate::typetopics::SetMaxSizeDDSExVectorAlarms(config_.MaxSizeDDSExVectorAlarms);
+	//scada_ate::typetopics::SetMaxSizeDDSExVectorAlarms(config_.MaxSizeDDSExVectorAlarms);
 }

@@ -24,7 +24,7 @@ AbstractDdsPublisher* PublisherFactory::createPublisher(
 	case TopicType::DDS_ALARM:
 		return new ConcretePublisher<DDSAlarm, DDSAlarmPubSubType>(participant, config);
 	case TopicType::DDS_EX_ALARM:
-		return new ConcretePublisher<DDSExAlarm, DDSExAlarmPubSubType>(participant, config);
+		return new ConcretePublisher<DDSAlarmEx, DDSAlarmExPubSubType>(participant, config);
 	default:
 		std::cout << "Topic type " << config.topic_type_name << " is not found" << std::endl;
 		return nullptr;
@@ -46,7 +46,7 @@ TopicType string2TopicType(std::string type_name)
 	{
 		return TopicType::DDS_ALARM;
 	}
-	else if (type_name == "DDSExAlarm")
+	else if (type_name == "DDSAlarmEx")
 	{
 		return TopicType::DDS_EX_ALARM;
 	}
@@ -67,7 +67,7 @@ std::string TopicType2string(TopicType type)
 	case TopicType::DDS_ALARM:
 		return "DDSAlarm";
 	case TopicType::DDS_EX_ALARM:
-		return "DDSExAlarm";
+		return "DDSAlarmEx";
 	default:
 		return "";
 	}

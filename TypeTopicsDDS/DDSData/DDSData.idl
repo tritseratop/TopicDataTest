@@ -1,0 +1,43 @@
+/// <summary>
+/// Topic data
+/// </summary>
+
+struct DataCollectionInt
+{
+	sequence<long> value;
+	sequence<char> quality;
+};
+
+struct DataCollectionFloat
+{
+	sequence<float> value;
+	sequence<char> quality;
+};
+
+struct DataCollectionDouble
+{
+	sequence<double> value;
+	sequence<char> quality;
+};
+
+struct DataChar
+{
+	sequence<char> value;
+};
+
+struct DataCollectionChar
+{
+	sequence<DataChar> value;
+	sequence<char> quality;
+};
+
+struct DDSData
+{
+	long long time_source;
+	long long time_service;
+	DataCollectionInt data_int;
+	DataCollectionFloat data_float;
+	DataCollectionDouble data_double;
+	DataCollectionChar data_char;
+};
+

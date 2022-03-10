@@ -42,6 +42,9 @@ struct ServiceConfig
 	size_t MaxSizeDDSAlarmVectorAlarm = 0;
 	size_t MaxSizeDDSExVectorAlarms = 0;
 
+	uint32_t ws_data_sleep = 1000;
+	uint32_t ws_alarm_sleep = 1000;
+
 	friend bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs);
 };
 
@@ -68,7 +71,7 @@ private:
 	ServiceConfig config_;
 
 	SubscriberFactory factory_;
-	DataObserver observer_;
+	DataHandler observer_;
 
 	//  онтейнеры с пользовательскими типам
 	std::vector<AbstractDdsSubscriber*> subscribers_;
