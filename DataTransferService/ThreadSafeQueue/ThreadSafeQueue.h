@@ -1,15 +1,15 @@
 #ifndef THREAD_SAFE_QUEUE_H_
 #define THREAD_SAFE_QUEUE_H_
 
-#include <queue>
+#include <deque>
 #include <optional>
 #include <shared_mutex>
 
 template<typename T>
-class ThreadSafeQueue 
+class ThreadSafeDeque
 {
 private:
-    std::queue<T> queue_;
+    std::deque<T> queue_;
     mutable std::shared_mutex mutex_;
 
     // Moved out of public interface to prevent races between this
@@ -19,16 +19,16 @@ private:
     }
 
 public:
-    ThreadSafeQueue() = default;
-    ThreadSafeQueue(const ThreadSafeQueue<T>&) = delete;
-    ThreadSafeQueue& operator=(const ThreadSafeQueue<T>&) = delete;
+    ThreadSafeDeque() = default;
+    ThreadSafeDeque(const ThreadSafeDeque<T>&) = delete;
+    ThreadSafeDeque& operator=(const ThreadSafeDeque<T>&) = delete;
 
-    ThreadSafeQueue(ThreadSafeQueue<T>&& other) {
+    ThreadSafeDeque(ThreadSafeDeque<T>&& other) {
         std::unique_lock<std::shared_mutex> w_lock(mutex_);
         queue_ = std::move(other.queue_);
     }
 
-    virtual ~ThreadSafeQueue() { }
+    virtual ~ThreadSafeDeque() { }
 
     size_t size() const {
         std::shared_lock<std::shared_mutex> r_lock(mutex_);
@@ -44,19 +44,28 @@ public:
         return tmp;
     }
 
-    std::optional<T> pop() {
+    std::optional<T> back() {
+        std::shared_lock<std::shared_mutex> r_lock(mutex_);
+        if (queue_.empty()) {
+            return {};
+        }
+        T tmp = queue_.back();
+        return tmp;
+    }
+
+    std::optional<T> pop_front() {
         std::unique_lock<std::shared_mutex> w_lock(mutex_);
         if (queue_.empty()) {
             return {};
         }
         T tmp = queue_.front();
-        queue_.pop();
+        queue_.pop_front();
         return tmp;
     }
 
-    void push(const T& item) {
+    void push_back(const T& item) {
         std::unique_lock<std::shared_mutex> w_lock(mutex_);
-        queue_.push(item);
+        queue_.push_back(item);
     }
 };
 

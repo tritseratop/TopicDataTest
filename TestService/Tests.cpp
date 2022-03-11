@@ -231,12 +231,39 @@ DataExUnion getEqualDdsDataEx(size_t size = 2)
 TEST(DtoTest, DdsDataConvertation) {
     auto dds_data = getEqualDdsData(4);
     DataMapper mapper;
+
     DataDto d = mapper.mapDdsData(std::move(dds_data.first));
     EXPECT_EQ(dds_data.second, d);
 
     DataExUnion data_ex_union = getEqualDdsDataEx(2);
     DataDto d2 = mapper.mapDdsDataEx(data_ex_union.data_ex, data_ex_union.dto_to_change);
     EXPECT_EQ(d2, data_ex_union.dto);
+
+    DataDto	dto{
+        100,
+        {
+            fillVector<int64_t>(101, 2),
+            {0, 0},
+            {'b', 'b'}
+        },
+        {
+            fillVector<int64_t>(101, 2),
+            {0, 0},
+            {'b', 'b'}
+        },
+        {
+            fillVector<int64_t>(101, 2),
+            {0, 0},
+            {'b', 'b'}
+        },
+        {
+            {102, 102},
+            fillVector(fillVector('a', 4), 2),
+            {'b', 'b'}
+        }
+    };
+    DataDto d3 = mapper.mapDdsDataEx(data_ex_union.data_ex, DataDto());
+    EXPECT_EQ(d3, dto);
 }
 
 

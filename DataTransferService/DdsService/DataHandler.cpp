@@ -96,7 +96,7 @@ void DataHandler::sendingDdsData(uint32_t sleep)
 	{
 		if (data_cache_.size() != 0)
 		{
-			server_->sendData(data_cache_.pop().value());
+			server_->sendData(data_cache_.pop_front().value());
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
 	}
@@ -108,7 +108,7 @@ void DataHandler::sendingDdsAlarm(uint32_t sleep)
 	{
 		if (data_cache_.size() != 0)
 		{
-			server_->sendAlarm(alarm_cache_.pop().value());
+			server_->sendAlarm(alarm_cache_.pop_front().value());
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
 	}
@@ -125,20 +125,28 @@ void DataHandler::stopSendingDdsAlarm()
 
 void DataHandler::cacheDdsData(DDSData data)
 {
-	data_cache_.push(mapper_.mapDdsData(std::move(data)));
+	data_cache_.push_back(mapper_.mapDdsData(std::move(data)));
 }
 
-void DataHandler::cacheDdsDataEx(std::deque<DDSDataEx> data)
+void DataHandler::cacheDdsDataEx(DDSDataEx data)
+{
+	std::optional<DataDto> back = data_cache_.back();
+	if (back.has_value())
+	{
+		data_cache_.push_back(mapper_.mapDdsDataEx(data, back.value()));
+	}
+	else
+	{
+		data_cache_.push_back(mapper_.mapDdsDataEx(data, DataDto()));
+	}
+}
+
+void DataHandler::cacheDdsAlarm(DDSAlarm data)
 {
 
 }
 
-void DataHandler::cacheDdsAlarm(std::deque<DDSAlarm> data)
-{
-
-}
-
-void DataHandler::cacheDdsAlarmEx(std::deque<DDSAlarmEx> data)
+void DataHandler::cacheDdsAlarmEx(DDSAlarmEx data)
 {
 
 }

@@ -30,6 +30,7 @@ SubscriberService::SubscriberService(const ServiceConfig& config, IServer* serve
 	, config_listener_(this)
 	, observer_(server)
 {
+	setVectorSizesInDataTopic();
 }
 
 SubscriberService::~SubscriberService()
@@ -281,7 +282,7 @@ void SubscriberService::setVectorSizesInDataTopic()
 	scada_ate::typetopics::SetMaxSizeDDSDataExVectorDouble(config_.MaxSizeDDSDataExVectorDouble);
 	scada_ate::typetopics::SetMaxSizeDDSDataExVectorChar(config_.MaxSizeDDSDataExVectorChar);
 
-	//scada_ate::typetopics::SetMaxSizeDDSAlarmAlarms(config_.MaxSizeDDSAlarmVectorAlarm);
+	scada_ate::typetopics::SetMaxSizeDDSAlarmExVectorAlarms(config_.MaxSizeDDSAlarmVectorAlarm);
 
-	//scada_ate::typetopics::SetMaxSizeDDSExVectorAlarms(config_.MaxSizeDDSExVectorAlarms);
+	scada_ate::typetopics::SetMaxSizeDDSAlarmExVectorAlarms(config_.MaxSizeDDSExVectorAlarms);
 }

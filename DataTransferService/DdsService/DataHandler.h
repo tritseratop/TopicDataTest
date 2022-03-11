@@ -31,15 +31,15 @@ public:
 	void stopSendingDdsAlarm();
 
 	void cacheDdsData(DDSData data);
-	void cacheDdsDataEx(std::deque<DDSDataEx> data);
-	void cacheDdsAlarm(std::deque<DDSAlarm> data);
-	void cacheDdsAlarmEx(std::deque<DDSAlarmEx> data);
+	void cacheDdsDataEx(DDSDataEx data);
+	void cacheDdsAlarm(DDSAlarm data);
+	void cacheDdsAlarmEx(DDSAlarmEx data);
 
 private:
 	bool stop_sending_data_;
 	bool stop_sending_alarm_;
-	ThreadSafeQueue<DataDto> data_cache_;
-	ThreadSafeQueue<AlarmDto> alarm_cache_;
+	ThreadSafeDeque<DataDto> data_cache_;
+	ThreadSafeDeque<AlarmDto> alarm_cache_;
 	DataMapper mapper_;
 	IServer* server_;
 };
