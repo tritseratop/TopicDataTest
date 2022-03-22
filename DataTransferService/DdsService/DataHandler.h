@@ -24,16 +24,16 @@ class DataHandler
 public:
 	DataHandler(IServer* server);
 
-	void sendingDdsData(uint32_t sleep);
-	void sendingDdsAlarm(uint32_t sleep);
-
-	void stopSendingDdsData();
-	void stopSendingDdsAlarm();
+	bool sendDdsData();
+	bool sendDdsAlarm();
 
 	void cacheDdsData(DDSData data);
 	void cacheDdsDataEx(DDSDataEx data);
 	void cacheDdsAlarm(DDSAlarm data);
 	void cacheDdsAlarmEx(DDSAlarmEx data);
+
+	std::deque<DataDto> getDataCacheCopy() const;
+	std::deque<AlarmDto> getAlarmCacheCopy() const;
 
 private:
 	bool stop_sending_data_;

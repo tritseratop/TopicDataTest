@@ -29,7 +29,9 @@ SubscriberService::SubscriberService(const ServiceConfig& config, IServer* serve
 	, config_type_(new ConfigTopicPubSubType())
 	, config_listener_(this)
 	, observer_(server)
+	, stop_ws_server_(false)
 {
+	//TODO где вызывать?
 	setVectorSizesInDataTopic();
 }
 
@@ -222,8 +224,6 @@ bool SubscriberService::createNewSubscriber(const SubscriberConfig& config)
 
 void SubscriberService::runSubscribers()
 {
-	std::thread obs_t([this]() { observer_.sendingDdsData(config_.ws_data_sleep); });
-	obs_t.detach();
 	std::vector<std::thread> threads;
 	for (auto& sub : subscribers_)
 	{
@@ -234,6 +234,16 @@ void SubscriberService::runSubscribers()
 	{
 		t.join();
 	}
+}
+
+void SubscriberService::runWsServer()
+{
+	while (!stop_ws_server_)
+	{
+		if (!observer_.sendDdsData()) break;
+		std::this_thread::sleep_for(std::chrono::milliseconds(config_.ws_data_sleep));
+	}
+	
 }
 
 std::vector<AbstractDdsSubscriber*> SubscriberService::getSubscribers() const
@@ -285,4 +295,9 @@ void SubscriberService::setVectorSizesInDataTopic()
 	scada_ate::typetopics::SetMaxSizeDDSAlarmExVectorAlarms(config_.MaxSizeDDSAlarmVectorAlarm);
 
 	scada_ate::typetopics::SetMaxSizeDDSAlarmExVectorAlarms(config_.MaxSizeDDSExVectorAlarms);
+}
+
+std::deque<DataDto> SubscriberService::getDataCacheCopy() const
+{
+	return observer_.getDataCacheCopy();
 }

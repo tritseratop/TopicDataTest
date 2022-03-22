@@ -5,6 +5,8 @@
 #include <optional>
 #include <shared_mutex>
 
+#include "../../include/CommonClasses.h"
+
 template<typename T>
 class ThreadSafeDeque
 {
@@ -66,6 +68,11 @@ public:
     void push_back(const T& item) {
         std::unique_lock<std::shared_mutex> w_lock(mutex_);
         queue_.push_back(item);
+    }
+
+    std::deque<DataDto> getDequeCopy() const
+    {
+        return queue_;
     }
 };
 

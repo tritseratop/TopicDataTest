@@ -180,6 +180,11 @@ private:
 				if (info.valid_data)
 				{
 					samples_++;
+					//TODO по другому надо как то проверять
+					if (samples_ >= sub_->config_.samples)
+					{
+						sub_->stop_ = true;
+					}
 					sub_->cacheData(sub_->data_sample_);
 					std::cout << "Sub #" << sub_->config_.subscriber_id << " get data" << std::endl;
 				}

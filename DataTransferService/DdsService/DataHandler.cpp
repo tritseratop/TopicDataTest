@@ -90,37 +90,30 @@ DataHandler::DataHandler(IServer* server)
 {
 }
 
-void DataHandler::sendingDdsData(uint32_t sleep)
+bool DataHandler::sendDdsData()
 {
-	while (!stop_sending_data_)
+	if (server_ != nullptr)
 	{
 		if (data_cache_.size() != 0)
 		{
 			server_->sendData(data_cache_.pop_front().value());
 		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
+		return true;
 	}
+	return false;
 }
 
-void DataHandler::sendingDdsAlarm(uint32_t sleep)
+bool DataHandler::sendDdsAlarm()
 {
-	while (!stop_sending_alarm_)
+	if (server_ != nullptr)
 	{
 		if (data_cache_.size() != 0)
 		{
 			server_->sendAlarm(alarm_cache_.pop_front().value());
 		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
+		return true;
 	}
-}
-
-void DataHandler::stopSendingDdsData()
-{
-	stop_sending_data_ = true;
-}
-void DataHandler::stopSendingDdsAlarm()
-{
-	stop_sending_alarm_ = true;
+	return false;
 }
 
 void DataHandler::cacheDdsData(DDSData data)
@@ -149,4 +142,9 @@ void DataHandler::cacheDdsAlarm(DDSAlarm data)
 void DataHandler::cacheDdsAlarmEx(DDSAlarmEx data)
 {
 
+}
+
+std::deque<DataDto> DataHandler::getDataCacheCopy() const
+{
+	return data_cache_.getDequeCopy();
 }

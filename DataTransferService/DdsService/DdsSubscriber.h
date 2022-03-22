@@ -63,10 +63,15 @@ public:
 	bool initSubscribers();
 	bool createNewSubscriber(const SubscriberConfig& config);
 	void runSubscribers();
+	void runWsServer();
 	std::vector<AbstractDdsSubscriber*> getSubscribers() const;
 	void setVectorSizesInDataTopic();
 
+	std::deque<DataDto> getDataCacheCopy() const;
+
 private:
+
+	bool stop_ws_server_;
 
 	ServiceConfig config_;
 

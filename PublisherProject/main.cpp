@@ -1,7 +1,7 @@
 #include "DdsPublisher.h"
+#include "../include/TestUtility.h"
 
 #define TEST_MODE
-
 #ifdef TEST_MODE
 
 std::vector<PublisherConfig> configs({
@@ -51,8 +51,9 @@ int main(
     PublisherService* mypub = new PublisherService(config);
     if (mypub->initPublishers())
     {
-        DDSData data = getDdsData();
-        mypub->setDdsData(&data, sizeof(data));
+        auto dds_data = getEqualDdsData(4).first;
+        //DDSData dds_data = getDdsData();
+        mypub->setDdsData(&dds_data, sizeof(dds_data));
         mypub->runPublishers();
     }
 

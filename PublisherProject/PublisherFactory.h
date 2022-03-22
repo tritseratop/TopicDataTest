@@ -195,7 +195,10 @@ private:
 		//std::lock_guard<std::mutex> guard(std::mutex());
 		if (listener > 0 && listener->first_connected_)
 		{
-			writer->write(&data_);
+			if (!writer->write(&data_))
+			{
+				return false;
+			}
 			data_.time_service(data_.time_service() + 1);
 			return true;
 		}
