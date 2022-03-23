@@ -66,6 +66,7 @@ public:
 		, type_(new TPubSubType())
 		, listener_(this)
 		, topic_type_(config.topic_type)
+		, stop_(false)
 	{
 	}
 
@@ -121,7 +122,7 @@ public:
 	void run() override
 	{
 		uint32_t samples_sent = 0;
-		while (samples_sent < config_.samples)
+		while (!stop_ && samples_sent < config_.samples)
 		{
 			if (publish(writer_, &listener_, samples_sent))
 			{
@@ -140,6 +141,7 @@ private:
 	// ѕринимает только данные в этом формате
 	T data_;
 	const TopicType topic_type_;
+	bool stop_;
 
 	PublisherConfig config_;
 
@@ -170,12 +172,25 @@ private:
 		{
 			if (info.current_count_change == 1)
 			{
+				matched_ += info.current_count_change;
 				std::cout << "ConcretePublisher matched." << std::endl;
 				first_connected_ = true;
 			}
 			else if (info.current_count_change == -1)
 			{
+				matched_ += info.current_count_change;
 				std::cout << "ConcretePublisher unmatched." << std::endl;
+				if (matched_ == 0)
+				{
+					std::thread countdown([this]() {
+						std::this_thread::sleep_for(std::chrono::seconds(3));
+						if (matched_ == 0)
+						{
+							this->pub_->stop_ = true;
+						}
+						});
+					countdown.detach();
+				}
 			}
 			else
 			{

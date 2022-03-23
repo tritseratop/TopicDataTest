@@ -15,48 +15,15 @@
 #include "../../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "SubscriberFactory.h"
 
-struct ServiceConfig
-{
-	// participant params
-	std::string participant_name;
-
-	// TCP params
-	std::string ip;
-	uint16_t port = 4042;
-	std::vector<std::string> whitelist;
-
-	// subscribers params
-	std::vector<SubscriberConfig> sub_configs;
-
-	// vector_size
-	size_t MaxSizeDataCollectionInt = 0;
-	size_t MaxSizeDataCollectionFloat = 0;
-	size_t MaxSizeDataCollectionDouble = 0;
-	size_t MaxSizeDataCollectionChar = 0;
-
-	size_t MaxSizeDDSDataExVectorInt = 0;
-	size_t MaxSizeDDSDataExVectorFloat = 0;
-	size_t MaxSizeDDSDataExVectorDouble = 0;
-	size_t MaxSizeDDSDataExVectorChar = 0;
-
-	size_t MaxSizeDDSAlarmVectorAlarm = 0;
-	size_t MaxSizeDDSExVectorAlarms = 0;
-
-	uint32_t ws_data_sleep = 1000;
-	uint32_t ws_alarm_sleep = 1000;
-
-	friend bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs);
-};
-
 class SubscriberService {
 public: 
-	SubscriberService(const ServiceConfig& config, IServer* server);
+	SubscriberService(const ServiceConfig<SubscriberConfig>& config, IServer* server);
 	virtual ~SubscriberService();
 
 	bool initConfigSubscriber();
 	void runConfigSubscriber(uint32_t samples);
 
-	void changeSubsConfig(const ServiceConfig& config);
+	void changeSubsConfig(const ServiceConfig<SubscriberConfig>& config);
 
 	bool createParticipant();
 	eprosima::fastdds::dds::DomainParticipantQos getParticipantQos();
@@ -73,7 +40,7 @@ private:
 
 	bool stop_ws_server_;
 
-	ServiceConfig config_;
+	ServiceConfig<SubscriberConfig> config_;
 
 	SubscriberFactory factory_;
 	DataHandler observer_;

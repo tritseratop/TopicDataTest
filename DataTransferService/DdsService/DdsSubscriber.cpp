@@ -11,16 +11,7 @@
 using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
 
-bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs)
-{
-	return lhs.participant_name == rhs.participant_name
-		&& lhs.ip == rhs.ip
-		&& lhs.port == rhs.port
-		&& lhs.whitelist == rhs.whitelist
-		&& lhs.sub_configs == rhs.sub_configs;
-}
-
-SubscriberService::SubscriberService(const ServiceConfig& config, IServer* server)
+SubscriberService::SubscriberService(const ServiceConfig<SubscriberConfig>& config, IServer* server)
 	: participant_(nullptr)
 	, config_(config)
 	, config_subscriber_(nullptr)
@@ -97,7 +88,7 @@ void SubscriberService::runConfigSubscriber(uint32_t samples)
 	}
 }
 
-void SubscriberService::changeSubsConfig(const ServiceConfig& config)
+void SubscriberService::changeSubsConfig(const ServiceConfig<SubscriberConfig>& config)
 {
 	if (config_ == config)
 	{
@@ -189,9 +180,9 @@ DomainParticipantQos SubscriberService::getParticipantQos()
 bool SubscriberService::initSubscribers()
 {
 	createParticipant();
-	if (!config_.sub_configs.empty())
+	if (!config_.configs.empty())
 	{
-		for (const auto& config : config_.sub_configs)
+		for (const auto& config : config_.configs)
 		{
 			createNewSubscriber(config);
 		}

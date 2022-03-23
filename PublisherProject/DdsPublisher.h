@@ -12,43 +12,14 @@
 
 #include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "../ConfigTopic/ConfigTopicPubSubTypes.h"
+#include "../include/CommonClasses.h"
 #include "PublisherFactory.h"
-
-struct ServiceConfig
-{
-    // participant params
-    std::string participant_name;
-
-    // TCP params
-    std::string ip;
-    uint16_t port = 4042;
-    std::vector<std::string> whitelist;
-
-    // subscribers params
-    std::vector<PublisherConfig> pub_configs;
-
-    // vector_size
-    size_t MaxSizeDataCollectionInt = 0;
-    size_t MaxSizeDataCollectionFloat = 0;
-    size_t MaxSizeDataCollectionDouble = 0;
-    size_t MaxSizeDataCollectionChar = 0;
-
-    size_t MaxSizeDDSDataExVectorInt = 0;
-    size_t MaxSizeDDSDataExVectorFloat = 0;
-    size_t MaxSizeDDSDataExVectorDouble = 0;
-    size_t MaxSizeDDSDataExVectorChar = 0;
-
-    size_t MaxSizeDDSAlarmVectorAlarm = 0;
-    size_t MaxSizeDDSExVectorAlarms = 0;
-
-    friend bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs);
-};
 
 class PublisherService
 {
 public:
 
-    PublisherService(const ServiceConfig& config);
+    PublisherService(const ServiceConfig<PublisherConfig>& config);
     virtual ~PublisherService();
 
     bool initConfigPub();
@@ -58,7 +29,7 @@ public:
 
     bool initPublishers();
     void runPublishers();
-    void changeSubsConfig(const ServiceConfig& config);
+    void changeSubsConfig(const ServiceConfig<PublisherConfig>& config);
 
     void setDdsData(DDSData* data, size_t size);
     void setDdsDataEx(DDSDataEx* data, size_t size);
@@ -66,7 +37,7 @@ public:
     bool createNewPublisher(const PublisherConfig& config);
 
 private:
-    ServiceConfig config_;
+    ServiceConfig<PublisherConfig> config_;
 
     PublisherFactory factory_;
     std::vector<AbstractDdsPublisher*> publishers_;

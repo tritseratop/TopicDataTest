@@ -197,11 +197,25 @@ private:
 		{
 			if (info.current_count_change == 1)
 			{
+				matched_ += info.current_count_change;
 				std::cout << "ConcreteSubscriber matched." << std::endl;
 			}
 			else if (info.current_count_change == -1)
 			{
+				matched_ += info.current_count_change;
 				std::cout << "ConcreteSubscriber unmatched." << std::endl;
+
+				if (matched_ == 0)
+				{
+					std::thread countdown([this]() {
+						std::this_thread::sleep_for(std::chrono::seconds(3));
+						if (matched_ == 0)
+						{
+							this->sub_->stop_ = true;
+						}
+						});
+					countdown.detach();
+				}
 			}
 			else
 			{

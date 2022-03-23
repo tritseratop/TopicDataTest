@@ -7,16 +7,7 @@
 using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
 
-bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs)
-{
-	return lhs.participant_name == rhs.participant_name
-		&& lhs.ip == rhs.ip
-		&& lhs.port == rhs.port
-		&& lhs.whitelist == rhs.whitelist
-		&& lhs.pub_configs == rhs.pub_configs;
-}
-
-PublisherService::PublisherService(const ServiceConfig& config)
+PublisherService::PublisherService(const ServiceConfig<PublisherConfig>& config)
 	: participant_(nullptr)
 	, config_(config)
 	, publisher_(nullptr)
@@ -177,9 +168,9 @@ bool PublisherService::initPublishers()
 		return false;
 	}
 
-	if (!config_.pub_configs.empty())
+	if (!config_.configs.empty())
 	{
-		for (const auto& config : config_.pub_configs)
+		for (const auto& config : config_.configs)
 		{
 			createNewPublisher(config);
 		}
@@ -208,7 +199,7 @@ void PublisherService::runPublishers()
 	}
 }
 
-void PublisherService::changeSubsConfig(const ServiceConfig& config)
+void PublisherService::changeSubsConfig(const ServiceConfig<PublisherConfig>& config)
 {
 	if (config_ == config)
 	{

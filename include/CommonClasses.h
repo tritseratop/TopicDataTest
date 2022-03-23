@@ -5,6 +5,55 @@
 #include <string>
 #include <algorithm>
 
+enum Transport
+{
+	UDP, 
+	TCP, 
+	SHARED_MEMORY
+};
+
+template<class T>
+struct ServiceConfig
+{
+	// participant params
+	std::string participant_name;
+
+	// transport params
+	Transport transport = Transport::TCP;
+	std::string ip;
+	uint16_t port = 4042;
+	std::vector<std::string> whitelist;
+
+	// subscribers params
+	std::vector<T> configs;
+
+	// vector_size
+	size_t MaxSizeDataCollectionInt = 0;
+	size_t MaxSizeDataCollectionFloat = 0;
+	size_t MaxSizeDataCollectionDouble = 0;
+	size_t MaxSizeDataCollectionChar = 0;
+
+	size_t MaxSizeDDSDataExVectorInt = 0;
+	size_t MaxSizeDDSDataExVectorFloat = 0;
+	size_t MaxSizeDDSDataExVectorDouble = 0;
+	size_t MaxSizeDDSDataExVectorChar = 0;
+
+	size_t MaxSizeDDSAlarmVectorAlarm = 0;
+	size_t MaxSizeDDSExVectorAlarms = 0;
+
+	uint32_t ws_data_sleep = 1000;
+	uint32_t ws_alarm_sleep = 1000;
+
+	friend bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs)
+	{
+		return lhs.participant_name == rhs.participant_name
+			&& lhs.ip == rhs.ip
+			&& lhs.port == rhs.port
+			&& lhs.whitelist == rhs.whitelist
+			&& lhs.configs == rhs.configs;
+	}
+};
+
 template <class T>
 struct DataCollection
 {
@@ -62,12 +111,21 @@ struct DataDto
 	DataCollection<double> data_double;
 	DataCollection<std::vector<char>> data_char;
 
+	std::string topic_name = "";
+
 	friend bool operator==(const DataDto& lhs, const DataDto& rhs)
 	{
 		return lhs.time_service == rhs.time_service
 			&& lhs.data_int == rhs.data_int
 			&& lhs.data_double == rhs.data_double
-			&& lhs.data_char == rhs.data_char;
+			&& lhs.data_char == rhs.data_char
+			&& lhs.topic_name == rhs.topic_name;
+	}
+
+	friend bool operator<(const DataDto& lhs, const DataDto& rhs)
+	{
+		return std::tie(lhs.topic_name, lhs.time_service)
+			< std::tie(rhs.topic_name, rhs.time_service);
 	}
 };
 
@@ -77,6 +135,8 @@ struct AlarmDto
 	std::vector<int64_t> time_source;
 	std::vector<uint32_t> value;
 	std::vector<uint32_t> quality;
+
+	std::string topic_name = "";
 
 	size_t size() const
 	{
