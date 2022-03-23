@@ -79,6 +79,7 @@ private:
         uint32_t number,
         uint32_t sleep);
 
+    void deletePublishers();
     void setVectorSizesInDataTopic();
 
 public:

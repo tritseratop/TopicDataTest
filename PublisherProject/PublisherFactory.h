@@ -14,6 +14,8 @@
 
 #include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 
+using eprosima::fastrtps::types::ReturnCode_t;
+
 enum TopicType
 {
 	DDS_DATA, 
@@ -82,14 +84,19 @@ public:
 		}
 		if (topic_ != nullptr)
 		{
-			participant_->delete_topic(topic_);
+			auto res = participant_->delete_topic(topic_);
+			if (res != ReturnCode_t::RETCODE_OK)
+			{
+				std::cout << res() << std::endl;
+			}
 		}
 	}
 
 	void setData(void* data, size_t size) override
 	{
 		//T* data_p;
-		std::memcpy(&data_, data, size);
+		data_ = *(static_cast<T*>(data));
+		//std::memcpy(&data_, data, size);
 		//data_ = *(data_p);
 	}
 
@@ -182,14 +189,7 @@ private:
 				std::cout << "ConcretePublisher unmatched." << std::endl;
 				if (matched_ == 0)
 				{
-					std::thread countdown([this]() {
-						std::this_thread::sleep_for(std::chrono::seconds(3));
-						if (matched_ == 0)
-						{
-							this->pub_->stop_ = true;
-						}
-						});
-					countdown.detach();
+					this->pub_->stop_ = true;
 				}
 			}
 			else
@@ -214,7 +214,7 @@ private:
 			{
 				return false;
 			}
-			data_.time_service(data_.time_service() + 1);
+			//data_.time_service(data_.time_service() + 1);
 			return true;
 		}
 		return false;

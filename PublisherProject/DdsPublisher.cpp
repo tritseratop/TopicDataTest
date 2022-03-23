@@ -20,6 +20,8 @@ PublisherService::PublisherService(const ServiceConfig<PublisherConfig>& config)
 
 PublisherService::~PublisherService()
 {
+	deletePublishers();
+
 	if (writer_ != nullptr)
 	{
 		publisher_->delete_datawriter(writer_);
@@ -32,6 +34,7 @@ PublisherService::~PublisherService()
 	{
 		participant_->delete_topic(topic_);
 	}
+
 	DomainParticipantFactory::get_instance()->delete_participant(participant_);
 }
 
@@ -294,4 +297,13 @@ void PublisherService::setVectorSizesInDataTopic()
 	scada_ate::typetopics::SetMaxSizeDDSAlarmExVectorAlarms(config_.MaxSizeDDSAlarmVectorAlarm);
 
 	scada_ate::typetopics::SetMaxSizeDDSAlarmExVectorAlarms(config_.MaxSizeDDSExVectorAlarms);
+}
+
+void PublisherService::deletePublishers()
+{
+	for (auto& sub : publishers_)
+	{
+		delete sub;
+	}
+	publishers_.clear();
 }

@@ -80,7 +80,11 @@ public:
 		}
 		if (topic_ != nullptr)
 		{
-			participant_->delete_topic(topic_);
+			auto res = participant_->delete_topic(topic_);
+			if (res != ReturnCode_t::RETCODE_OK)
+			{
+				std::cout << res() << std::endl;
+			}
 		}
 	}
 
@@ -175,18 +179,20 @@ private:
 			eprosima::fastdds::dds::DataReader* reader) override
 		{
 			eprosima::fastdds::dds::SampleInfo info;
-			if (reader->take_next_sample(&sub_->data_sample_, &info) == ReturnCode_t::RETCODE_OK)
+			if (reader->take_next_sample(&data_sample_, &info) == ReturnCode_t::RETCODE_OK)
 			{
 				if (info.valid_data)
 				{
 					samples_++;
 					//TODO по другому надо как то проверять
-					if (samples_ >= sub_->config_.samples)
 					{
-						sub_->stop_ = true;
+						if (samples_ >= sub_->config_.samples)
+						{
+							sub_->stop_ = true;
+						}
+						sub_->cacheData(data_sample_);
 					}
-					sub_->cacheData(sub_->data_sample_);
-					std::cout << "Sub #" << sub_->config_.subscriber_id << " get data" << std::endl;
+					std::cout << samples_ << ". Sub #" << sub_->config_.subscriber_id << " get data" << std::endl;
 				}
 			}
 		}
@@ -207,14 +213,10 @@ private:
 
 				if (matched_ == 0)
 				{
-					std::thread countdown([this]() {
-						std::this_thread::sleep_for(std::chrono::seconds(3));
-						if (matched_ == 0)
-						{
-							this->sub_->stop_ = true;
-						}
-						});
-					countdown.detach();
+					if (matched_ == 0)
+					{
+						this->sub_->stop_ = true;
+					}
 				}
 			}
 			else
@@ -226,6 +228,7 @@ private:
 
 		int matched_;
 		uint32_t samples_; // TODO atomic??
+		T data_sample_;
 		ConcreteSubscriber* sub_;
 	} listener_;
 };

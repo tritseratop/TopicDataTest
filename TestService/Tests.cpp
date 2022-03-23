@@ -79,15 +79,9 @@ TEST(DdsDataTransmitionTest, DdsDataTransmition) {
     delete mysub;
 }
 
-void recievingDdsData(uint32_t samples, uint32_t sleep)
+void recievingDdsData(const ServiceConfig<SubscriberConfig>& conf)
 {
-    std::vector<SubscriberConfig> conf({
-        {0, 10000, "DDSData1", "DDSData", TopicType::DDS_DATA, samples, sleep},
-        });
-
-    config.configs = conf;
-
-    SubscriberService* mysub = new SubscriberService(config, nullptr);
+    SubscriberService* mysub = new SubscriberService(conf, nullptr);
 
     mysub->setVectorSizesInDataTopic();
     if (mysub->initSubscribers())
@@ -99,7 +93,7 @@ void recievingDdsData(uint32_t samples, uint32_t sleep)
     auto data = mysub->getDataCacheCopy();
 
     size_t sum = 0;
-    for (const auto& c : conf)
+    for (const auto& c : conf.configs)
     {
         sum += c.samples;
     }
@@ -110,7 +104,30 @@ void recievingDdsData(uint32_t samples, uint32_t sleep)
 }
 
 TEST(DdsDataTransmitionTest, DdsDataLostedPackages) {
-    recievingDdsData(100, 50);
+    ServiceConfig<SubscriberConfig> conf({
+            "Participant_sub",
+            Transport::TCP,
+            "127.0.0.1",
+            4042,
+            {"127.0.0.1"},
+            configs,
+            1000,
+            1000,
+            1000,
+            1000,
+            1000,
+            1000,
+            1000,
+            1000,
+            1000,
+            1000
+        });
+    std::vector<SubscriberConfig> confs({
+        {0, 10000, "DDSData1", "DDSData", TopicType::DDS_DATA, 75, 100},
+        });
+
+    conf.configs = confs;
+    recievingDdsData(conf);
     //recievingDdsData(100, 100);
     //recievingDdsData(100, 200);
     //recievingDdsData(100, 500);

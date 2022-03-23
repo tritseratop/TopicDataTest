@@ -43,16 +43,9 @@ DDSData getDdsData()
     return ddsData;
 }
 
-void sendingDdsData(uint32_t samples, uint32_t sleep)
+void sendingDdsData(const ServiceConfig<PublisherConfig>& conf)
 {
-    std::vector<PublisherConfig> conf({
-        {0, 10000, "DDSData1", "DDSData", TopicType::DDS_DATA, samples, sleep},
-    });
-
-    std::cout << "Starting publisher." << std::endl;
-    config.configs = conf;
-
-    PublisherService* mypub = new PublisherService(config);
+    PublisherService* mypub = new PublisherService(conf);
     if (mypub->initPublishers())
     {
         auto dds_data = getEqualDdsData(4).first;
@@ -68,11 +61,39 @@ int main(
     int argc,
     char** argv)
 {
+    ServiceConfig<PublisherConfig> conf({
+        "Participant_pub",
+        Transport::TCP,
+        "127.0.0.1",
+        4042,
+        {"127.0.0.1"},
+        configs,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000
+    });
+    std::cout << "Starting publisher 1" << std::endl;
+    std::vector<PublisherConfig> confs1({
+        {0, 10000, "DDSData1", "DDSData", TopicType::DDS_DATA, 100, 100},
+        });
+    conf.configs = confs1;
+    sendingDdsData(conf);
 
-    sendingDdsData(100, 100);
-    sendingDdsData(100, 100);
+    std::cout << "Starting publisher 2" << std::endl;
+    std::vector<PublisherConfig> confs2({
+        {0, 10000, "DDSData1", "DDSData", TopicType::DDS_DATA, 75, 100},
+        });
+    conf.configs = confs2;
+    sendingDdsData(conf);
     //sendingDdsData(100, 100);
     //sendingDdsData(100, 100);
     //sendingDdsData(100, 100);
-    return 0;
+    system("pause");
 }
