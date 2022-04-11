@@ -2,6 +2,7 @@
 #define DATA_OBSERVER_H_
 
 #include <deque>
+#include <unordered_map>
 
 #include "../ThreadSafeQueue/ThreadSafeQueue.h"
 #include "../../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
@@ -10,13 +11,13 @@
 class DataMapper
 {
 public:
-	DataDto mapDdsData(DDSData data);
-	DataDto mapDdsDataEx(const DDSDataEx& data_ex, DataDto data);
-	AlarmDto mapDdsAlarm(DDSAlarm data);
-	AlarmDto mapDdsAlarmEx(const DDSAlarmEx& data_ex, AlarmDto dto);
+	DataDto mapDdsData(DDSData data, const AdditionalTopicInfo& info);
+	DataDto mapDdsDataEx(DataDto prev_dto, const DDSDataEx& cur_data_ex, const AdditionalTopicInfo& info);
+	AlarmDto mapDdsAlarm(DDSAlarm data, const AdditionalTopicInfo& info);
+	AlarmDto mapDdsAlarmEx(AlarmDto prev_dto, const DDSAlarmEx& cur_data_ex, const AdditionalTopicInfo& info);
 
-	template<class DtoDataCollection, class DdsData>
-	void fillChanged(DtoDataCollection& next, const std::vector<DdsData>& prev);
+	template<class DtoDataCollection, class DdsSample>
+	void fillChanged(DtoDataCollection& prev_dto_collection, const std::vector<DdsSample>& cur_samples, const TagToIndex& tag_to_index);
 };
 
 class DataHandler
@@ -25,21 +26,26 @@ public:
 	DataHandler(IServer* server);
 
 	bool sendDdsData();
-	bool sendDdsAlarm();
-
-	void cacheDdsData(DDSData data);
-	void cacheDdsDataEx(DDSDataEx data);
-	void cacheDdsAlarm(DDSAlarm data);
-	void cacheDdsAlarmEx(DDSAlarmEx data);
-
+	void cache(DDSData data, const AdditionalTopicInfo& info);
+	void cache(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
+	void cache(const DDSDataEx& data, const AdditionalTopicInfo& info);
+	void cache(const DDSDataEx& data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
 	std::deque<DataDto> getDataCacheCopy() const;
+
+	bool sendDdsAlarm();
+	void cache(DDSAlarm data, const AdditionalTopicInfo& info);
+	void cache(DDSAlarm data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
+	void cache(const DDSAlarmEx& data, const AdditionalTopicInfo& info);
+	void cache(const DDSAlarmEx& data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
 	std::deque<AlarmDto> getAlarmCacheCopy() const;
 
 private:
 	bool stop_sending_data_;
-	bool stop_sending_alarm_;
 	ThreadSafeDeque<DataDto> data_cache_;
+
+	bool stop_sending_alarm_;
 	ThreadSafeDeque<AlarmDto> alarm_cache_;
+
 	DataMapper mapper_;
 	IServer* server_;
 };

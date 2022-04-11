@@ -1,4 +1,5 @@
 #include "PublisherFactory.h"
+#include "../include/TestUtility.h"
 
 using namespace eprosima::fastdds::dds;
 
@@ -9,6 +10,28 @@ bool operator==(const PublisherConfig& lhs, const PublisherConfig& rhs)
 		&& lhs.topic_name == rhs.topic_name
 		&& lhs.topic_type_name == rhs.topic_type_name
 		&& lhs.topic_type == rhs.topic_type;
+}
+
+template<>
+void ConcretePublisher<DDSData, DDSDataPubSubType>::setData()
+{
+	data_ = getDdsData(config_.vector_size);
+}
+
+template<>
+void ConcretePublisher<DDSDataEx, DDSDataExPubSubType>::setData()
+{
+	data_ = getDdsDataEx(config_.vector_size);
+}
+
+template<>
+void ConcretePublisher<DDSAlarm, DDSAlarmPubSubType>::setData()
+{
+}
+
+template<>
+void ConcretePublisher<DDSAlarmEx, DDSAlarmExPubSubType>::setData()
+{
 }
 
 AbstractDdsPublisher* PublisherFactory::createPublisher(
@@ -28,47 +51,5 @@ AbstractDdsPublisher* PublisherFactory::createPublisher(
 	default:
 		std::cout << "Topic type " << config.topic_type_name << " is not found" << std::endl;
 		return nullptr;
-	}
-}
-
-
-TopicType string2TopicType(std::string type_name)
-{
-	if (type_name == "DDSData")
-	{
-		return TopicType::DDS_DATA;
-	}
-	else if (type_name == "DDSDataEx")
-	{
-		return TopicType::DDS_DATA_EX;
-	}
-	else if (type_name == "DDSAlarm")
-	{
-		return TopicType::DDS_ALARM;
-	}
-	else if (type_name == "DDSAlarmEx")
-	{
-		return TopicType::DDS_EX_ALARM;
-	}
-	else
-	{
-		return TopicType::UNKNOWN;
-	}
-}
-
-std::string TopicType2string(TopicType type)
-{
-	switch (type)
-	{
-	case TopicType::DDS_DATA:
-		return "DDSData";
-	case TopicType::DDS_DATA_EX:
-		return "DDSDataEx";
-	case TopicType::DDS_ALARM:
-		return "DDSAlarm";
-	case TopicType::DDS_EX_ALARM:
-		return "DDSAlarmEx";
-	default:
-		return "";
 	}
 }

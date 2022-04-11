@@ -14,12 +14,6 @@ private:
     std::deque<T> queue_;
     mutable std::shared_mutex mutex_;
 
-    // Moved out of public interface to prevent races between this
-    // and pop().
-    bool empty() const {
-        return queue_.empty();
-    }
-
 public:
     ThreadSafeDeque() = default;
     ThreadSafeDeque(const ThreadSafeDeque<T>&) = delete;
@@ -35,6 +29,11 @@ public:
     size_t size() const {
         std::shared_lock<std::shared_mutex> r_lock(mutex_);
         return queue_.size();
+    }
+
+    size_t empty() const {
+        std::shared_lock<std::shared_mutex> r_lock(mutex_);
+        return queue_.empty();
     }
 
     std::optional<T> front() {

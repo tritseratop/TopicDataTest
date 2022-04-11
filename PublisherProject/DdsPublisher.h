@@ -20,6 +20,7 @@ class PublisherService
 public:
 
     PublisherService(const ServiceConfig<PublisherConfig>& config);
+    PublisherService();
     virtual ~PublisherService();
 
     bool initConfigPub();
@@ -30,9 +31,9 @@ public:
     bool initPublishers();
     void runPublishers();
     void changeSubsConfig(const ServiceConfig<PublisherConfig>& config);
-
-    void setDdsData(DDSData* data, size_t size);
-    void setDdsDataEx(DDSDataEx* data, size_t size);
+    void setData();
+    void setDdsData(DDSData* data);
+    void setDdsDataEx(DDSDataEx* data);
 
     bool createNewPublisher(const PublisherConfig& config);
 

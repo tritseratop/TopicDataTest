@@ -4,7 +4,7 @@
 #include "../include/TestUtility.h"
 
 std::vector<SubscriberConfig> configs({
-        {0, 10000, "DDSData1", "DDSData", TopicType::DDS_DATA, 100, 100},
+        {0, 100, "DDSData1", "DDSData", TopicType::DDS_DATA, 100, 100},
 //        {1, 10000, "DDSData2", "DDSData", TopicType::DDS_DATA, 100, 100},
 //        {2, 10000, "DDSData3", "DDSData", TopicType::DDS_DATA, 100, 100},
     });
@@ -16,6 +16,8 @@ ServiceConfig<SubscriberConfig> config({
     4042,
     {"127.0.0.1"},
     configs,
+    1000,
+    1000,
     1000,
     1000,
     1000,
@@ -39,99 +41,113 @@ TEST(DtoTest, DdsDataConversation) {
     auto dds_data = getEqualDdsData(4);
     DataMapper mapper;
 
-    DataDto d = mapper.mapDdsData(std::move(dds_data.first));
+    AdditionalTopicInfo info = getAdditionalTopicInfo(4);
+
+    DataDto d = mapper.mapDdsData(std::move(dds_data.first), info);
     EXPECT_EQ(dds_data.second, d);
 
     DataExUnion data_ex_union = getEqualDdsDataEx(3, 5);
-    DataDto d2 = mapper.mapDdsDataEx(data_ex_union.data_ex, data_ex_union.dto_to_change);
+    DataDto d2 = mapper.mapDdsDataEx(data_ex_union.dto_to_change, data_ex_union.data_ex, info);
     EXPECT_EQ(d2, data_ex_union.dto);
 
     DataExUnion data_ex_union1 = getEqualDdsDataEx(3, 0);
-    DataDto d3 = mapper.mapDdsDataEx(data_ex_union1.data_ex, data_ex_union1.dto_to_change);
+    DataDto d3 = mapper.mapDdsDataEx(data_ex_union1.dto_to_change, data_ex_union1.data_ex, info);
     EXPECT_EQ(d3, data_ex_union1.dto);
 
+    info = getAdditionalTopicInfo(500);
     DataExUnion data_ex_union2 = getEqualDdsDataEx(500, 1000);
-    DataDto d4 = mapper.mapDdsDataEx(data_ex_union2.data_ex, data_ex_union2.dto_to_change);
+    DataDto d4 = mapper.mapDdsDataEx(data_ex_union2.dto_to_change, data_ex_union2.data_ex, info);
     EXPECT_EQ(d4, data_ex_union2.dto);
 
     DataExUnion data_ex_union3 = getEqualDdsDataEx(0, 0);
-    DataDto d5 = mapper.mapDdsDataEx(data_ex_union3.data_ex, data_ex_union3.dto_to_change);
+    DataDto d5 = mapper.mapDdsDataEx(data_ex_union3.dto_to_change, data_ex_union3.data_ex, info);
     EXPECT_EQ(d5, data_ex_union3.dto);
 
     DataExUnion data_ex_union4 = getEqualDdsDataEx(0, 3);
-    DataDto d6 = mapper.mapDdsDataEx(data_ex_union4.data_ex, data_ex_union4.dto_to_change);
+    DataDto d6 = mapper.mapDdsDataEx(data_ex_union4.dto_to_change, data_ex_union4.data_ex, info);
     EXPECT_EQ(d6, data_ex_union4.dto);
 }
 
-TEST(DdsDataTransmitionTest, DdsDataTransmition) {
-    SubscriberService* mysub = new SubscriberService(config, nullptr);
-
-    mysub->setVectorSizesInDataTopic();
-    if (mysub->initSubscribers())
-    {
-        mysub->runSubscribers();
-    }
-
-    auto dds_data = getEqualDdsData(4);
-    auto data = mysub->getDataCacheCopy();
-    EXPECT_EQ(dds_data.second, data.front());
-
-    delete mysub;
-}
-
-void recievingDdsData(const ServiceConfig<SubscriberConfig>& conf)
-{
-    SubscriberService* mysub = new SubscriberService(conf, nullptr);
-
-    mysub->setVectorSizesInDataTopic();
-    if (mysub->initSubscribers())
-    {
-        mysub->runSubscribers();
-    }
-
-    auto dds_data = getEqualDdsData(4);
-    auto data = mysub->getDataCacheCopy();
-
-    size_t sum = 0;
-    for (const auto& c : conf.configs)
-    {
-        sum += c.samples;
-    }
-
-    EXPECT_EQ(data.size(), sum);
-
-    delete mysub;
-}
+//TEST(DdsDataTransmitionTest, DdsDataTransmition) {
+//    SubscriberService* mysub = new SubscriberService(config, nullptr);
+//
+//    mysub->setVectorSizesInDataTopic();
+//    if (mysub->initSubscribers())
+//    {
+//        mysub->runSubscribers();
+//    }
+//
+//    auto dds_data = getEqualDdsData(config.configs[0].vector_size);
+//    auto data = mysub->getDataCacheCopy();
+//    EXPECT_EQ(dds_data.second, data.front());
+//
+//    delete mysub;
+//}
 
 TEST(DdsDataTransmitionTest, DdsDataLostedPackages) {
-    ServiceConfig<SubscriberConfig> conf({
-            "Participant_sub",
-            Transport::TCP,
-            "127.0.0.1",
-            4042,
-            {"127.0.0.1"},
-            configs,
-            1000,
-            1000,
-            1000,
-            1000,
-            1000,
-            1000,
-            1000,
-            1000,
-            1000,
-            1000
-        });
-    std::vector<SubscriberConfig> confs({
-        {0, 10000, "DDSData1", "DDSData", TopicType::DDS_DATA, 75, 100},
-        });
+    std::vector<uint16_t> sizes = { 10, 100, 1000, 10000 };
+    std::vector<uint32_t> v_sleep = { 100 };
+    uint32_t samples = 50;
+    std::string ip = "127.0.0.1";
+    Transport transport = Transport::TCP;
+    ServiceConfig<SubscriberConfig> default_service_config({
+        "Participant_sub",
+        transport,
+        ip,
+        4042,
+        {"127.0.0.1"},
+        configs,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000
+    });
+    SubscriberConfig ddsdata_config = {
+        0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 100
+    };
+    SubscriberConfig ddsdataex_config = {
+        0, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, samples, 100
+    };
+    std::vector<ServiceConfig<SubscriberConfig>> configs;
+    for (auto size : sizes)
+    {
+        ddsdata_config.vector_size = size;
+        ddsdata_config.info = getAdditionalTopicInfo(size);
+        ddsdataex_config.vector_size = size;
+        ddsdataex_config.info = getAdditionalTopicInfo(size);
+        for (auto sleep : v_sleep)
+        {
+            ddsdata_config.sleep = sleep;
+            default_service_config.configs = { ddsdata_config };
+            configs.push_back(default_service_config);
 
-    conf.configs = confs;
-    recievingDdsData(conf);
-    //recievingDdsData(100, 100);
-    //recievingDdsData(100, 200);
-    //recievingDdsData(100, 500);
-    //recievingDdsData(100, 1000);
+            ddsdataex_config.sleep = sleep;
+            default_service_config.configs = { ddsdataex_config };
+            configs.push_back(default_service_config);
+
+        }
+    }
+    
+    SubscriberService* mysub = new SubscriberService(default_service_config, nullptr);
+
+    int i = 1;
+    for (auto conf : configs)
+    {
+        std::cout << "\n\n" << i++ << ". SERVICE RUN WITH TOPIC " << conf.configs[0].topic_type_name
+            << " size: " << conf.configs[0].vector_size << std::endl;
+        mysub->changeSubsConfig(conf);
+        mysub->runSubscribers();
+    }
+    delete mysub;
+
 }
 
 //TEST(WsDataTransmitionTest, DdsDataTransmition) {

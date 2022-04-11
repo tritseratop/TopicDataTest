@@ -31,6 +31,30 @@ std::vector<T> getFilledVector(size_t size, T filler)
     return result;
 }
 
+AdditionalTopicInfo getAdditionalTopicInfo(size_t size = 4)
+{
+    AdditionalTopicInfo info;
+    info.tag_to_index[DataCollectiionType::DATA_INT];
+    info.tag_to_index[DataCollectiionType::DATA_FLOAT];
+    info.tag_to_index[DataCollectiionType::DATA_DOUBLE];
+    info.tag_to_index[DataCollectiionType::DATA_CHAR];
+    info.tags[DataCollectiionType::DATA_INT];
+    info.tags[DataCollectiionType::DATA_FLOAT];
+    info.tags[DataCollectiionType::DATA_DOUBLE];
+    info.tags[DataCollectiionType::DATA_CHAR];
+    for (auto& [data_type, tag_to_index] : info.tag_to_index)
+    {
+        info.tags.at(data_type).reserve(size);
+        for (size_t i = 0; i < size; i++)
+        {
+            tag_to_index[1000000 + i] = i;
+            info.tags.at(data_type).push_back(1000000 + i);
+        }
+    }
+    info.topic_name = "Name";
+    return info;
+}
+
 std::pair<DDSData, DataDto> getEqualDdsData(size_t size = 4)
 {
     DDSData data1;
@@ -56,27 +80,91 @@ std::pair<DDSData, DataDto> getEqualDdsData(size_t size = 4)
         100,
         {
             getFilledVector<int64_t>(size, 101),
+            getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_INT),
             getDefaultVector<int32_t>(size, 1),
             getDefaultVector(size)
         },
         {
             getFilledVector<int64_t>(size, 101),
+            getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_FLOAT),
             getDefaultVector<float>(size, 1),
             getDefaultVector(size)
         },
         {
             getFilledVector<int64_t>(size, 101),
+            getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_DOUBLE),
             getDefaultVector<double>(size, 1),
             getDefaultVector(size)
         },
         {
             getFilledVector<int64_t>(size, 101),
+            getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_CHAR),
             getFilledVector(size, getFilledVector(size, 'a')),
             getDefaultVector(size)
         }
     };
 
     return std::make_pair(data1, dto);
+}
+
+DDSData getDdsData(size_t size = 4)
+{
+    DDSData data1;
+
+    data1.time_service(100);
+    data1.time_source(101);
+
+    data1.data_int().value(getDefaultVector<int32_t>(size));
+    data1.data_int().quality(getDefaultVector(size));
+
+    data1.data_float().value(getDefaultVector<float>(size));
+    data1.data_float().quality(getDefaultVector(size));
+
+    data1.data_double().value(getDefaultVector<double>(size));
+    data1.data_double().quality(getDefaultVector(size));
+
+    DataChar data_char;
+    //data_char.value(getFilledVector(1, 'a'));
+    data1.data_char().value(getFilledVector(size, data_char));
+    data1.data_char().quality(getDefaultVector(size));
+
+    return data1;
+}
+
+DDSDataEx getDdsDataEx(size_t size = 4)
+{
+    DDSDataEx data1;
+    data1.time_service(100);
+    DataExInt data_ex_int;
+    data_ex_int.time_source(101);
+    data_ex_int.value(0);
+    data_ex_int.quality('b');
+    DataExFloat data_ex_float;
+    data_ex_float.time_source(101);
+    data_ex_float.value(0);
+    data_ex_float.quality('b');
+    DataExDouble data_ex_double;
+    data_ex_double.time_source(101);
+    data_ex_double.value(0);
+    data_ex_double.quality('b');
+    DataExChar data_ex_char;
+    data_ex_char.time_source(102);
+    data_ex_char.value(getDefaultVector(1));
+    data_ex_char.quality('b');
+
+    for (int i = 0; i < size; ++i)
+    {
+        data_ex_int.id_tag(1000000 + i);
+        data_ex_float.id_tag(1000000 + i);
+        data_ex_double.id_tag(1000000 + i);
+        data_ex_char.id_tag(1000000 + i);
+        data1.data_int().push_back(data_ex_int);
+        data1.data_float().push_back(data_ex_float);
+        data1.data_double().push_back(data_ex_double);
+        data1.data_char().push_back(data_ex_char);
+    }
+
+    return data1;
 }
 
 struct DataExUnion
@@ -110,10 +198,10 @@ DataExUnion getEqualDdsDataEx(size_t size_ex = 2, size_t size_data = 4)
 
     for (int i = 0; i < size_ex; ++i)
     {
-        data_ex_int.id_tag(i);
-        data_ex_float.id_tag(i);
-        data_ex_double.id_tag(i);
-        data_ex_char.id_tag(i);
+        data_ex_int.id_tag(1000000 + i);
+        data_ex_float.id_tag(1000000 + i);
+        data_ex_double.id_tag(1000000 + i);
+        data_ex_char.id_tag(1000000 + i);
         data1.data_int().push_back(data_ex_int);
         data1.data_float().push_back(data_ex_float);
         data1.data_double().push_back(data_ex_double);
@@ -138,21 +226,25 @@ DataExUnion getEqualDdsDataEx(size_t size_ex = 2, size_t size_data = 4)
         100,
         {
             getFilledVector<int64_t>(size_data, 101),
+            getAdditionalTopicInfo(size_data).tags.at(DataCollectiionType::DATA_INT),
             getDefaultVector<int32_t>(size_data, 1),
             getDefaultVector(size_data)
         },
         {
             getFilledVector<int64_t>(size_data, 101),
+            getAdditionalTopicInfo(size_data).tags.at(DataCollectiionType::DATA_FLOAT),
             getDefaultVector<float>(size_data, 1),
             getDefaultVector(size_data)
         },
         {
             getFilledVector<int64_t>(size_data, 101),
+            getAdditionalTopicInfo(size_data).tags.at(DataCollectiionType::DATA_DOUBLE),
             getDefaultVector<double>(size_data, 1),
             getDefaultVector(size_data)
         },
         {
             getFilledVector<int64_t>(size_data, 101),
+            getAdditionalTopicInfo(size_data).tags.at(DataCollectiionType::DATA_CHAR),
             getFilledVector(size_data, getFilledVector(size_data, 'a')),
             getDefaultVector(size_data)
         }
@@ -163,18 +255,22 @@ DataExUnion getEqualDdsDataEx(size_t size_ex = 2, size_t size_data = 4)
     if (size_data < size_ex)
     {
         result_dto.data_int.time_source.resize(size_ex);
+        result_dto.data_int.id_tag.resize(size_ex);
         result_dto.data_int.value.resize(size_ex);
         result_dto.data_int.quality.resize(size_ex);
 
         result_dto.data_float.time_source.resize(size_ex);
+        result_dto.data_float.id_tag.resize(size_ex);
         result_dto.data_float.value.resize(size_ex);
         result_dto.data_float.quality.resize(size_ex);
 
         result_dto.data_double.time_source.resize(size_ex);
+        result_dto.data_double.id_tag.resize(size_ex);
         result_dto.data_double.value.resize(size_ex);
         result_dto.data_double.quality.resize(size_ex);
 
         result_dto.data_char.time_source.resize(size_ex);
+        result_dto.data_char.id_tag.resize(size_ex);
         result_dto.data_char.value.resize(size_ex);
         result_dto.data_char.quality.resize(size_ex);
     }
@@ -182,18 +278,22 @@ DataExUnion getEqualDdsDataEx(size_t size_ex = 2, size_t size_data = 4)
     for (int i = 0; i < size_ex; ++i)
     {
         result_dto.data_int.time_source[i] = data_ex_int.time_source();
+        result_dto.data_int.id_tag[i] = 1000000 + i;
         result_dto.data_int.value[i] = data_ex_int.value();
         result_dto.data_int.quality[i] = data_ex_int.quality();
 
         result_dto.data_float.time_source[i] = data_ex_float.time_source();
+        result_dto.data_float.id_tag[i] = 1000000 + i;
         result_dto.data_float.value[i] = data_ex_float.value();
         result_dto.data_float.quality[i] = data_ex_float.quality();
 
         result_dto.data_double.time_source[i] = data_ex_double.time_source();
+        result_dto.data_double.id_tag[i] = 1000000 + i;
         result_dto.data_double.value[i] = data_ex_double.value();
         result_dto.data_double.quality[i] = data_ex_double.quality();
 
         result_dto.data_char.time_source[i] = data_ex_char.time_source();
+        result_dto.data_char.id_tag[i] = 1000000 + i;
         result_dto.data_char.value[i] = data_ex_char.value();
         result_dto.data_char.quality[i] = data_ex_char.quality();
     }

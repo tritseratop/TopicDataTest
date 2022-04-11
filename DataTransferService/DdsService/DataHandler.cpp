@@ -2,10 +2,16 @@
 
 #include "DataHandler.h"
 
-DataDto DataMapper::mapDdsData(DDSData data)
+DataDto DataMapper::mapDdsData(DDSData data, const AdditionalTopicInfo& info)
 {
 	std::vector<std::vector<char>> data_char;
 	data_char.reserve(data.data_char().value().size());
+	
+	auto tags = info.tags;
+	for (auto& [type, tag] : tags)
+	{
+		tag.resize(data.data_char().value().size());
+	}
 
 	for (int i = 0; i < data.data_char().value().size(); ++i)
 	{
@@ -16,21 +22,25 @@ DataDto DataMapper::mapDdsData(DDSData data)
 		data.time_service(),
 		{ 
 			std::vector(data.data_int().value().size(), data.time_source()),
+			std::move(tags.at(DataCollectiionType::DATA_INT)),
 			std::move(data.data_int().value()),
 			std::move(data.data_int().quality()) 
 		},
 		{ 
 			std::vector(data.data_float().value().size(), data.time_source()),
+			std::move(tags.at(DataCollectiionType::DATA_FLOAT)),
 			std::move(data.data_float().value()),
 			std::move(data.data_float().quality()) 
 		},
 		{
 			std::vector(data.data_double().value().size(), data.time_source()),
+			std::move(tags.at(DataCollectiionType::DATA_DOUBLE)),
 			std::move(data.data_double().value()),
 			std::move(data.data_double().quality()) 
 		},
 		{
 			std::vector(data.data_char().value().size(), data.time_source()),
+			std::move(tags.at(DataCollectiionType::DATA_CHAR)),
 			std::move(data_char),
 			std::move(data.data_char().quality())
 		}
@@ -38,48 +48,53 @@ DataDto DataMapper::mapDdsData(DDSData data)
 	return result;
 }
 
-DataDto DataMapper::mapDdsDataEx(const DDSDataEx& data_ex, DataDto data)
+DataDto DataMapper::mapDdsDataEx(DataDto prev_dto, const DDSDataEx& cur_data_ex, const AdditionalTopicInfo& info)
 {
-	data.time_service = data_ex.time_service();
-	fillChanged(data.data_int, data_ex.data_int());
-	fillChanged(data.data_float, data_ex.data_float());
-	fillChanged(data.data_double, data_ex.data_double());
-	fillChanged(data.data_char, data_ex.data_char());
+	prev_dto.time_service = cur_data_ex.time_service();
+	fillChanged(prev_dto.data_int, cur_data_ex.data_int(), info.tag_to_index.at(DataCollectiionType::DATA_INT));
+	fillChanged(prev_dto.data_float, cur_data_ex.data_float(), info.tag_to_index.at(DataCollectiionType::DATA_FLOAT));
+	fillChanged(prev_dto.data_double, cur_data_ex.data_double(), info.tag_to_index.at(DataCollectiionType::DATA_DOUBLE));
+	fillChanged(prev_dto.data_char, cur_data_ex.data_char(), info.tag_to_index.at(DataCollectiionType::DATA_DOUBLE));
 
-	return data;
+	return prev_dto;
 }
 
-AlarmDto DataMapper::mapDdsAlarm(DDSAlarm data)
+AlarmDto DataMapper::mapDdsAlarm(DDSAlarm data,const AdditionalTopicInfo& info)
 {
+	auto tags = info.tags.at(DataCollectiionType::ALARM_UINT32);
+	tags.resize(data.alarms().size());
+
 	AlarmDto result{
 		data.time_service(),
 		std::vector(data.alarms().size(), data.time_source()),
+		std::move(tags),
 		std::move(data.alarms()),
 		std::move(data.quality())
 	};
 	return result;
 }
 
-AlarmDto DataMapper::mapDdsAlarmEx(const DDSAlarmEx& data_ex, AlarmDto dto)
+AlarmDto DataMapper::mapDdsAlarmEx(AlarmDto prev_dto, const DDSAlarmEx& cur_data_ex, const AdditionalTopicInfo& info)
 {
-	dto.time_service = data_ex.time_service();
-	fillChanged(dto, data_ex.alarms());
-	return dto;
+	prev_dto.time_service = cur_data_ex.time_service();
+	fillChanged(prev_dto, cur_data_ex.alarms(), info.tag_to_index.at(DataCollectiionType::ALARM_UINT32));
+	return prev_dto;
 }
 
-template<class DtoDataCollection, class DdsData>
-void DataMapper::fillChanged(DtoDataCollection& next, const std::vector<DdsData>& prev)
+template<class DtoDataCollection, class DdsSample>
+void DataMapper::fillChanged(DtoDataCollection& prev_dto_collection, const std::vector<DdsSample>& cur_samples, const TagToIndex& tag_to_index)
 {
-	size_t n = prev.size();
-	for (const auto& c : prev)
+	size_t n = cur_samples.size();
+	for (const auto& sample : cur_samples)
 	{
-		if (c.id_tag() >= next.size())
+		if (tag_to_index.at(sample.id_tag()) >= prev_dto_collection.size())
 		{
-			next.resize(c.id_tag() + 1);
+			prev_dto_collection.resize(tag_to_index.at(sample.id_tag()) + 1);
 		}
-		next.time_source[c.id_tag()] = c.time_source();
-		next.value[c.id_tag()] = c.value();
-		next.quality[c.id_tag()] = c.quality();
+		prev_dto_collection.time_source[tag_to_index.at(sample.id_tag())] = sample.time_source();
+		prev_dto_collection.id_tag[tag_to_index.at(sample.id_tag())] = sample.id_tag();
+		prev_dto_collection.value[tag_to_index.at(sample.id_tag())] = sample.value();
+		prev_dto_collection.quality[tag_to_index.at(sample.id_tag())] = sample.quality();
 	}
 }
 
@@ -116,30 +131,30 @@ bool DataHandler::sendDdsAlarm()
 	return false;
 }
 
-void DataHandler::cacheDdsData(DDSData data)
+void DataHandler::cache(DDSData data, const AdditionalTopicInfo& info)
 {
-	data_cache_.push_back(mapper_.mapDdsData(std::move(data)));
+	data_cache_.push_back(mapper_.mapDdsData(std::move(data), info));
 }
 
-void DataHandler::cacheDdsDataEx(DDSDataEx data)
+void DataHandler::cache(const DDSDataEx& data, const AdditionalTopicInfo& info)
 {
-	std::optional<DataDto> back = data_cache_.back();
-	if (back.has_value())
+	if (!data_cache_.empty())
 	{
-		data_cache_.push_back(mapper_.mapDdsDataEx(data, back.value()));
+		data_cache_.push_back(mapper_.mapDdsDataEx(data_cache_.back().value(), data, info));
 	}
 	else
 	{
-		data_cache_.push_back(mapper_.mapDdsDataEx(data, DataDto()));
+		//TODO datadto default constructor check
+		data_cache_.push_back(mapper_.mapDdsDataEx(DataDto(), data, info));
 	}
 }
 
-void DataHandler::cacheDdsAlarm(DDSAlarm data)
+void DataHandler::cache(DDSAlarm data, const AdditionalTopicInfo& info)
 {
 
 }
 
-void DataHandler::cacheDdsAlarmEx(DDSAlarmEx data)
+void DataHandler::cache(const DDSAlarmEx& data, const AdditionalTopicInfo& info)
 {
 
 }

@@ -18,6 +18,17 @@ PublisherService::PublisherService(const ServiceConfig<PublisherConfig>& config)
 {
 }
 
+PublisherService::PublisherService()
+	: participant_(nullptr)
+	, publisher_(nullptr)
+	, topic_(nullptr)
+	, writer_(nullptr)
+	, type_(new ConfigTopicPubSubType())
+	, stop(false)
+{
+}
+
+
 PublisherService::~PublisherService()
 {
 	deletePublishers();
@@ -147,11 +158,11 @@ bool PublisherService::initPublishers()
 	std::shared_ptr<TCPv4TransportDescriptor> descriptor = std::make_shared<TCPv4TransportDescriptor>();
 
 	std::vector<std::string> whitelist({ "127.0.0.1" });
-	for (std::string ip : whitelist)
+	/*for (std::string ip : whitelist)
 	{
 		descriptor->interfaceWhiteList.push_back(ip);
 		std::cout << "Whitelisted " << ip << std::endl;
-	}
+	}*/
 
 	descriptor->sendBufferSize = 0;
 	descriptor->receiveBufferSize = 0;
@@ -211,28 +222,37 @@ void PublisherService::changeSubsConfig(const ServiceConfig<PublisherConfig>& co
 	else
 	{
 		config_ = config;
+		deletePublishers();
 		initPublishers();
 	}
 }
 
-void PublisherService::setDdsData(DDSData* data, size_t size)
+void PublisherService::setData()
+{
+	for (auto pub : publishers_)
+	{
+		pub->setData();
+	}
+}
+
+void PublisherService::setDdsData(DDSData* data)
 {
 	for (auto pub : publishers_)
 	{
 		if (pub->getTopicType() == TopicType::DDS_DATA)
 		{
-			pub->setData(static_cast<void*>(data), size);
+			pub->setData(static_cast<void*>(data));
 		}
 	}
 }
 
-void PublisherService::setDdsDataEx(DDSDataEx* data, size_t size)
+void PublisherService::setDdsDataEx(DDSDataEx* data)
 {
 	for (auto pub : publishers_)
 	{
 		if (pub->getTopicType() == TopicType::DDS_DATA_EX)
 		{
-			pub->setData(static_cast<void*>(data), size);
+			pub->setData(static_cast<void*>(data));
 		}
 	}
 }

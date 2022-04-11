@@ -1,11 +1,10 @@
 #include "DdsPublisher.h"
-#include "../include/TestUtility.h"
 
 #define TEST_MODE
 #ifdef TEST_MODE
 
 std::vector<PublisherConfig> configs({
-        {0, 10000, "DDSData1", "DDSData", TopicType::DDS_DATA, 100, 1000}, 
+        {0, 100, "DDSData1", "DDSData", TopicType::DDS_DATA, 100, 100}, 
 //        {1, 10000, "DDSData2", "DDSData", TopicType::DDS_DATA, 100, 50},
 //        {2, 10000, "DDSData3", "DDSData", TopicType::DDS_DATA, 100, 10}
     });
@@ -18,6 +17,8 @@ ServiceConfig<PublisherConfig> config({
     {"127.0.0.1"},
     configs,
     1000, 
+    1000,
+    1000,
     1000,
     1000,
     1000,
@@ -43,57 +44,76 @@ DDSData getDdsData()
     return ddsData;
 }
 
-void sendingDdsData(const ServiceConfig<PublisherConfig>& conf)
-{
-    PublisherService* mypub = new PublisherService(conf);
-    if (mypub->initPublishers())
-    {
-        auto dds_data = getEqualDdsData(4).first;
-        auto dds_data_ex = getEqualDdsDataEx(4).data_ex;
-        //DDSData dds_data = getDdsData();
-        mypub->setDdsData(&dds_data, sizeof(dds_data));
-        mypub->runPublishers();
-    }
-    delete mypub;
-}
-
 int main(
     int argc,
     char** argv)
 {
-    ServiceConfig<PublisherConfig> conf({
+    std::vector<uint16_t> sizes = { 10, 100, 1000, 10000 };
+    std::vector<uint32_t> v_sleep = { 100 };
+    uint32_t samples = 50;
+    std::string ip = "127.0.0.1";
+    Transport transport = Transport::TCP;
+
+    ServiceConfig<PublisherConfig> default_service_config({
         "Participant_pub",
-        Transport::TCP,
-        "127.0.0.1",
+        transport,
+        ip,
         4042,
         {"127.0.0.1"},
         configs,
-        1000,
-        1000,
-        1000,
-        1000,
-        1000,
-        1000,
-        1000,
-        1000,
-        1000,
-        1000
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000
     });
-    std::cout << "Starting publisher 1" << std::endl;
-    std::vector<PublisherConfig> confs1({
-        {0, 10000, "DDSData1", "DDSData", TopicType::DDS_DATA, 100, 100},
-        });
-    conf.configs = confs1;
-    sendingDdsData(conf);
+    PublisherConfig ddsdata_config = {
+        0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 1000, 
+    };
+    PublisherConfig ddsdataex_config = {
+        0, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, samples, 1000
+    };
 
-    std::cout << "Starting publisher 2" << std::endl;
-    std::vector<PublisherConfig> confs2({
-        {0, 10000, "DDSData1", "DDSData", TopicType::DDS_DATA, 75, 100},
-        });
-    conf.configs = confs2;
-    sendingDdsData(conf);
-    //sendingDdsData(100, 100);
-    //sendingDdsData(100, 100);
-    //sendingDdsData(100, 100);
+    std::vector<ServiceConfig<PublisherConfig>> configs;
+    for (auto size : sizes)
+    {
+        ddsdata_config.vector_size = size;
+        ddsdataex_config.vector_size = size;
+        for (auto sleep : v_sleep)
+        {
+            ddsdata_config.sleep = sleep;
+            default_service_config.configs = { ddsdata_config };
+            configs.push_back(default_service_config);
+
+            ddsdataex_config.sleep = sleep;
+            default_service_config.configs = { ddsdataex_config };
+            configs.push_back(default_service_config);
+
+        }
+    }
+
+    PublisherService* mypub = new PublisherService(config);
+    /*mypub->initPublishers();
+    mypub->setData();
+    mypub->runPublishers();*/
+
+    int i = 1;
+    for (auto conf : configs)
+    {
+        std::cout << "\n" << i++ << ". SERVICE RUN WITH TOPIC " << conf.configs[0].topic_name
+            << " size: " << conf.configs[0].vector_size << std::endl;
+        mypub->changeSubsConfig(conf);
+        mypub->setData();
+        mypub->runPublishers();
+    }
+
+    delete mypub;
     system("pause");
 }

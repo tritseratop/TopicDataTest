@@ -33,15 +33,3 @@ bool WebsockServer::sendAlarm(AlarmDto data) {
 	sock_listener->sendMessageToAllAsync(oatpp::String("I'm here"));
 	return true;
 }
-
-//int main() {
-//	oatpp::base::Environment::init();
-//
-//	//run();
-//	WebsockServer server;
-//	server.run();
-//
-//	oatpp::base::Environment::destroy();
-//
-//	return 0;
-//}

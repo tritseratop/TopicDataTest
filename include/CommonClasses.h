@@ -2,6 +2,7 @@
 #define COMMON_CLASSES_H_
 
 #include <vector>
+#include <unordered_map>
 #include <string>
 #include <algorithm>
 
@@ -10,6 +11,46 @@ enum Transport
 	UDP, 
 	TCP, 
 	SHARED_MEMORY
+};
+
+enum TopicType
+{
+	DDS_DATA,
+	DDS_DATA_EX,
+	DDS_ALARM,
+	DDS_EX_ALARM,
+	UNKNOWN
+};
+
+enum DataCollectiionType
+{
+	DATA_INT,
+	DATA_FLOAT,
+	DATA_DOUBLE,
+	DATA_CHAR,
+	ALARM_UINT32
+};
+
+TopicType string2TopicType(std::string type_name);
+
+std::string TopicType2string(TopicType type);
+
+struct AdditionalPackageInfo
+{
+	int64_t arrived_time;
+	std::string info;
+	//int64_t dispatch_time;
+};
+
+using Tag = std::vector<uint32_t>;
+using TagToIndex = std::unordered_map<uint32_t, uint32_t>;
+
+struct AdditionalTopicInfo
+{
+	std::unordered_map<DataCollectiionType, Tag> tags;
+	std::unordered_map<DataCollectiionType, TagToIndex> tag_to_index;
+	std::string topic_name;
+	std::string info;
 };
 
 template<class T>
@@ -28,11 +69,13 @@ struct ServiceConfig
 	std::vector<T> configs;
 
 	// vector_size
+	size_t MaxSizeSizeDataChar = 0;
 	size_t MaxSizeDataCollectionInt = 0;
 	size_t MaxSizeDataCollectionFloat = 0;
 	size_t MaxSizeDataCollectionDouble = 0;
 	size_t MaxSizeDataCollectionChar = 0;
 
+	size_t MaxSizeSizeDataExVectorChar = 0;
 	size_t MaxSizeDDSDataExVectorInt = 0;
 	size_t MaxSizeDDSDataExVectorFloat = 0;
 	size_t MaxSizeDDSDataExVectorDouble = 0;
@@ -58,6 +101,7 @@ template <class T>
 struct DataCollection
 {
 	std::vector<int64_t> time_source;
+	std::vector<uint32_t> id_tag;
 	std::vector<T> value;
 	std::vector<char> quality;
 	size_t size() const
@@ -67,12 +111,14 @@ struct DataCollection
 	void reserve(size_t capasity)
 	{
 		time_source.reserve(capasity);
+		id_tag.reserve(capasity);
 		value.reserve(capasity);
 		quality.reserve(capasity);
 	}
 	void resize(size_t size)
 	{
 		time_source.resize(size);
+		id_tag.resize(size);
 		value.resize(size);
 		quality.resize(size);
 	}
@@ -80,6 +126,7 @@ struct DataCollection
 	friend bool operator==(const DataCollection& lhs, const DataCollection& rhs)
 	{
 		return std::equal(lhs.time_source.begin(), lhs.time_source.end(), rhs.time_source.begin(), rhs.time_source.end())
+			&& std::equal(lhs.id_tag.begin(), lhs.id_tag.end(), rhs.id_tag.begin(), rhs.id_tag.end())
 			&& std::equal(lhs.value.begin(), lhs.value.end(), rhs.value.begin(), rhs.value.end())
 			&& std::equal(lhs.quality.begin(), lhs.quality.end(), rhs.quality.begin(), rhs.quality.end());
 	}
@@ -98,6 +145,7 @@ bool operator==(const DataCollection<std::vector<T>>& lhs, const DataCollection<
 		}
 	}
 	return std::equal(lhs.time_source.begin(), lhs.time_source.end(), rhs.time_source.begin(), rhs.time_source.end())
+		&& std::equal(lhs.id_tag.begin(), lhs.id_tag.end(), rhs.id_tag.begin(), rhs.id_tag.end())
 		&& res
 		&& std::equal(lhs.quality.begin(), lhs.quality.end(), rhs.quality.begin(), rhs.quality.end());
 }
@@ -111,6 +159,7 @@ struct DataDto
 	DataCollection<double> data_double;
 	DataCollection<std::vector<char>> data_char;
 
+	int64_t dispatch_time;
 	std::string topic_name = "";
 
 	friend bool operator==(const DataDto& lhs, const DataDto& rhs)
@@ -133,6 +182,7 @@ struct AlarmDto
 {
 	int64_t time_service;
 	std::vector<int64_t> time_source;
+	std::vector<uint32_t> id_tag;
 	std::vector<uint32_t> value;
 	std::vector<uint32_t> quality;
 
@@ -145,12 +195,14 @@ struct AlarmDto
 	void reserve(size_t capasity)
 	{
 		time_source.reserve(capasity);
+		id_tag.reserve(capasity);
 		value.reserve(capasity);
 		quality.reserve(capasity);
 	}
 	void resize(size_t size)
 	{
 		time_source.resize(size);
+		id_tag.resize(size);
 		value.resize(size);
 		quality.resize(size);
 	}
@@ -158,6 +210,7 @@ struct AlarmDto
 	friend bool operator==(const AlarmDto& lhs, const AlarmDto& rhs)
 	{
 		return std::equal(lhs.time_source.begin(), lhs.time_source.end(), rhs.time_source.begin(), rhs.time_source.end())
+			&& std::equal(lhs.id_tag.begin(), lhs.id_tag.end(), rhs.id_tag.begin(), rhs.id_tag.end())
 			&& std::equal(lhs.value.begin(), lhs.value.end(), rhs.value.begin(), rhs.value.end())
 			&& std::equal(lhs.quality.begin(), lhs.quality.end(), rhs.quality.begin(), rhs.quality.end());
 	}
@@ -198,6 +251,22 @@ public:
 	int MAX_MESSAGE_BUF_COUNT;;
 	std::string WS_HOST;
 	int WS_PORT;
+};
+
+struct TransitionInfo
+{
+	int64_t delivery_time = 0;
+	int64_t max_delivery_time = 0;
+	int64_t min_delivery_time = 0;
+	uint64_t size = 0;
+};
+
+struct PacketInfo
+{
+	int64_t dispatch_time;
+	int64_t receiving_time;
+	int64_t delivery_time;
+	uint64_t size;
 };
 
 #endif //!COMMON_CLASSES_H_

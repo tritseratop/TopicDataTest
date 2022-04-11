@@ -13,17 +13,9 @@
 #include <fastrtps/transport/TCPv4TransportDescriptor.h>
 
 #include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "../include/CommonClasses.h"
 
 using eprosima::fastrtps::types::ReturnCode_t;
-
-enum TopicType
-{
-	DDS_DATA, 
-	DDS_DATA_EX,
-	DDS_ALARM,
-	DDS_EX_ALARM,
-	UNKNOWN
-};
 
 struct PublisherConfig
 {
@@ -46,7 +38,8 @@ public:
 	virtual ~AbstractDdsPublisher() {};
 	virtual bool init() = 0;
 	virtual void run() = 0;
-	virtual void setData(void* data, size_t size) = 0;
+	virtual void setData() = 0;
+	virtual void setData(void* data) = 0;
 	virtual TopicType getTopicType() = 0;
 	//virtual void setConfig(const SubscriberConfig& config) = 0;
 protected:
@@ -92,13 +85,15 @@ public:
 		}
 	}
 
-	void setData(void* data, size_t size) override
+	void setData(void* data) override
 	{
 		//T* data_p;
 		data_ = *(static_cast<T*>(data));
 		//std::memcpy(&data_, data, size);
 		//data_ = *(data_p);
 	}
+
+	void setData() override;
 
 	bool init() override
 	{
@@ -231,9 +226,5 @@ public:
 protected:
 
 };
-
-TopicType string2TopicType(std::string type_name);
-
-std::string TopicType2string(TopicType type);
 
 #endif //!PUBLISHER_FACTORY_H_

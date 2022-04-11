@@ -12,15 +12,7 @@
 #include "DataHandler.h"
 #include "../ThreadSafeQueue/ThreadSafeQueue.h"
 #include "../../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-
-enum TopicType
-{
-	DDS_DATA, 
-	DDS_DATA_EX,
-	DDS_ALARM,
-	DDS_EX_ALARM,
-	UNKNOWN
-};
+#include "../../include/CommonClasses.h"
 
 struct SubscriberConfig
 {
@@ -33,6 +25,8 @@ struct SubscriberConfig
 	// listener settings
 	uint32_t samples = 10;
 	uint32_t sleep = 1000;
+
+	AdditionalTopicInfo info;
 
 	friend bool operator==(const SubscriberConfig& lhs, const SubscriberConfig& rhs);
 };
@@ -61,10 +55,10 @@ public:
 		, reader_(nullptr)
 		, topic_(nullptr)
 		, config_(config)
-		, listener_(this)
 		, support_type_(new TPubSubType())
 		, observer_(observer)
 		, stop_(false)
+		, listener_(this)
 	{
 		setDataSize();
 	}
@@ -72,24 +66,34 @@ public:
 	{
 		if (reader_ != nullptr)
 		{
-			subscriber_->delete_datareader(reader_);
+			auto res = subscriber_->delete_datareader(reader_);
+			if (res != ReturnCode_t::RETCODE_OK)
+			{
+				std::cout << "Error: " + std::to_string(res());
+			}
 		}
+		subscriber_->delete_contained_entities();
 		if (subscriber_ != nullptr)
 		{
-			participant_->delete_subscriber(subscriber_);
+			auto res = participant_->delete_subscriber(subscriber_);
+			if (res != ReturnCode_t::RETCODE_OK)
+			{
+				std::cout << "Error: " + std::to_string(res());
+			}
 		}
 		if (topic_ != nullptr)
 		{
 			auto res = participant_->delete_topic(topic_);
 			if (res != ReturnCode_t::RETCODE_OK)
 			{
-				std::cout << res() << std::endl;
+				std::cout << "Error: " + std::to_string(res());
 			}
 		}
 	}
 
 	bool init() override
 	{
+		stop_ = false;
 		if (participant_ == nullptr)
 		{
 			return false;
@@ -109,9 +113,17 @@ public:
 			return false;
 		}
 
+		eprosima::fastdds::dds::DataReaderQos rqos;
+		/*rqos.history().kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
+		rqos.history().depth = 30;
+		rqos.resource_limits().max_samples = 50;
+		rqos.resource_limits().allocated_samples = 20;
+		rqos.reliability().kind = eprosima::fastdds::dds::RELIABLE_RELIABILITY_QOS;*/
+		//rqos.durability().kind = eprosima::fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
+		//rqos.deadline().period.nanosec = config_.sleep * 1000 * 1000;
 		reader_ = subscriber_->create_datareader(
 			topic_,
-			eprosima::fastdds::dds::DATAREADER_QOS_DEFAULT,
+			rqos,
 			&listener_);
 		if (reader_ == nullptr)
 		{
@@ -145,7 +157,7 @@ private:
 
 	DataHandler* observer_;
 
-	bool stop_;
+	std::atomic<bool> stop_;
 
 	eprosima::fastdds::dds::DomainParticipant* participant_;
 	eprosima::fastdds::dds::Subscriber* subscriber_;
@@ -156,21 +168,23 @@ private:
 
 	void setDataSize() {};
 
-	void cacheData(const T& data_) {};
+	void cacheData(const T& data_) {
+		observer_->cache(data_, config_.info);
+	}
 
 	void runDataSending();
 
-	class DDSDataSubscriberListener : public eprosima::fastdds::dds::DataReaderListener
+	class SubscriberListener : public eprosima::fastdds::dds::DataReaderListener
 	{
 	public:
-		DDSDataSubscriberListener(
+		SubscriberListener(
 			ConcreteSubscriber* subscriber)
 			: matched_(0)
 			, samples_(0)
 			, sub_(subscriber)
 		{
 		}
-		~DDSDataSubscriberListener() override
+		~SubscriberListener() override
 		{
 		}
 
@@ -211,12 +225,9 @@ private:
 				matched_ += info.current_count_change;
 				std::cout << "ConcreteSubscriber unmatched." << std::endl;
 
-				if (matched_ == 0)
+				if (info.current_count == 0)
 				{
-					if (matched_ == 0)
-					{
-						this->sub_->stop_ = true;
-					}
+					this->sub_->stop_ = true;
 				}
 			}
 			else
@@ -244,9 +255,5 @@ public:
 protected:
 
 };
-
-TopicType string2TopicType(const std::string& type_name);
-
-std::string TopicType2string(TopicType type);
 
 #endif //!SUBSCRIBER_FACTORY_H_

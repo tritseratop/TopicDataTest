@@ -4,6 +4,7 @@
 
 #include <fastrtps/Domain.h>
 #include <fastrtps/transport/TCPv4TransportDescriptor.h>
+#include <fastrtps/transport/UDPv4TransportDescriptor.h>
 #include <fastrtps/utils/IPLocator.h>
 
 #include "DdsSubscriber.h"
@@ -37,8 +38,14 @@ SubscriberService::~SubscriberService()
 		config_subscriber_->delete_datareader(config_reader_);
 		participant_->delete_subscriber(config_subscriber_);
 	}
-
-	DomainParticipantFactory::get_instance()->delete_participant(participant_);
+	if (participant_->delete_contained_entities() != ReturnCode_t::RETCODE_OK)
+	{
+		std::cout << "Participant's entities deletion failed" << std::endl;
+	}
+	if (DomainParticipantFactory::get_instance()->delete_participant(participant_) != ReturnCode_t::RETCODE_OK)
+	{
+		std::cout << "Participant deletion failed" << std::endl;
+	}
 }
 
 bool SubscriberService::initConfigSubscriber()
@@ -96,6 +103,7 @@ void SubscriberService::changeSubsConfig(const ServiceConfig<SubscriberConfig>& 
 	}
 	else
 	{
+		// TODO сравнение параметров
 		config_ = config;
 		deleteSubscribers();
 		initSubscribers();
@@ -135,10 +143,10 @@ bool SubscriberService::createParticipant()
 	if (participant_ == nullptr)
 	{
 		participant_ = DomainParticipantFactory::get_instance()->create_participant(0, getParticipantQos());
-	}
-	if (participant_ == nullptr)
-	{
-		return false;
+		if (participant_ == nullptr)
+		{
+			return false;
+		}
 	}
 	return true;
 }
@@ -151,28 +159,41 @@ DomainParticipantQos SubscriberService::getParticipantQos()
 
 	DomainParticipantQos qos;
 
-	Locator_t initial_peer_locator;
-	initial_peer_locator.kind = LOCATOR_KIND_TCPv4;
-	initial_peer_locator.port = config_.port;
-
-	std::shared_ptr<TCPv4TransportDescriptor> descriptor = std::make_shared<TCPv4TransportDescriptor>();
-
-	for (std::string ip : config_.whitelist)
+	if (config_.transport = Transport::TCP)
 	{
-		descriptor->interfaceWhiteList.push_back(ip);
-		std::cout << "Whitelisted " << ip << std::endl;
+		Locator_t initial_peer_locator;
+		initial_peer_locator.kind = LOCATOR_KIND_TCPv4;
+		initial_peer_locator.port = config_.port;
+
+		std::shared_ptr<TCPv4TransportDescriptor> descriptor = std::make_shared<TCPv4TransportDescriptor>();
+
+		for (std::string ip : config_.whitelist)
+		{
+			descriptor->interfaceWhiteList.push_back(ip);
+			std::cout << "Whitelisted " << ip << std::endl;
+		}
+		IPLocator::setIPv4(initial_peer_locator, config_.ip);
+		qos.wire_protocol().builtin.initialPeersList.push_back(initial_peer_locator); // Publisher's meta channel
+
+		qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
+		qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(5, 0);
+		qos.name(config_.participant_name);
+
+
+		qos.transport().use_builtin_transports = false;
+
+		qos.transport().user_transports.push_back(descriptor);
 	}
-	IPLocator::setIPv4(initial_peer_locator, config_.ip);
-	qos.wire_protocol().builtin.initialPeersList.push_back(initial_peer_locator); // Publisher's meta channel
+	else
+	{ 
+		std::shared_ptr<UDPv4TransportDescriptor> descriptor = std::make_shared<UDPv4TransportDescriptor>();
 
-	qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
-	qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(5, 0);
-	qos.name(config_.participant_name);
-	
+		descriptor->sendBufferSize = 0;
+		descriptor->receiveBufferSize = 0;
+		descriptor->non_blocking_send = true;
 
-	qos.transport().use_builtin_transports = false;
-
-	qos.transport().user_transports.push_back(descriptor);
+		qos.transport().user_transports.push_back(descriptor);
+	}
 
 	return qos;
 }
@@ -273,11 +294,13 @@ void SubscriberService::deleteSubscribers()
 // TODO: сделать макрос?
 void SubscriberService::setVectorSizesInDataTopic()
 {
+	scada_ate::typetopics::SetMaxSizeDataChar(config_.MaxSizeSizeDataChar);
 	scada_ate::typetopics::SetMaxSizeDataCollectionInt(config_.MaxSizeDataCollectionInt);
 	scada_ate::typetopics::SetMaxSizeDataCollectionFloat(config_.MaxSizeDataCollectionFloat);
 	scada_ate::typetopics::SetMaxSizeDataCollectionDouble(config_.MaxSizeDataCollectionDouble);
 	scada_ate::typetopics::SetMaxSizeDataCollectionChar(config_.MaxSizeDataCollectionChar);
 
+	scada_ate::typetopics::SetMaxSizeDataExVectorChar(config_.MaxSizeSizeDataExVectorChar);
 	scada_ate::typetopics::SetMaxSizeDDSDataExVectorInt(config_.MaxSizeDDSDataExVectorInt);
 	scada_ate::typetopics::SetMaxSizeDDSDataExVectorFloat(config_.MaxSizeDDSDataExVectorFloat);
 	scada_ate::typetopics::SetMaxSizeDDSDataExVectorDouble(config_.MaxSizeDDSDataExVectorDouble);

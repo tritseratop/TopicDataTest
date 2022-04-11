@@ -29,17 +29,19 @@ find_package(oatpp-websocket REQUIRED)
 
 message(STATUS "Configuring HelloWorld example...")
 
-file(GLOB DATA_TRANSFER_PROJECT_CPP 
-        "DdsService/*.cpp" 
-        "DdsService/*.h" 
-        "ThreadSafeQueue/*.h" 
-        "WsService/*.cpp"
-        "WsService/*.h"
+file(GLOB DATA_TRANSFER_PROJECT_CPP
         "../ConfigTopic/*.cxx" 
         "../TypeTopicsDDS/DDSAlarm/*.cxx" 
         "../TypeTopicsDDS/DDSAlarmEx/*.cxx" 
         "../TypeTopicsDDS/DDSData/*.cxx" 
         "../TypeTopicsDDS/DDSDataEx/*.cxx" 
+        "../include/*.h"
+        "../include/*.cpp" 
+        "DdsService/*.cpp" 
+        "DdsService/*.h" 
+        "ThreadSafeQueue/*.h" 
+        "WsService/*.cpp"
+        "WsService/*.h"
 )
 
 # Add source to this project's executable.
