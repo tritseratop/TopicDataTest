@@ -12,7 +12,7 @@
 
 #include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "../ConfigTopic/ConfigTopicPubSubTypes.h"
-#include "../include/CommonClasses.h"
+#include "../include/DdsCommonClasses.h"
 #include "PublisherFactory.h"
 
 class PublisherService

@@ -2,7 +2,7 @@
 #define APP_COMPONENT_HPP
 
 #include "WsSocketListener.h"
-#include "../../include/CommonClasses.h"
+#include "../../include/DdsCommonClasses.h"
 
 #include "oatpp/web/server/AsyncHttpConnectionHandler.hpp"
 #include "oatpp/web/server/HttpRouter.hpp"

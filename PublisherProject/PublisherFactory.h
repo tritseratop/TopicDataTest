@@ -13,7 +13,7 @@
 #include <fastrtps/transport/TCPv4TransportDescriptor.h>
 
 #include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "../include/CommonClasses.h"
+#include "../include/DdsCommonClasses.h"
 
 using eprosima::fastrtps::types::ReturnCode_t;
 

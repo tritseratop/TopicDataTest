@@ -22,7 +22,7 @@ find_package(oatpp-websocket REQUIRED)
 
 message(STATUS "Configuring HelloWorld example...")
 
-file(GLOB WS_CLIENT "*.cpp")
+file(GLOB WS_CLIENT "*.cpp" "*.h" "*.hpp")
 
 # Add source to this project's executable.
 add_executable (WsClient  ${WS_CLIENT})

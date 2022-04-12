@@ -1,6 +1,9 @@
 #include "WSListener.hpp"
 #include "WSClient.hpp"
+
 #include <iostream>
+
+#include "oatpp/parser/json/Beautifier.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WSListener
@@ -30,8 +33,7 @@ oatpp::async::CoroutineStarter WSListener::onClose(const std::shared_ptr<AsyncWe
 }
 
 oatpp::async::CoroutineStarter WSListener::readMessage(const std::shared_ptr<AsyncWebSocket>& socket, v_uint8 opcode, p_char8 data, oatpp::v_io_size size) {
-    if (size == 0) { // message transfer finished
-
+    if (size == 0) { // message transfer finished        
         auto wholeMessage = m_messageBuffer.toString();
         m_messageBuffer.clear();
         std::cout << wholeMessage->c_str() << std::endl;

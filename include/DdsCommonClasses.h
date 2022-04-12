@@ -1,5 +1,5 @@
-#ifndef COMMON_CLASSES_H_
-#define COMMON_CLASSES_H_
+#ifndef DDS_COMMON_CLASSES_H_
+#define DDS_COMMON_CLASSES_H_
 
 #include <vector>
 #include <unordered_map>
@@ -216,13 +216,6 @@ struct AlarmDto
 	}
 };
 
-class IServer
-{
-public:
-	virtual bool sendData(DataDto data) = 0;
-	virtual bool sendAlarm(AlarmDto data) = 0;
-};
-
 class Configure {
 public:
 	Configure(int N = 3, int M = 5
@@ -269,4 +262,4 @@ struct PacketInfo
 	uint64_t size;
 };
 
-#endif //!COMMON_CLASSES_H_
+#endif //!DDS_COMMON_CLASSES_H_

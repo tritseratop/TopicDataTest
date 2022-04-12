@@ -9,10 +9,10 @@
 #include <fastdds/dds/subscriber/DataReader.hpp>
 #include <fastdds/dds/subscriber/DataReaderListener.hpp>
 
-#include "DataHandler.h"
+#include "../../include/DataHandler.h"
 #include "../ThreadSafeQueue/ThreadSafeQueue.h"
 #include "../../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "../../include/CommonClasses.h"
+#include "../../include/DdsCommonClasses.h"
 
 struct SubscriberConfig
 {

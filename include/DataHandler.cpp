@@ -98,6 +98,59 @@ void DataMapper::fillChanged(DtoDataCollection& prev_dto_collection, const std::
 	}
 }
 
+WsDataDto::Wrapper WsDtoMapper::mapDataDto(const DataDto& data)
+{
+	auto collect_int = WsDataCollectionInt::createShared();
+	fillVector(collect_int->time_source, data.data_int.time_source);
+	fillVector(collect_int->id_tag, data.data_int.id_tag);
+	fillVector(collect_int->value, data.data_int.value);
+	fillVector(collect_int->quality, data.data_int.quality);
+
+	auto collect_float = WsDataCollectionFloat::createShared();
+	fillVector(collect_float->time_source, data.data_int.time_source);
+	fillVector(collect_float->id_tag, data.data_int.id_tag);
+	fillVector(collect_float->value, data.data_int.value);
+	fillVector(collect_float->quality, data.data_int.quality);
+
+	auto collect_double = WsDataCollectionDouble::createShared();
+	fillVector(collect_double->time_source, data.data_int.time_source);
+	fillVector(collect_double->id_tag, data.data_int.id_tag);
+	fillVector(collect_double->value, data.data_int.value);
+	fillVector(collect_double->quality, data.data_int.quality);
+
+	auto collect_char = WsDataCollectionChar::createShared();
+	fillVector(collect_char->time_source, data.data_int.time_source);
+	fillVector(collect_char->id_tag, data.data_int.id_tag);
+	fillVector(collect_char->value, data.data_int.value);
+	fillVector(collect_char->quality, data.data_int.quality);
+
+	auto ws_data_dto = WsDataDto::createShared();
+	ws_data_dto->time_service = data.time_service;
+	ws_data_dto->data_collection_int = collect_int;
+	ws_data_dto->data_collection_float = collect_float;
+	ws_data_dto->data_collection_double = collect_double;
+	ws_data_dto->data_collection_char = collect_char;
+
+	return ws_data_dto;
+}
+
+template<class OatppT, class T>
+void WsDtoMapper::fillVector(oatpp::Vector<OatppT>& oatpp_v, const std::vector<T>& v)
+{
+	oatpp_v = {};
+	oatpp_v->reserve(v.size());
+	for (T elem : v)
+	{
+		oatpp_v->push_back(OatppT(elem));
+	}
+}
+
+void WsDtoMapper::fillVector(oatpp::String& oatpp_v, const std::vector<char>& v)
+{
+	std::string str(v.begin(), v.end());
+	oatpp_v = oatpp::String(str.c_str());
+}
+
 DataHandler::DataHandler(IServer* server)
 	: server_(server)
 	, stop_sending_data_(false)
@@ -111,7 +164,7 @@ bool DataHandler::sendDdsData()
 	{
 		if (data_cache_.size() != 0)
 		{
-			server_->sendData(data_cache_.pop_front().value());
+			server_->sendData(ws_mapper_.mapDataDto(data_cache_.pop_front().value()));
 		}
 		return true;
 	}
@@ -124,7 +177,7 @@ bool DataHandler::sendDdsAlarm()
 	{
 		if (data_cache_.size() != 0)
 		{
-			server_->sendAlarm(alarm_cache_.pop_front().value());
+			//server_->sendAlarm(alarm_cache_.pop_front().value());
 		}
 		return true;
 	}

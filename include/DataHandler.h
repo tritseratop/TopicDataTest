@@ -4,9 +4,11 @@
 #include <deque>
 #include <unordered_map>
 
-#include "../ThreadSafeQueue/ThreadSafeQueue.h"
-#include "../../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "../../include/CommonClasses.h"
+#include "../DataTransferService/ThreadSafeQueue/ThreadSafeQueue.h"
+#include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "DdsCommonClasses.h"
+#include "WsCommonClasses.h"
+#include "WsDto.h"
 
 class DataMapper
 {
@@ -18,6 +20,24 @@ public:
 
 	template<class DtoDataCollection, class DdsSample>
 	void fillChanged(DtoDataCollection& prev_dto_collection, const std::vector<DdsSample>& cur_samples, const TagToIndex& tag_to_index);
+};
+
+class DirectDtoMapper
+{
+public:
+	WsDataDto mapDataDto(DataDto data);
+
+};
+
+class WsDtoMapper
+{
+public:
+	WsDataDto::Wrapper mapDataDto(const DataDto& data);
+
+private:
+	template<class OatppT, class T>
+	void fillVector(oatpp::Vector<OatppT>& oatpp_v, const std::vector<T>& v);
+	void fillVector(oatpp::String& oatpp_v, const std::vector<char>& v);
 };
 
 class DataHandler
@@ -47,6 +67,7 @@ private:
 	ThreadSafeDeque<AlarmDto> alarm_cache_;
 
 	DataMapper mapper_;
+	WsDtoMapper ws_mapper_;
 	IServer* server_;
 };
 

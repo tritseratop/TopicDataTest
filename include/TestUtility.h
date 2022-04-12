@@ -2,7 +2,7 @@
 #define TEST_UTILITY_H_
 
 #include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "CommonClasses.h"
+#include "DdsCommonClasses.h"
 
 template<class T>
 std::vector<T> getDefaultVector(size_t size = 0, T offset = 0)

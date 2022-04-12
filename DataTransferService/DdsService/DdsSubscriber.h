@@ -13,6 +13,7 @@
 
 #include "../../ConfigTopic/ConfigTopicPubSubTypes.h"
 #include "../../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "../../include/WsCommonClasses.h"
 #include "SubscriberFactory.h"
 
 class SubscriberService {

@@ -5,7 +5,8 @@
 #include "oatpp-websocket/AsyncWebSocket.hpp"
 #include "oatpp-websocket/Connector.hpp"
 
-#include "../include/CommonClasses.h"
+#include "../include/DdsCommonClasses.h"
+#include "../include/WsDto.h"
 
 class WSClient;
 

@@ -5,7 +5,7 @@
 #include "oatpp/network/tcp/client/ConnectionProvider.hpp"
 #include "oatpp/core/macro/component.hpp"
 
-#include "../include/CommonClasses.h"
+#include "../include/DdsCommonClasses.h"
 
 class AppComponent {
 private:
