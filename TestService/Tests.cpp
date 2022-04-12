@@ -2,6 +2,7 @@
 #include "../DataTransferService/WsService/WsServer.h"
 #include <gtest/gtest.h>
 #include "../include/TestUtility.h"
+#include "../include/WsTestUtility.h"
 
 std::vector<SubscriberConfig> configs({
         {0, 100, "DDSData1", "DDSData", TopicType::DDS_DATA, 100, 100},
@@ -66,6 +67,20 @@ TEST(DtoTest, DdsDataConversation) {
     DataExUnion data_ex_union4 = getEqualDdsDataEx(0, 3);
     DataDto d6 = mapper.mapDdsDataEx(data_ex_union4.dto_to_change, data_ex_union4.data_ex, info);
     EXPECT_EQ(d6, data_ex_union4.dto);
+}
+
+TEST(DtoTest, WsDataConversation) {
+    WsDtoMapper ws_mapper;
+    std::shared_ptr<oatpp::parser::json::mapping::ObjectMapper> json_object_mapper
+        = oatpp::parser::json::mapping::ObjectMapper::createShared();
+    
+    auto data = getWsDataUnion(20);
+    auto dto = ws_mapper.mapDataDto(data.data_dto);
+    EXPECT_EQ(json_object_mapper->writeToString(data.ws_dto), json_object_mapper->writeToString(dto));
+
+    auto data1 = getWsDataUnion(0);
+    auto dto1 = ws_mapper.mapDataDto(data1.data_dto);
+    EXPECT_EQ(json_object_mapper->writeToString(data1.ws_dto), json_object_mapper->writeToString(dto1));
 }
 
 //TEST(DdsDataTransmitionTest, DdsDataTransmition) {

@@ -62,45 +62,45 @@ std::pair<DDSData, DataDto> getEqualDdsData(size_t size = 4)
     data1.time_service(100);
     data1.time_source(101);
 
-    data1.data_int().value(getDefaultVector<int32_t>(size, 1));
-    data1.data_int().quality(getDefaultVector(size));
+    data1.data_int().value(getFilledVector<int32_t>(size, 1));
+    data1.data_int().quality(getFilledVector(size, 'a'));
 
-    data1.data_float().value(getDefaultVector<float>(size, 1));
-    data1.data_float().quality(getDefaultVector(size));
+    data1.data_float().value(getFilledVector<float>(size, 1));
+    data1.data_float().quality(getFilledVector(size, 'a'));
 
-    data1.data_double().value(getDefaultVector<double>(size, 1));
-    data1.data_double().quality(getDefaultVector(size));
+    data1.data_double().value(getFilledVector<double>(size, 1));
+    data1.data_double().quality(getFilledVector(size, 'a'));
 
     DataChar data_char;
     data_char.value(getFilledVector(size, 'a'));
     data1.data_char().value(getFilledVector(size, data_char));
-    data1.data_char().quality(getDefaultVector(size));
+    data1.data_char().quality(getFilledVector(size, 'a'));
 
     DataDto	dto{
         100,
         {
             getFilledVector<int64_t>(size, 101),
             getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_INT),
-            getDefaultVector<int32_t>(size, 1),
-            getDefaultVector(size)
+            getFilledVector<int32_t>(size, 1),
+            getFilledVector(size, 'a')
         },
         {
             getFilledVector<int64_t>(size, 101),
             getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_FLOAT),
-            getDefaultVector<float>(size, 1),
-            getDefaultVector(size)
+            getFilledVector<float>(size, 1),
+            getFilledVector(size, 'a')
         },
         {
             getFilledVector<int64_t>(size, 101),
             getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_DOUBLE),
-            getDefaultVector<double>(size, 1),
-            getDefaultVector(size)
+            getFilledVector<double>(size, 1),
+            getFilledVector(size, 'a')
         },
         {
             getFilledVector<int64_t>(size, 101),
             getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_CHAR),
             getFilledVector(size, getFilledVector(size, 'a')),
-            getDefaultVector(size)
+            getFilledVector(size, 'a')
         }
     };
 

@@ -236,6 +236,7 @@ bool SubscriberService::createNewSubscriber(const SubscriberConfig& config)
 
 void SubscriberService::runSubscribers()
 {
+	stop_ws_server_ = false;
 	std::vector<std::thread> threads;
 	for (auto& sub : subscribers_)
 	{
@@ -246,6 +247,7 @@ void SubscriberService::runSubscribers()
 	{
 		t.join();
 	}
+	stop_ws_server_ = true;
 }
 
 void SubscriberService::runWsServer()
