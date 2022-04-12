@@ -37,6 +37,7 @@ public:
 private:
 	template<class OatppT, class T>
 	void fillVector(oatpp::Vector<OatppT>& oatpp_v, const std::vector<T>& v);
+	void fillVector(oatpp::Vector<oatpp::String>& oatpp_v, const std::vector<std::vector<char>>& v);
 	void fillVector(oatpp::String& oatpp_v, const std::vector<char>& v);
 };
 

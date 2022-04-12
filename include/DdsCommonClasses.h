@@ -84,8 +84,8 @@ struct ServiceConfig
 	size_t MaxSizeDDSAlarmVectorAlarm = 0;
 	size_t MaxSizeDDSExVectorAlarms = 0;
 
-	uint32_t ws_data_sleep = 1000;
-	uint32_t ws_alarm_sleep = 1000;
+	uint32_t ws_data_sleep = 100;
+	uint32_t ws_alarm_sleep = 100;
 
 	friend bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs)
 	{

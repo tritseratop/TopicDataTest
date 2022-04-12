@@ -107,22 +107,22 @@ WsDataDto::Wrapper WsDtoMapper::mapDataDto(const DataDto& data)
 	fillVector(collect_int->quality, data.data_int.quality);
 
 	auto collect_float = WsDataCollectionFloat::createShared();
-	fillVector(collect_float->time_source, data.data_int.time_source);
-	fillVector(collect_float->id_tag, data.data_int.id_tag);
-	fillVector(collect_float->value, data.data_int.value);
-	fillVector(collect_float->quality, data.data_int.quality);
+	fillVector(collect_float->time_source, data.data_float.time_source);
+	fillVector(collect_float->id_tag, data.data_float.id_tag);
+	fillVector(collect_float->value, data.data_float.value);
+	fillVector(collect_float->quality, data.data_float.quality);
 
 	auto collect_double = WsDataCollectionDouble::createShared();
-	fillVector(collect_double->time_source, data.data_int.time_source);
-	fillVector(collect_double->id_tag, data.data_int.id_tag);
-	fillVector(collect_double->value, data.data_int.value);
-	fillVector(collect_double->quality, data.data_int.quality);
+	fillVector(collect_double->time_source, data.data_double.time_source);
+	fillVector(collect_double->id_tag, data.data_double.id_tag);
+	fillVector(collect_double->value, data.data_double.value);
+	fillVector(collect_double->quality, data.data_double.quality);
 
 	auto collect_char = WsDataCollectionChar::createShared();
-	fillVector(collect_char->time_source, data.data_int.time_source);
-	fillVector(collect_char->id_tag, data.data_int.id_tag);
-	fillVector(collect_char->value, data.data_int.value);
-	fillVector(collect_char->quality, data.data_int.quality);
+	fillVector(collect_char->time_source, data.data_char.time_source);
+	fillVector(collect_char->id_tag, data.data_char.id_tag);
+	fillVector(collect_char->value, data.data_char.value);
+	fillVector(collect_char->quality, data.data_char.quality);
 
 	auto ws_data_dto = WsDataDto::createShared();
 	ws_data_dto->time_service = data.time_service;
@@ -142,6 +142,19 @@ void WsDtoMapper::fillVector(oatpp::Vector<OatppT>& oatpp_v, const std::vector<T
 	for (T elem : v)
 	{
 		oatpp_v->push_back(OatppT(elem));
+	}
+}
+
+void WsDtoMapper::fillVector(
+	oatpp::Vector<oatpp::String>& oatpp_v, 
+	const std::vector<std::vector<char>>& v)
+{
+	oatpp_v = {};
+	oatpp_v->reserve(v.size());
+	for (auto elem : v)
+	{
+		std::string str(elem.begin(), elem.end());
+		oatpp_v->push_back(oatpp::String(str.c_str()));
 	}
 }
 

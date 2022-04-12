@@ -218,8 +218,11 @@ TEST(WsDataTransmitionTest, DdsDataTransmition) {
         std::cout << "\n\n" << i++ << ". SERVICE RUN WITH TOPIC " << conf.configs[0].topic_type_name
             << " size: " << conf.configs[0].vector_size << std::endl;
         mysub->changeSubsConfig(conf);
-        mysub->runWsServer();
+        std::thread ws_thread([](SubscriberService* mysub) {
+            mysub->runWsServer();
+            }, mysub);
         mysub->runSubscribers();
+        ws_thread.join();
     }
 
     delete mysub;
