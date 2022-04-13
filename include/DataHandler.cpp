@@ -101,35 +101,35 @@ void DataMapper::fillChanged(DtoDataCollection& prev_dto_collection, const std::
 WsDataDto::Wrapper WsDtoMapper::mapDataDto(const DataDto& data)
 {
 	auto collect_int = WsDataCollectionInt::createShared();
-	fillVector(collect_int->time_source, data.data_int.time_source);
-	fillVector(collect_int->id_tag, data.data_int.id_tag);
-	fillVector(collect_int->value, data.data_int.value);
-	fillVector(collect_int->quality, data.data_int.quality);
+	fillVector(collect_int->tsrc, data.data_int.time_source);
+	fillVector(collect_int->tag, data.data_int.id_tag);
+	fillVector(collect_int->val, data.data_int.value);
+	fillVector(collect_int->qlt, data.data_int.quality);
 
 	auto collect_float = WsDataCollectionFloat::createShared();
-	fillVector(collect_float->time_source, data.data_float.time_source);
-	fillVector(collect_float->id_tag, data.data_float.id_tag);
-	fillVector(collect_float->value, data.data_float.value);
-	fillVector(collect_float->quality, data.data_float.quality);
+	fillVector(collect_float->tsrc, data.data_float.time_source);
+	fillVector(collect_float->tag, data.data_float.id_tag);
+	fillVector(collect_float->val, data.data_float.value);
+	fillVector(collect_float->qlt, data.data_float.quality);
 
 	auto collect_double = WsDataCollectionDouble::createShared();
-	fillVector(collect_double->time_source, data.data_double.time_source);
-	fillVector(collect_double->id_tag, data.data_double.id_tag);
-	fillVector(collect_double->value, data.data_double.value);
-	fillVector(collect_double->quality, data.data_double.quality);
+	fillVector(collect_double->tsrc, data.data_double.time_source);
+	fillVector(collect_double->tag, data.data_double.id_tag);
+	fillVector(collect_double->val, data.data_double.value);
+	fillVector(collect_double->qlt, data.data_double.quality);
 
 	auto collect_char = WsDataCollectionChar::createShared();
-	fillVector(collect_char->time_source, data.data_char.time_source);
-	fillVector(collect_char->id_tag, data.data_char.id_tag);
-	fillVector(collect_char->value, data.data_char.value);
-	fillVector(collect_char->quality, data.data_char.quality);
+	fillVector(collect_char->tsrc, data.data_char.time_source);
+	fillVector(collect_char->tag, data.data_char.id_tag);
+	fillVector(collect_char->val, data.data_char.value);
+	fillVector(collect_char->qlt, data.data_char.quality);
 
 	auto ws_data_dto = WsDataDto::createShared();
-	ws_data_dto->time_service = data.time_service;
-	ws_data_dto->data_collection_int = collect_int;
-	ws_data_dto->data_collection_float = collect_float;
-	ws_data_dto->data_collection_double = collect_double;
-	ws_data_dto->data_collection_char = collect_char;
+	ws_data_dto->tsrv = data.time_service;
+	ws_data_dto->di = collect_int;
+	ws_data_dto->df = collect_float;
+	ws_data_dto->dd = collect_double;
+	ws_data_dto->dc = collect_char;
 
 	return ws_data_dto;
 }

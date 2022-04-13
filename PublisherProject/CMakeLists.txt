@@ -27,13 +27,14 @@ endif()
 message(STATUS "Configuring HelloWorld example...")
 
 file(GLOB DDS_PUBLISHER_CPP 
-        "PublisherFactory.cpp" 
-        "*.cpp" 
-        "../ConfigTopic/*.cxx" 
         "../TypeTopicsDDS/DDSAlarm/*.cxx" 
         "../TypeTopicsDDS/DDSAlarmEx/*.cxx" 
         "../TypeTopicsDDS/DDSData/*.cxx" 
-        "../TypeTopicsDDS/DDSDataEx/*.cxx" 
+        "../TypeTopicsDDS/DDSDataEx/*.cxx"
+        "../include/TimeConverter/*.cpp"
+        "PublisherFactory.cpp" 
+        "*.cpp" 
+        "../ConfigTopic/*.cxx"  
 )
 
 # Add source to this project's executable.
