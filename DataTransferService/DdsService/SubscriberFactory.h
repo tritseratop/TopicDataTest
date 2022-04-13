@@ -168,8 +168,8 @@ private:
 
 	void setDataSize() {};
 
-	void cacheData(const T& data_) {
-		observer_->cache(data_, config_.info);
+	void cacheData(const T& data_, AdditionalPackageInfo info) {
+		observer_->cache(data_, config_.info, std::move(info));
 	}
 
 	void runDataSending();

@@ -202,6 +202,11 @@ void DataHandler::cache(DDSData data, const AdditionalTopicInfo& info)
 	data_cache_.push_back(mapper_.mapDdsData(std::move(data), info));
 }
 
+void DataHandler::cache(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info)
+{
+	data_cache_.push_back(mapper_.mapDdsData(std::move(data), info));
+}
+
 void DataHandler::cache(const DDSDataEx& data, const AdditionalTopicInfo& info)
 {
 	if (!data_cache_.empty())

@@ -37,17 +37,18 @@ std::string TopicType2string(TopicType type);
 
 struct AdditionalPackageInfo
 {
-	int64_t arrived_time;
+	int64_t dds_dispatch_time = 0;
+	int64_t dds_arrived_time = 0;
+	int64_t mapping_time = 0;
 	std::string info;
-	//int64_t dispatch_time;
 };
 
-using Tag = std::vector<uint32_t>;
+using Tags = std::vector<uint32_t>;
 using TagToIndex = std::unordered_map<uint32_t, uint32_t>;
 
 struct AdditionalTopicInfo
 {
-	std::unordered_map<DataCollectiionType, Tag> tags;
+	std::unordered_map<DataCollectiionType, Tags> tags;
 	std::unordered_map<DataCollectiionType, TagToIndex> tag_to_index;
 	std::string topic_name;
 	std::string info;

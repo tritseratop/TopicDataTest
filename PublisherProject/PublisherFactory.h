@@ -13,6 +13,7 @@
 #include <fastrtps/transport/TCPv4TransportDescriptor.h>
 
 #include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "../include/TimeConverter/TimeConverter.hpp"
 #include "../include/DdsCommonClasses.h"
 
 using eprosima::fastrtps::types::ReturnCode_t;
@@ -205,11 +206,11 @@ private:
 		//std::lock_guard<std::mutex> guard(std::mutex());
 		if (listener > 0 && listener->first_connected_)
 		{
+			data_.time_service(TimeConverter::GetTime_LLmcs());
 			if (!writer->write(&data_))
 			{
 				return false;
 			}
-			//data_.time_service(data_.time_service() + 1);
 			return true;
 		}
 		return false;
