@@ -64,12 +64,17 @@ public:
         return tmp;
     }
 
+    void clear() {
+        std::unique_lock<std::shared_mutex> w_lock(mutex_);
+        queue_.clear();
+    }
+
     void push_back(const T& item) {
         std::unique_lock<std::shared_mutex> w_lock(mutex_);
         queue_.push_back(item);
     }
 
-    std::deque<DataDto> getDequeCopy() const
+    std::deque<T> getDequeCopy() const
     {
         return queue_;
     }

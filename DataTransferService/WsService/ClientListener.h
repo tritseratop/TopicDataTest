@@ -17,7 +17,7 @@ private:
 	std::shared_ptr<AsyncWebSocket> socket_;
 	WsSocketListener* sock_listener_;
 	v_int64 client_id_;
-	oatpp::data::stream::ChunkedBuffer message_buffer_;
+	oatpp::data::stream::BufferOutputStream message_buffer_;
 	oatpp::async::Lock write_lock_;
 private:
 	OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, async_executor_);

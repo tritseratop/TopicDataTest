@@ -6,6 +6,7 @@
 
 #include "../DataTransferService/ThreadSafeQueue/ThreadSafeQueue.h"
 #include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "PackageAnalysis.h"
 #include "DdsCommonClasses.h"
 #include "WsCommonClasses.h"
 #include "WsDto.h"
@@ -70,6 +71,8 @@ private:
 	DataMapper mapper_;
 	WsDtoMapper ws_mapper_;
 	IServer* server_;
+
+	PackageAnalyser* analyser_;
 };
 
 #endif//!DATA_OBSERVER_H_

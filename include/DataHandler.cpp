@@ -1,6 +1,7 @@
 #include <utility>
 
 #include "DataHandler.h"
+#include "../include/TimeConverter/TimeConverter.hpp"
 
 DataDto DataMapper::mapDdsData(DDSData data, const AdditionalTopicInfo& info)
 {
@@ -169,6 +170,7 @@ DataHandler::DataHandler(IServer* server)
 	, stop_sending_data_(false)
 	, stop_sending_alarm_(false)
 {
+	analyser_ = PackageAnalyser::getInstance();
 }
 
 bool DataHandler::sendDdsData()
@@ -177,7 +179,11 @@ bool DataHandler::sendDdsData()
 	{
 		if (data_cache_.size() != 0)
 		{
-			server_->sendData(ws_mapper_.mapDataDto(data_cache_.pop_front().value()));
+			auto start = TimeConverter::GetTime_LLmcs();
+			auto data = ws_mapper_.mapDataDto(data_cache_.pop_front().value());
+			analyser_->ws_mapping_times_.push_back(TimeConverter::GetTime_LLmcs() - start);
+
+			server_->sendData(data);
 		}
 		return true;
 	}

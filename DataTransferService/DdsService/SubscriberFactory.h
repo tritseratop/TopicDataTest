@@ -10,6 +10,8 @@
 #include <fastdds/dds/subscriber/DataReaderListener.hpp>
 
 #include "../../include/DataHandler.h"
+#include "../../include/PackageAnalysis.h"
+#include "../../include/TimeConverter/TimeConverter.hpp"
 #include "../ThreadSafeQueue/ThreadSafeQueue.h"
 #include "../../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "../../include/DdsCommonClasses.h"
@@ -61,6 +63,7 @@ public:
 		, listener_(this)
 	{
 		setDataSize();
+		analyser_ = PackageAnalyser::getInstance();
 	}
 	~ConcreteSubscriber() override
 	{
@@ -89,6 +92,7 @@ public:
 				std::cout << "Error: " + std::to_string(res());
 			}
 		}
+		std::cout << "Logs for topic " << config_.topic_type_name << " vector size: " << config_.vector_size << std::endl;
 	}
 
 	bool init() override
@@ -156,6 +160,7 @@ private:
 	T data_sample_;
 
 	DataHandler* observer_;
+	PackageAnalyser* analyser_;
 
 	std::atomic<bool> stop_;
 
@@ -168,8 +173,13 @@ private:
 
 	void setDataSize() {};
 
-	void cacheData(const T& data_) {
+	void cacheData(const T& data_) 
+	{
+		auto start = TimeConverter::GetTime_LLmcs();
+
 		observer_->cache(data_, config_.info);
+
+		analyser_->dto_mapping_times_.push_back(TimeConverter::GetTime_LLmcs() - start);
 	}
 
 	void runDataSending();
@@ -195,8 +205,15 @@ private:
 			eprosima::fastdds::dds::SampleInfo info;
 			if (reader->take_next_sample(&data_sample_, &info) == ReturnCode_t::RETCODE_OK)
 			{
+				auto arrived_time = TimeConverter::GetTime_LLmcs();
 				if (info.valid_data)
 				{
+					sub_->analyser_->packages_.push_back({ 
+						data_sample_.time_service(), 
+						arrived_time,
+						arrived_time - data_sample_.time_service(),
+						sub_->config_.vector_size
+					});
 					samples_++;
 					//TODO по другому надо как то проверять
 					{

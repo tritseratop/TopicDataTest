@@ -35,6 +35,8 @@ file(GLOB DATA_TRANSFER_PROJECT_CPP
         "../TypeTopicsDDS/DDSAlarmEx/*.cxx" 
         "../TypeTopicsDDS/DDSData/*.cxx" 
         "../TypeTopicsDDS/DDSDataEx/*.cxx" 
+        "../include/TimeConverter/*.cpp"
+        "../include/logger/*.cpp"
         "../include/*.h"
         "../include/*.cpp" 
         "DdsService/*.cpp" 

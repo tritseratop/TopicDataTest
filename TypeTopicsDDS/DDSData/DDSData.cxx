@@ -27,7 +27,6 @@ char dummy;
 #endif  // _WIN32
 
 #include "DDSData.h"
-#include "DDSDataTypeObject.h"
 #include <fastcdr/Cdr.h>
 
 #include <fastcdr/exceptions/BadParamException.h>
@@ -62,13 +61,11 @@ namespace scada_ate
 
 DataCollectionInt::DataCollectionInt()
 {
-    // m_value com.eprosima.idl.parser.typecode.SequenceTypeCode@768b970c
+    // m_value com.eprosima.idl.parser.typecode.SequenceTypeCode@60c6f5b
 
-    // m_quality com.eprosima.idl.parser.typecode.SequenceTypeCode@5a4041cc
+    // m_quality com.eprosima.idl.parser.typecode.SequenceTypeCode@3c0f93f1
 
 
-    // Just to register all known types
-    registerDDSDataTypes();
 }
 
 DataCollectionInt::~DataCollectionInt()
@@ -109,6 +106,19 @@ DataCollectionInt& DataCollectionInt::operator =(
     m_quality = std::move(x.m_quality);
 
     return *this;
+}
+
+bool DataCollectionInt::operator ==(
+        const DataCollectionInt& x) const
+{
+
+    return (m_value == x.m_value && m_quality == x.m_quality);
+}
+
+bool DataCollectionInt::operator !=(
+        const DataCollectionInt& x) const
+{
+    return !(*this == x);
 }
 
 size_t DataCollectionInt::getMaxCdrSerializedSize(
@@ -280,13 +290,11 @@ void DataCollectionInt::serializeKey(
 
 DataCollectionFloat::DataCollectionFloat()
 {
-    // m_value com.eprosima.idl.parser.typecode.SequenceTypeCode@543e710e
+    // m_value com.eprosima.idl.parser.typecode.SequenceTypeCode@5ce81285
 
-    // m_quality com.eprosima.idl.parser.typecode.SequenceTypeCode@57f23557
+    // m_quality com.eprosima.idl.parser.typecode.SequenceTypeCode@78c03f1f
 
 
-    // Just to register all known types
-    registerDDSDataTypes();
 }
 
 DataCollectionFloat::~DataCollectionFloat()
@@ -327,6 +335,19 @@ DataCollectionFloat& DataCollectionFloat::operator =(
     m_quality = std::move(x.m_quality);
 
     return *this;
+}
+
+bool DataCollectionFloat::operator ==(
+        const DataCollectionFloat& x) const
+{
+
+    return (m_value == x.m_value && m_quality == x.m_quality);
+}
+
+bool DataCollectionFloat::operator !=(
+        const DataCollectionFloat& x) const
+{
+    return !(*this == x);
 }
 
 size_t DataCollectionFloat::getMaxCdrSerializedSize(
@@ -498,13 +519,11 @@ void DataCollectionFloat::serializeKey(
 
 DataCollectionDouble::DataCollectionDouble()
 {
-    // m_value com.eprosima.idl.parser.typecode.SequenceTypeCode@4f51b3e0
+    // m_value com.eprosima.idl.parser.typecode.SequenceTypeCode@20398b7c
 
-    // m_quality com.eprosima.idl.parser.typecode.SequenceTypeCode@4b9e255
+    // m_quality com.eprosima.idl.parser.typecode.SequenceTypeCode@6fc6f14e
 
 
-    // Just to register all known types
-    registerDDSDataTypes();
 }
 
 DataCollectionDouble::~DataCollectionDouble()
@@ -545,6 +564,19 @@ DataCollectionDouble& DataCollectionDouble::operator =(
     m_quality = std::move(x.m_quality);
 
     return *this;
+}
+
+bool DataCollectionDouble::operator ==(
+        const DataCollectionDouble& x) const
+{
+
+    return (m_value == x.m_value && m_quality == x.m_quality);
+}
+
+bool DataCollectionDouble::operator !=(
+        const DataCollectionDouble& x) const
+{
+    return !(*this == x);
 }
 
 size_t DataCollectionDouble::getMaxCdrSerializedSize(
@@ -716,11 +748,9 @@ void DataCollectionDouble::serializeKey(
 
 DataChar::DataChar()
 {
-    // m_value com.eprosima.idl.parser.typecode.SequenceTypeCode@2473b9ce
+    // m_value com.eprosima.idl.parser.typecode.SequenceTypeCode@4e9ba398
 
 
-    // Just to register all known types
-    registerDDSDataTypes();
 }
 
 DataChar::~DataChar()
@@ -755,6 +785,19 @@ DataChar& DataChar::operator =(
     m_value = std::move(x.m_value);
 
     return *this;
+}
+
+bool DataChar::operator ==(
+        const DataChar& x) const
+{
+
+    return (m_value == x.m_value);
+}
+
+bool DataChar::operator !=(
+        const DataChar& x) const
+{
+    return !(*this == x);
 }
 
 size_t DataChar::getMaxCdrSerializedSize(
@@ -867,13 +910,11 @@ void DataChar::serializeKey(
 
 DataCollectionChar::DataCollectionChar()
 {
-    // m_value com.eprosima.idl.parser.typecode.SequenceTypeCode@1a052a00
+    // m_value com.eprosima.idl.parser.typecode.SequenceTypeCode@7a765367
 
-    // m_quality com.eprosima.idl.parser.typecode.SequenceTypeCode@4d826d77
+    // m_quality com.eprosima.idl.parser.typecode.SequenceTypeCode@76b0bfab
 
 
-    // Just to register all known types
-    registerDDSDataTypes();
 }
 
 DataCollectionChar::~DataCollectionChar()
@@ -914,6 +955,19 @@ DataCollectionChar& DataCollectionChar::operator =(
     m_quality = std::move(x.m_quality);
 
     return *this;
+}
+
+bool DataCollectionChar::operator ==(
+        const DataCollectionChar& x) const
+{
+
+    return (m_value == x.m_value && m_quality == x.m_quality);
+}
+
+bool DataCollectionChar::operator !=(
+        const DataCollectionChar& x) const
+{
+    return !(*this == x);
 }
 
 size_t DataCollectionChar::getMaxCdrSerializedSize(
@@ -1084,21 +1138,19 @@ void DataCollectionChar::serializeKey(
 
 DDSData::DDSData()
 {
-    // m_time_source com.eprosima.idl.parser.typecode.PrimitiveTypeCode@36f0f1be
+    // m_time_source com.eprosima.idl.parser.typecode.PrimitiveTypeCode@480bdb19
     m_time_source = 0;
-    // m_time_service com.eprosima.idl.parser.typecode.PrimitiveTypeCode@157632c9
+    // m_time_service com.eprosima.idl.parser.typecode.PrimitiveTypeCode@2a556333
     m_time_service = 0;
-    // m_data_int com.eprosima.fastdds.idl.parser.typecode.StructTypeCode@6ee12bac
+    // m_data_int com.eprosima.fastdds.idl.parser.typecode.StructTypeCode@7d70d1b1
 
-    // m_data_float com.eprosima.fastdds.idl.parser.typecode.StructTypeCode@55040f2f
+    // m_data_float com.eprosima.fastdds.idl.parser.typecode.StructTypeCode@2a742aa2
 
-    // m_data_double com.eprosima.fastdds.idl.parser.typecode.StructTypeCode@64c87930
+    // m_data_double com.eprosima.fastdds.idl.parser.typecode.StructTypeCode@3cb1ffe6
 
-    // m_data_char com.eprosima.fastdds.idl.parser.typecode.StructTypeCode@400cff1a
+    // m_data_char com.eprosima.fastdds.idl.parser.typecode.StructTypeCode@3dfc5fb8
 
 
-    // Just to register all known types
-    registerDDSDataTypes();
 }
 
 DDSData::~DDSData()
@@ -1159,6 +1211,19 @@ DDSData& DDSData::operator =(
     m_data_char = std::move(x.m_data_char);
 
     return *this;
+}
+
+bool DDSData::operator ==(
+        const DDSData& x) const
+{
+
+    return (m_time_source == x.m_time_source && m_time_service == x.m_time_service && m_data_int == x.m_data_int && m_data_float == x.m_data_float && m_data_double == x.m_data_double && m_data_char == x.m_data_char);
+}
+
+bool DDSData::operator !=(
+        const DDSData& x) const
+{
+    return !(*this == x);
 }
 
 size_t DDSData::getMaxCdrSerializedSize(

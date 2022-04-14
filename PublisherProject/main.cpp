@@ -48,8 +48,8 @@ int main(
     int argc,
     char** argv)
 {
-    std::vector<uint16_t> sizes = { 10 };
-    std::vector<uint32_t> v_sleep = { 100 };
+    std::vector<uint16_t> sizes = { 10, 100, 1000, 10000 };
+    std::vector<uint32_t> v_sleep = { 200 };
     uint32_t samples = 50;
     std::string ip = "127.0.0.1";
     Transport transport = Transport::TCP;

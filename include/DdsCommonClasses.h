@@ -36,11 +36,14 @@ TopicType string2TopicType(std::string type_name);
 std::string TopicType2string(TopicType type);
 
 struct AdditionalPackageInfo
+{};
+
+struct PackageInfo
 {
-	int64_t dds_dispatch_time = 0;
-	int64_t dds_arrived_time = 0;
-	int64_t mapping_time = 0;
-	std::string info;
+	int64_t dispatch_time = 0;
+	int64_t arrived_time = 0;
+	int64_t delivery_time = 0;
+	size_t package_size = 0;
 };
 
 using Tags = std::vector<uint32_t>;

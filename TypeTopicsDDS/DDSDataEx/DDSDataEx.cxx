@@ -27,7 +27,6 @@ char dummy;
 #endif  // _WIN32
 
 #include "DDSDataEx.h"
-#include "DDSDataExTypeObject.h"
 #include <fastcdr/Cdr.h>
 
 #include <fastcdr/exceptions/BadParamException.h>
@@ -44,7 +43,7 @@ namespace scada_ate
         size_t MaxSizeDDSDataExVectorDouble = 0;
         size_t MaxSizeDDSDataExVectorChar = 0;
         size_t MaxSizeDataExCharVectorChar = 0;
-        
+
 
         void SetMaxSizeDDSDataExVectorInt(size_t size) { MaxSizeDDSDataExVectorInt = size; };
         void SetMaxSizeDDSDataExVectorFloat(size_t size) { MaxSizeDDSDataExVectorFloat = size; };
@@ -63,17 +62,15 @@ namespace scada_ate
 
 DataExInt::DataExInt()
 {
-    // m_time_source com.eprosima.idl.parser.typecode.PrimitiveTypeCode@78186a70
+    // m_time_source com.eprosima.idl.parser.typecode.PrimitiveTypeCode@3fee9989
     m_time_source = 0;
-    // m_id_tag com.eprosima.idl.parser.typecode.PrimitiveTypeCode@306279ee
+    // m_id_tag com.eprosima.idl.parser.typecode.PrimitiveTypeCode@73ad2d6
     m_id_tag = 0;
-    // m_value com.eprosima.idl.parser.typecode.PrimitiveTypeCode@545997b1
+    // m_value com.eprosima.idl.parser.typecode.PrimitiveTypeCode@7085bdee
     m_value = 0;
-    // m_quality com.eprosima.idl.parser.typecode.PrimitiveTypeCode@4cf4d528
+    // m_quality com.eprosima.idl.parser.typecode.PrimitiveTypeCode@1ce92674
     m_quality = 0;
 
-    // Just to register all known types
-    registerDDSDataExTypes();
 }
 
 DataExInt::~DataExInt()
@@ -124,6 +121,19 @@ DataExInt& DataExInt::operator =(
     m_quality = x.m_quality;
 
     return *this;
+}
+
+bool DataExInt::operator ==(
+        const DataExInt& x) const
+{
+
+    return (m_time_source == x.m_time_source && m_id_tag == x.m_id_tag && m_value == x.m_value && m_quality == x.m_quality);
+}
+
+bool DataExInt::operator !=(
+        const DataExInt& x) const
+{
+    return !(*this == x);
 }
 
 size_t DataExInt::getMaxCdrSerializedSize(
@@ -334,17 +344,15 @@ void DataExInt::serializeKey(
 
 DataExFloat::DataExFloat()
 {
-    // m_time_source com.eprosima.idl.parser.typecode.PrimitiveTypeCode@6fb0d3ed
+    // m_time_source com.eprosima.idl.parser.typecode.PrimitiveTypeCode@490ab905
     m_time_source = 0;
-    // m_id_tag com.eprosima.idl.parser.typecode.PrimitiveTypeCode@6dde5c8c
+    // m_id_tag com.eprosima.idl.parser.typecode.PrimitiveTypeCode@56ac3a89
     m_id_tag = 0;
-    // m_value com.eprosima.idl.parser.typecode.PrimitiveTypeCode@5123a213
+    // m_value com.eprosima.idl.parser.typecode.PrimitiveTypeCode@27c20538
     m_value = 0.0;
-    // m_quality com.eprosima.idl.parser.typecode.PrimitiveTypeCode@52525845
+    // m_quality com.eprosima.idl.parser.typecode.PrimitiveTypeCode@72d818d1
     m_quality = 0;
 
-    // Just to register all known types
-    registerDDSDataExTypes();
 }
 
 DataExFloat::~DataExFloat()
@@ -395,6 +403,19 @@ DataExFloat& DataExFloat::operator =(
     m_quality = x.m_quality;
 
     return *this;
+}
+
+bool DataExFloat::operator ==(
+        const DataExFloat& x) const
+{
+
+    return (m_time_source == x.m_time_source && m_id_tag == x.m_id_tag && m_value == x.m_value && m_quality == x.m_quality);
+}
+
+bool DataExFloat::operator !=(
+        const DataExFloat& x) const
+{
+    return !(*this == x);
 }
 
 size_t DataExFloat::getMaxCdrSerializedSize(
@@ -605,17 +626,15 @@ void DataExFloat::serializeKey(
 
 DataExDouble::DataExDouble()
 {
-    // m_time_source com.eprosima.idl.parser.typecode.PrimitiveTypeCode@1da51a35
+    // m_time_source com.eprosima.idl.parser.typecode.PrimitiveTypeCode@4566e5bd
     m_time_source = 0;
-    // m_id_tag com.eprosima.idl.parser.typecode.PrimitiveTypeCode@16022d9d
+    // m_id_tag com.eprosima.idl.parser.typecode.PrimitiveTypeCode@1ed4004b
     m_id_tag = 0;
-    // m_value com.eprosima.idl.parser.typecode.PrimitiveTypeCode@7e9a5fbe
+    // m_value com.eprosima.idl.parser.typecode.PrimitiveTypeCode@ff5b51f
     m_value = 0.0;
-    // m_quality com.eprosima.idl.parser.typecode.PrimitiveTypeCode@44a3ec6b
+    // m_quality com.eprosima.idl.parser.typecode.PrimitiveTypeCode@25bbe1b6
     m_quality = 0;
 
-    // Just to register all known types
-    registerDDSDataExTypes();
 }
 
 DataExDouble::~DataExDouble()
@@ -666,6 +685,19 @@ DataExDouble& DataExDouble::operator =(
     m_quality = x.m_quality;
 
     return *this;
+}
+
+bool DataExDouble::operator ==(
+        const DataExDouble& x) const
+{
+
+    return (m_time_source == x.m_time_source && m_id_tag == x.m_id_tag && m_value == x.m_value && m_quality == x.m_quality);
+}
+
+bool DataExDouble::operator !=(
+        const DataExDouble& x) const
+{
+    return !(*this == x);
 }
 
 size_t DataExDouble::getMaxCdrSerializedSize(
@@ -876,17 +908,15 @@ void DataExDouble::serializeKey(
 
 DataExChar::DataExChar()
 {
-    // m_time_source com.eprosima.idl.parser.typecode.PrimitiveTypeCode@70a9f84e
+    // m_time_source com.eprosima.idl.parser.typecode.PrimitiveTypeCode@520a3426
     m_time_source = 0;
-    // m_id_tag com.eprosima.idl.parser.typecode.PrimitiveTypeCode@130f889
+    // m_id_tag com.eprosima.idl.parser.typecode.PrimitiveTypeCode@18eed359
     m_id_tag = 0;
-    // m_value com.eprosima.idl.parser.typecode.SequenceTypeCode@1188e820
+    // m_value com.eprosima.idl.parser.typecode.SequenceTypeCode@3e9b1010
 
-    // m_quality com.eprosima.idl.parser.typecode.PrimitiveTypeCode@166fa74d
+    // m_quality com.eprosima.idl.parser.typecode.PrimitiveTypeCode@6f1fba17
     m_quality = 0;
 
-    // Just to register all known types
-    registerDDSDataExTypes();
 }
 
 DataExChar::~DataExChar()
@@ -937,6 +967,19 @@ DataExChar& DataExChar::operator =(
     m_quality = x.m_quality;
 
     return *this;
+}
+
+bool DataExChar::operator ==(
+        const DataExChar& x) const
+{
+
+    return (m_time_source == x.m_time_source && m_id_tag == x.m_id_tag && m_value == x.m_value && m_quality == x.m_quality);
+}
+
+bool DataExChar::operator !=(
+        const DataExChar& x) const
+{
+    return !(*this == x);
 }
 
 size_t DataExChar::getMaxCdrSerializedSize(
@@ -1165,19 +1208,17 @@ void DataExChar::serializeKey(
 
 DDSDataEx::DDSDataEx()
 {
-    // m_time_service com.eprosima.idl.parser.typecode.PrimitiveTypeCode@667a738
+    // m_time_service com.eprosima.idl.parser.typecode.PrimitiveTypeCode@467aecef
     m_time_service = 0;
-    // m_data_int com.eprosima.idl.parser.typecode.SequenceTypeCode@64c87930
+    // m_data_int com.eprosima.idl.parser.typecode.SequenceTypeCode@2173f6d9
 
-    // m_data_float com.eprosima.idl.parser.typecode.SequenceTypeCode@400cff1a
+    // m_data_float com.eprosima.idl.parser.typecode.SequenceTypeCode@307f6b8c
 
-    // m_data_double com.eprosima.idl.parser.typecode.SequenceTypeCode@275710fc
+    // m_data_double com.eprosima.idl.parser.typecode.SequenceTypeCode@7a187f14
 
-    // m_data_char com.eprosima.idl.parser.typecode.SequenceTypeCode@525f1e4e
+    // m_data_char com.eprosima.idl.parser.typecode.SequenceTypeCode@6f195bc3
 
 
-    // Just to register all known types
-    registerDDSDataExTypes();
 }
 
 DDSDataEx::~DDSDataEx()
@@ -1233,6 +1274,19 @@ DDSDataEx& DDSDataEx::operator =(
     m_data_char = std::move(x.m_data_char);
 
     return *this;
+}
+
+bool DDSDataEx::operator ==(
+        const DDSDataEx& x) const
+{
+
+    return (m_time_service == x.m_time_service && m_data_int == x.m_data_int && m_data_float == x.m_data_float && m_data_double == x.m_data_double && m_data_char == x.m_data_char);
+}
+
+bool DDSDataEx::operator !=(
+        const DDSDataEx& x) const
+{
+    return !(*this == x);
 }
 
 size_t DDSDataEx::getMaxCdrSerializedSize(

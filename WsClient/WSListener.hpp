@@ -21,7 +21,7 @@ private:
     /**
      * Buffer for messages. Needed for multi-frame messages.
      */
-    oatpp::data::stream::ChunkedBuffer m_messageBuffer;
+    oatpp::data::stream::BufferOutputStream m_messageBuffer;
     std::string login;
     WSClient* client;
 public:
@@ -101,7 +101,7 @@ public:
         , client(client_)
     {}
     Action act() override;
-    Action onConnected(const std::shared_ptr<oatpp::data::stream::IOStream>& connection);
+    Action onConnected(const oatpp::provider::ResourceHandle<oatpp::data::stream::IOStream>& connection);
     Action onFinishListen();
 };
 

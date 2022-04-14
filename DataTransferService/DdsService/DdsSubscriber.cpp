@@ -8,6 +8,7 @@
 #include <fastrtps/utils/IPLocator.h>
 
 #include "DdsSubscriber.h"
+#include "../../include/PackageAnalysis.h"
 
 using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
@@ -248,6 +249,8 @@ void SubscriberService::runSubscribers()
 		t.join();
 	}
 	stop_ws_server_ = true;
+	auto analyser = PackageAnalyser::getInstance();
+	analyser->writeResults();
 }
 
 void SubscriberService::runWsServer()
@@ -257,7 +260,6 @@ void SubscriberService::runWsServer()
 		if (!observer_.sendDdsData()) break;
 		std::this_thread::sleep_for(std::chrono::milliseconds(config_.ws_data_sleep));
 	}
-	
 }
 
 std::vector<AbstractDdsSubscriber*> SubscriberService::getSubscribers() const
