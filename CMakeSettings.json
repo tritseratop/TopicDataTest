@@ -15,6 +15,16 @@
           "name": "GTest_DIR",
           "value": "C:/googletest/build",
           "type": "PATH"
+        },
+        {
+          "name": "oatpp_DIR",
+          "value": "C:/oatpp/lib/oatpp-1.2.5",
+          "type": "PATH"
+        },
+        {
+          "name": "oatpp-websocket_DIR",
+          "value": "C:/oatpp-websocket/lib/oatpp-websocket-1.2.5",
+          "type": "PATH"
         }
       ]
     }
