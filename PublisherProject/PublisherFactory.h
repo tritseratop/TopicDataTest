@@ -18,21 +18,6 @@
 
 using eprosima::fastrtps::types::ReturnCode_t;
 
-struct PublisherConfig
-{
-	int16_t subscriber_id = 0;
-	uint16_t vector_size = 0;
-	std::string topic_name = "";
-	std::string topic_type_name = "";
-	TopicType topic_type = TopicType::UNKNOWN;
-
-	// listener settings
-	uint32_t samples = 10;
-	uint32_t sleep = 1000;
-
-	friend bool operator==(const PublisherConfig& lhs, const PublisherConfig& rhs);
-};
-
 class AbstractDdsPublisher
 {
 public:
@@ -113,7 +98,15 @@ public:
 			return false;
 		}
 
-		writer_ = publisher_->create_datawriter(topic_, DATAWRITER_QOS_DEFAULT, &listener_);
+		eprosima::fastdds::dds::DataWriterQos wqos;
+		wqos.history().kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
+		wqos.history().depth = 30;
+		wqos.resource_limits().max_samples = 50;
+		wqos.resource_limits().allocated_samples = 20;
+		wqos.reliability().kind = eprosima::fastdds::dds::RELIABLE_RELIABILITY_QOS;
+		wqos.durability().kind = eprosima::fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
+		wqos.deadline().period.nanosec = config_.sleep * 1000;
+		writer_ = publisher_->create_datawriter(topic_, wqos, &listener_);
 		if (writer_ == nullptr)
 		{
 			return false;

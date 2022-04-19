@@ -14,23 +14,6 @@
 #include "../../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "../../include/DdsCommonClasses.h"
 
-struct SubscriberConfig
-{
-	int16_t subscriber_id = 0;
-	uint16_t vector_size = 0;
-	std::string topic_name = "";
-	std::string topic_type_name = "";
-	TopicType topic_type = TopicType::UNKNOWN;
-
-	// listener settings
-	uint32_t samples = 10;
-	uint32_t sleep = 1000;
-
-	AdditionalTopicInfo info;
-
-	friend bool operator==(const SubscriberConfig& lhs, const SubscriberConfig& rhs);
-};
-
 class AbstractDdsSubscriber
 {
 public:
@@ -38,7 +21,6 @@ public:
 	virtual bool init() = 0;
 	virtual void run() = 0;
 	virtual void setConfig(const SubscriberConfig& config) = 0;
-	virtual const void* getData() const = 0;
 protected:
 };
 
@@ -114,13 +96,13 @@ public:
 		}
 
 		eprosima::fastdds::dds::DataReaderQos rqos;
-		/*rqos.history().kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
+		rqos.history().kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
 		rqos.history().depth = 30;
 		rqos.resource_limits().max_samples = 50;
 		rqos.resource_limits().allocated_samples = 20;
-		rqos.reliability().kind = eprosima::fastdds::dds::RELIABLE_RELIABILITY_QOS;*/
-		//rqos.durability().kind = eprosima::fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
-		//rqos.deadline().period.nanosec = config_.sleep * 1000 * 1000;
+		rqos.reliability().kind = eprosima::fastdds::dds::RELIABLE_RELIABILITY_QOS;
+		rqos.durability().kind = eprosima::fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
+		rqos.deadline().period.nanosec = config_.sleep * 1000;
 		reader_ = subscriber_->create_datareader(
 			topic_,
 			rqos,
@@ -145,14 +127,7 @@ public:
 		config_ = config;
 	}
 
-	const void* getData() const override
-	{
-		return &data_;
-	}
-
 private:
-	// ѕринимает только данные в этом формате
-	std::deque<T> data_;
 	T data_sample_;
 
 	DataHandler* observer_;
@@ -235,6 +210,13 @@ private:
 				std::cout << "ConcreteSubscriber: " << info.current_count_change
 					<< " is not a valid value for SubscriptionMatchedStatus current count change" << std::endl;
 			}
+		}
+
+		void on_requested_deadline_missed(
+			eprosima::fastdds::dds::DataReader* reader,
+			const eprosima::fastdds::dds::RequestedDeadlineMissedStatus& info) override
+		{
+			std::cout << "Deadline was missed" << std::endl;
 		}
 
 		int matched_;

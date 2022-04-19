@@ -72,7 +72,7 @@ std::pair<DDSData, DataDto> getEqualDdsData(size_t size = 4)
     data1.data_double().quality(getFilledVector(size, 'a'));
 
     DataChar data_char;
-    data_char.value(getFilledVector(size, 'a'));
+    data_char.value(getFilledVector(size / 5, 'a'));
     data1.data_char().value(getFilledVector(size, data_char));
     data1.data_char().quality(getFilledVector(size, 'a'));
 
@@ -99,7 +99,7 @@ std::pair<DDSData, DataDto> getEqualDdsData(size_t size = 4)
         {
             getFilledVector<int64_t>(size, 101),
             getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_CHAR),
-            getFilledVector(size, getFilledVector(size, 'a')),
+            getFilledVector(size, getFilledVector(size / 5, 'a')),
             getFilledVector(size, 'a')
         }
     };
@@ -124,7 +124,7 @@ DDSData getDdsData(size_t size = 4)
     data1.data_double().quality(getDefaultVector(size));
 
     DataChar data_char;
-    data_char.value(getFilledVector(size, 'a'));
+    data_char.value(getFilledVector(size / 5, 'a'));
     data1.data_char().value(getFilledVector(size, data_char));
     data1.data_char().quality(getDefaultVector(size));
 
@@ -149,7 +149,7 @@ DDSDataEx getDdsDataEx(size_t size = 4)
     data_ex_double.quality('b');
     DataExChar data_ex_char;
     data_ex_char.time_source(102);
-    data_ex_char.value(getDefaultVector(size));
+    data_ex_char.value(getDefaultVector(size / 5));
     data_ex_char.quality('b');
 
     for (int i = 0; i < size; ++i)
@@ -193,7 +193,7 @@ DataExUnion getEqualDdsDataEx(size_t size_ex = 2, size_t size_data = 4)
     data_ex_double.quality('b');
     DataExChar data_ex_char;
     data_ex_char.time_source(102);
-    data_ex_char.value(getDefaultVector(size_ex));
+    data_ex_char.value(getDefaultVector(size_ex / 5));
     data_ex_char.quality('b');
 
     for (int i = 0; i < size_ex; ++i)
@@ -218,7 +218,7 @@ DataExUnion getEqualDdsDataEx(size_t size_ex = 2, size_t size_data = 4)
     data2.data_double().quality(getDefaultVector(size_ex));
 
     DataChar data_char;
-    data_char.value(getFilledVector(size_ex, 'a'));
+    data_char.value(getFilledVector(size_ex / 5, 'a'));
     data2.data_char().value(getFilledVector(size_ex, data_char));
     data2.data_char().quality(getDefaultVector(size_ex));
 
@@ -245,7 +245,7 @@ DataExUnion getEqualDdsDataEx(size_t size_ex = 2, size_t size_data = 4)
         {
             getFilledVector<int64_t>(size_data, 101),
             getAdditionalTopicInfo(size_data).tags.at(DataCollectiionType::DATA_CHAR),
-            getFilledVector(size_data, getFilledVector(size_data, 'a')),
+            getFilledVector(size_data, getFilledVector(size_data / 5, 'a')),
             getDefaultVector(size_data)
         }
     };

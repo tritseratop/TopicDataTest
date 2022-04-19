@@ -51,8 +51,31 @@ int main(
     std::vector<uint16_t> sizes = { 10 };
     std::vector<uint32_t> v_sleep = { 100 };
     uint32_t samples = 50;
+
+    // изменяемые настройки
     std::string ip = "127.0.0.1";
+    bool isWsServerRun = false;
     Transport transport = Transport::TCP;
+    bool isSync = false;
+
+    if (argc > 1)
+    {
+        ip = std::string(argv[1]);
+
+        if (argc > 2)
+        {
+            if (argv[2] = "UDP")
+            {
+                transport = Transport::UDP;
+            }
+
+            if (argc > 3)
+            {
+                isSync = argv[3];
+            }
+            
+        }
+    }
 
     ServiceConfig<PublisherConfig> default_service_config({
         "Participant_pub",

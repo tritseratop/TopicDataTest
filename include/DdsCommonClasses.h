@@ -98,6 +98,42 @@ struct ServiceConfig
 	}
 };
 
+struct PublisherConfig
+{
+	int16_t subscriber_id = 0;
+	uint16_t vector_size = 0;
+	std::string topic_name = "";
+	std::string topic_type_name = "";
+	TopicType topic_type = TopicType::UNKNOWN;
+
+	// listener settings
+	uint32_t samples = 10;
+	uint32_t sleep = 1000;
+
+	bool isSync = false;
+
+	friend bool operator==(const PublisherConfig& lhs, const PublisherConfig& rhs);
+};
+
+
+struct SubscriberConfig
+{
+	int16_t subscriber_id = 0;
+	uint16_t vector_size = 0;
+	std::string topic_name = "";
+	std::string topic_type_name = "";
+	TopicType topic_type = TopicType::UNKNOWN;
+
+	// listener settings
+	uint32_t samples = 10;
+	uint32_t sleep = 1000;
+
+	AdditionalTopicInfo info;
+
+	friend bool operator==(const SubscriberConfig& lhs, const SubscriberConfig& rhs);
+};
+
+
 template <class T>
 struct DataCollection
 {

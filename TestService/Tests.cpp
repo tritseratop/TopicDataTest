@@ -175,7 +175,18 @@ TEST(WsDataTransmitionTest, DdsDataTransmition) {
     std::vector<uint32_t> v_sleep = { 100 };
     uint32_t samples = 50;
     std::string ip = "127.0.0.1";
+    uint32_t samples = 50;
     Transport transport = Transport::TCP;
+
+    if (argc > 1)
+    {
+        ip = std::string(argv[1]);
+        if (argc > 2)
+        {
+            transport = Transport::UDP;
+        }
+    }
+
     ServiceConfig<SubscriberConfig> default_service_config({
         "Participant_sub",
         transport,
@@ -221,6 +232,11 @@ TEST(WsDataTransmitionTest, DdsDataTransmition) {
 
         }
     }
+
+    oatpp::base::Environment::init();
+
+    Configure conf;
+    WebsockServer server(conf);
     std::thread tcp_thread([](WebsockServer& server) {
         server.run();
         }, std::ref(server));
@@ -234,13 +250,17 @@ TEST(WsDataTransmitionTest, DdsDataTransmition) {
             << " size: " << conf.configs[0].vector_size << std::endl;
         mysub->changeSubsConfig(conf);
         std::thread ws_thread([](SubscriberService* mysub) {
-            mysub->runWsServer();
+            mysub->runWsService();
             }, mysub);
         mysub->runSubscribers();
         ws_thread.join();
     }
 
     delete mysub;
+
+    server.stop();
+
+    std::this_thread::sleep_for(std::chrono::seconds(5000));
 
     oatpp::base::Environment::destroy();
 }

@@ -175,9 +175,11 @@ bool DataHandler::sendDdsData()
 {
 	if (server_ != nullptr)
 	{
-		if (data_cache_.size() != 0)
+		auto data = data_cache_.pop_front();
+		if (data.has_value())
 		{
-			server_->sendData(ws_mapper_.mapDataDto(data_cache_.pop_front().value()));
+			auto ws_dto = ws_mapper_.mapDataDto(data.value());
+			server_->sendData(ws_dto);
 		}
 		return true;
 	}
@@ -186,14 +188,6 @@ bool DataHandler::sendDdsData()
 
 bool DataHandler::sendDdsAlarm()
 {
-	if (server_ != nullptr)
-	{
-		if (data_cache_.size() != 0)
-		{
-			//server_->sendAlarm(alarm_cache_.pop_front().value());
-		}
-		return true;
-	}
 	return false;
 }
 

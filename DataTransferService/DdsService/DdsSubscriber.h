@@ -31,7 +31,7 @@ public:
 	bool initSubscribers();
 	bool createNewSubscriber(const SubscriberConfig& config);
 	void runSubscribers();
-	void runWsServer();
+	void runWsService();
 	std::vector<AbstractDdsSubscriber*> getSubscribers() const;
 	void setVectorSizesInDataTopic();
 
