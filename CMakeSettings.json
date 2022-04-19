@@ -18,12 +18,12 @@
         },
         {
           "name": "oatpp_DIR",
-          "value": "C:/oatpp/lib/oatpp-1.2.5",
+          "value": "C:\\Program Files (x86)\\oatpp\\lib\\oatpp-1.3.0",
           "type": "PATH"
         },
         {
           "name": "oatpp-websocket_DIR",
-          "value": "C:/oatpp-websocket/lib/oatpp-websocket-1.2.5",
+          "value": "C:\\Program Files (x86)\\oatpp-websocket\\lib\\oatpp-1.3.0",
           "type": "PATH"
         }
       ]

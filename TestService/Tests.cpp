@@ -168,24 +168,11 @@ TEST(DtoTest, WsDataConversation) {
 TEST(WsDataTransmitionTest, DdsDataTransmition) {
     oatpp::base::Environment::init();
 
-    Configure conf;
-    WebsockServer server(conf);
-
     std::vector<uint16_t> sizes = { 10 };
     std::vector<uint32_t> v_sleep = { 100 };
     uint32_t samples = 50;
     std::string ip = "127.0.0.1";
-    uint32_t samples = 50;
     Transport transport = Transport::TCP;
-
-    if (argc > 1)
-    {
-        ip = std::string(argv[1]);
-        if (argc > 2)
-        {
-            transport = Transport::UDP;
-        }
-    }
 
     ServiceConfig<SubscriberConfig> default_service_config({
         "Participant_sub",
@@ -235,8 +222,8 @@ TEST(WsDataTransmitionTest, DdsDataTransmition) {
 
     oatpp::base::Environment::init();
 
-    Configure conf;
-    WebsockServer server(conf);
+    Configure ws_conf;
+    WebsockServer server(ws_conf);
     std::thread tcp_thread([](WebsockServer& server) {
         server.run();
         }, std::ref(server));
