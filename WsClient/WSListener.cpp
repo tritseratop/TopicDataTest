@@ -35,7 +35,7 @@ oatpp::async::CoroutineStarter WSListener::onClose(const std::shared_ptr<AsyncWe
 oatpp::async::CoroutineStarter WSListener::readMessage(const std::shared_ptr<AsyncWebSocket>& socket, v_uint8 opcode, p_char8 data, oatpp::v_io_size size) {
     if (size == 0) { // message transfer finished        
         auto wholeMessage = m_messageBuffer.toString();
-        m_messageBuffer.clear();
+        m_messageBuffer.setCurrentPosition(0);
         std::cout << wholeMessage->c_str() << std::endl;
     }
     else if (size > 0) { // message frame received
@@ -50,7 +50,7 @@ oatpp::async::Action ClientCoroutine::act() {
     return m_connector->connectAsync("ws").callbackTo(&ClientCoroutine::onConnected);
 }
 
-oatpp::async::Action ClientCoroutine::onConnected(const std::shared_ptr<oatpp::data::stream::IOStream>& connection) {
+oatpp::async::Action ClientCoroutine::onConnected(const oatpp::provider::ResourceHandle<oatpp::data::stream::IOStream>& connection) {
     m_socket = oatpp::websocket::AsyncWebSocket::createShared(connection, true);
     //m_socket->setListener(std::make_shared<WSListener>());
     m_socket->setListener(std::make_shared<WSListener>(client));

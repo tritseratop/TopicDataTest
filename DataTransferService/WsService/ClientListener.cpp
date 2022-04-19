@@ -21,7 +21,7 @@ oatpp::async::CoroutineStarter ClientListener::onClose(const std::shared_ptr<Asy
 oatpp::async::CoroutineStarter ClientListener::readMessage(const std::shared_ptr<AsyncWebSocket>& socket, v_uint8 opcode, p_char8 data, oatpp::v_io_size size) {
 	if (size == 0) {
 		auto wholeMessage = message_buffer_.toString();
-		message_buffer_.clear();
+		message_buffer_.setCurrentPosition(0);
 		// TODO что делать с принятыми сообщениями?
 		return nullptr;
 	}
@@ -58,7 +58,7 @@ void ClientListener::sendMessageAsync(const oatpp::String& message) {
 
 void ClientListener::invalidateSocket() {
 	if (socket_) {
-		server_connection_provider_->invalidate(socket_->getConnection());
+		//server_connection_provider_->invalidate(socket_->getConnection());
 	}
 	socket_.reset();
 }
