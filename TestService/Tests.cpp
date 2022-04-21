@@ -40,7 +40,7 @@ TEST(HelloTest, BasicAssertions) {
 
 TEST(DtoTest, DdsDataConversation) {
     auto dds_data = getEqualDdsData(4);
-    DataMapper mapper;
+    DdsTopicToMediateDtoMapper mapper;
 
     AdditionalTopicInfo info = getAdditionalTopicInfo(4);
 
@@ -70,7 +70,7 @@ TEST(DtoTest, DdsDataConversation) {
 }
 
 TEST(DtoTest, WsDataConversation) {
-    WsDtoMapper ws_mapper;
+    MediateDtoToWsDtoMapper ws_mapper;
     std::shared_ptr<oatpp::parser::json::mapping::ObjectMapper> json_object_mapper
         = oatpp::parser::json::mapping::ObjectMapper::createShared();
     

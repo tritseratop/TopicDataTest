@@ -10,7 +10,7 @@
 #include "WsCommonClasses.h"
 #include "WsDto.h"
 
-class DataMapper
+class DdsTopicToMediateDtoMapper
 {
 public:
 	DataDto mapDdsData(DDSData data, const AdditionalTopicInfo& info);
@@ -29,7 +29,7 @@ public:
 
 };
 
-class WsDtoMapper
+class MediateDtoToWsDtoMapper
 {
 public:
 	WsDataDto::Wrapper mapDataDto(const DataDto& data);
@@ -47,17 +47,17 @@ public:
 	DataObserver(IServer* server);
 
 	bool sendDdsData();
-	void cache(DDSData data, const AdditionalTopicInfo& info);
-	void cache(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
-	void cache(const DDSDataEx& data, const AdditionalTopicInfo& info);
-	void cache(const DDSDataEx& data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
+	void update(DDSData data, const AdditionalTopicInfo& info);
+	void update(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
+	void update(const DDSDataEx& data, const AdditionalTopicInfo& info);
+	void update(const DDSDataEx& data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
 	std::deque<DataDto> getDataCacheCopy() const;
 
 	bool sendDdsAlarm();
-	void cache(DDSAlarm data, const AdditionalTopicInfo& info);
-	void cache(DDSAlarm data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
-	void cache(const DDSAlarmEx& data, const AdditionalTopicInfo& info);
-	void cache(const DDSAlarmEx& data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
+	void update(DDSAlarm data, const AdditionalTopicInfo& info);
+	void update(DDSAlarm data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
+	void update(const DDSAlarmEx& data, const AdditionalTopicInfo& info);
+	void update(const DDSAlarmEx& data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
 	std::deque<AlarmDto> getAlarmCacheCopy() const;
 
 private:
@@ -67,8 +67,8 @@ private:
 	bool stop_sending_alarm_;
 	ThreadSafeDeque<AlarmDto> alarm_cache_;
 
-	DataMapper mapper_;
-	WsDtoMapper ws_mapper_;
+	DdsTopicToMediateDtoMapper mapper_;
+	MediateDtoToWsDtoMapper ws_mapper_;
 	IServer* server_;
 };
 

@@ -2,7 +2,7 @@
 
 #include "DataObserver.h"
 
-DataDto DataMapper::mapDdsData(DDSData data, const AdditionalTopicInfo& info)
+DataDto DdsTopicToMediateDtoMapper::mapDdsData(DDSData data, const AdditionalTopicInfo& info)
 {
 	std::vector<std::vector<char>> data_char;
 	data_char.reserve(data.data_char().value().size());
@@ -48,7 +48,7 @@ DataDto DataMapper::mapDdsData(DDSData data, const AdditionalTopicInfo& info)
 	return result;
 }
 
-DataDto DataMapper::mapDdsDataEx(DataDto prev_dto, const DDSDataEx& cur_data_ex, const AdditionalTopicInfo& info)
+DataDto DdsTopicToMediateDtoMapper::mapDdsDataEx(DataDto prev_dto, const DDSDataEx& cur_data_ex, const AdditionalTopicInfo& info)
 {
 	prev_dto.time_service = cur_data_ex.time_service();
 	fillChanged(prev_dto.data_int, cur_data_ex.data_int(), info.tag_to_index.at(DataCollectiionType::DATA_INT));
@@ -59,7 +59,7 @@ DataDto DataMapper::mapDdsDataEx(DataDto prev_dto, const DDSDataEx& cur_data_ex,
 	return prev_dto;
 }
 
-AlarmDto DataMapper::mapDdsAlarm(DDSAlarm data,const AdditionalTopicInfo& info)
+AlarmDto DdsTopicToMediateDtoMapper::mapDdsAlarm(DDSAlarm data,const AdditionalTopicInfo& info)
 {
 	auto tags = info.tags.at(DataCollectiionType::ALARM_UINT32);
 	tags.resize(data.alarms().size());
@@ -74,7 +74,7 @@ AlarmDto DataMapper::mapDdsAlarm(DDSAlarm data,const AdditionalTopicInfo& info)
 	return result;
 }
 
-AlarmDto DataMapper::mapDdsAlarmEx(AlarmDto prev_dto, const DDSAlarmEx& cur_data_ex, const AdditionalTopicInfo& info)
+AlarmDto DdsTopicToMediateDtoMapper::mapDdsAlarmEx(AlarmDto prev_dto, const DDSAlarmEx& cur_data_ex, const AdditionalTopicInfo& info)
 {
 	prev_dto.time_service = cur_data_ex.time_service();
 	fillChanged(prev_dto, cur_data_ex.alarms(), info.tag_to_index.at(DataCollectiionType::ALARM_UINT32));
@@ -82,7 +82,7 @@ AlarmDto DataMapper::mapDdsAlarmEx(AlarmDto prev_dto, const DDSAlarmEx& cur_data
 }
 
 template<class DtoDataCollection, class DdsSample>
-void DataMapper::fillChanged(DtoDataCollection& prev_dto_collection, const std::vector<DdsSample>& cur_samples, const TagToIndex& tag_to_index)
+void DdsTopicToMediateDtoMapper::fillChanged(DtoDataCollection& prev_dto_collection, const std::vector<DdsSample>& cur_samples, const TagToIndex& tag_to_index)
 {
 	size_t n = cur_samples.size();
 	for (const auto& sample : cur_samples)
@@ -98,7 +98,7 @@ void DataMapper::fillChanged(DtoDataCollection& prev_dto_collection, const std::
 	}
 }
 
-WsDataDto::Wrapper WsDtoMapper::mapDataDto(const DataDto& data)
+WsDataDto::Wrapper MediateDtoToWsDtoMapper::mapDataDto(const DataDto& data)
 {
 	auto collect_int = WsDataCollectionInt::createShared();
 	fillVector(collect_int->tsrc, data.data_int.time_source);
@@ -135,7 +135,7 @@ WsDataDto::Wrapper WsDtoMapper::mapDataDto(const DataDto& data)
 }
 
 template<class OatppT, class T>
-void WsDtoMapper::fillVector(oatpp::Vector<OatppT>& oatpp_v, const std::vector<T>& v)
+void MediateDtoToWsDtoMapper::fillVector(oatpp::Vector<OatppT>& oatpp_v, const std::vector<T>& v)
 {
 	oatpp_v = {};
 	oatpp_v->reserve(v.size());
@@ -145,7 +145,7 @@ void WsDtoMapper::fillVector(oatpp::Vector<OatppT>& oatpp_v, const std::vector<T
 	}
 }
 
-void WsDtoMapper::fillVector(
+void MediateDtoToWsDtoMapper::fillVector(
 	oatpp::Vector<oatpp::String>& oatpp_v, 
 	const std::vector<std::vector<char>>& v)
 {
@@ -158,7 +158,7 @@ void WsDtoMapper::fillVector(
 	}
 }
 
-void WsDtoMapper::fillVector(oatpp::String& oatpp_v, const std::vector<char>& v)
+void MediateDtoToWsDtoMapper::fillVector(oatpp::String& oatpp_v, const std::vector<char>& v)
 {
 	std::string str(v.begin(), v.end());
 	oatpp_v = oatpp::String(str.c_str());
@@ -191,17 +191,17 @@ bool DataObserver::sendDdsAlarm()
 	return false;
 }
 
-void DataObserver::cache(DDSData data, const AdditionalTopicInfo& info)
+void DataObserver::update(DDSData data, const AdditionalTopicInfo& info)
 {
 	data_cache_.push_back(mapper_.mapDdsData(std::move(data), info));
 }
 
-void DataObserver::cache(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info)
+void DataObserver::update(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info)
 {
 	data_cache_.push_back(mapper_.mapDdsData(std::move(data), info));
 }
 
-void DataObserver::cache(const DDSDataEx& data, const AdditionalTopicInfo& info)
+void DataObserver::update(const DDSDataEx& data, const AdditionalTopicInfo& info)
 {
 	if (!data_cache_.empty())
 	{
@@ -214,12 +214,12 @@ void DataObserver::cache(const DDSDataEx& data, const AdditionalTopicInfo& info)
 	}
 }
 
-void DataObserver::cache(DDSAlarm data, const AdditionalTopicInfo& info)
+void DataObserver::update(DDSAlarm data, const AdditionalTopicInfo& info)
 {
 
 }
 
-void DataObserver::cache(const DDSAlarmEx& data, const AdditionalTopicInfo& info)
+void DataObserver::update(const DDSAlarmEx& data, const AdditionalTopicInfo& info)
 {
 
 }
