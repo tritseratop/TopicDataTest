@@ -69,7 +69,7 @@ public:
         queue_.push_back(item);
     }
 
-    std::deque<DataDto> getDequeCopy() const
+    std::deque<T> getDequeCopy() const
     {
         return queue_;
     }

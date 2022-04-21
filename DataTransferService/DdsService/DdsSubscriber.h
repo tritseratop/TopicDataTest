@@ -35,7 +35,7 @@ public:
 	std::vector<AbstractDdsSubscriber*> getSubscribers() const;
 	void setVectorSizesInDataTopic();
 
-	std::deque<DataDto> getDataCacheCopy() const;
+	std::deque<MediateDataDto> getDataCacheCopy() const;
 
 private:
 

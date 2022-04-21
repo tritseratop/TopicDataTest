@@ -44,28 +44,28 @@ TEST(DtoTest, DdsDataConversation) {
 
     AdditionalTopicInfo info = getAdditionalTopicInfo(4);
 
-    DataDto d = mapper.mapDdsData(std::move(dds_data.first), info);
+    MediateDataDto d = mapper.mapDdsData(std::move(dds_data.first), info);
     EXPECT_EQ(dds_data.second, d);
 
     DataExUnion data_ex_union = getEqualDdsDataEx(3, 5);
-    DataDto d2 = mapper.mapDdsDataEx(data_ex_union.dto_to_change, data_ex_union.data_ex, info);
+    MediateDataDto d2 = mapper.mapDdsDataEx(data_ex_union.dto_to_change, data_ex_union.data_ex, info);
     EXPECT_EQ(d2, data_ex_union.dto);
 
     DataExUnion data_ex_union1 = getEqualDdsDataEx(3, 0);
-    DataDto d3 = mapper.mapDdsDataEx(data_ex_union1.dto_to_change, data_ex_union1.data_ex, info);
+    MediateDataDto d3 = mapper.mapDdsDataEx(data_ex_union1.dto_to_change, data_ex_union1.data_ex, info);
     EXPECT_EQ(d3, data_ex_union1.dto);
 
     info = getAdditionalTopicInfo(500);
     DataExUnion data_ex_union2 = getEqualDdsDataEx(500, 1000);
-    DataDto d4 = mapper.mapDdsDataEx(data_ex_union2.dto_to_change, data_ex_union2.data_ex, info);
+    MediateDataDto d4 = mapper.mapDdsDataEx(data_ex_union2.dto_to_change, data_ex_union2.data_ex, info);
     EXPECT_EQ(d4, data_ex_union2.dto);
 
     DataExUnion data_ex_union3 = getEqualDdsDataEx(0, 0);
-    DataDto d5 = mapper.mapDdsDataEx(data_ex_union3.dto_to_change, data_ex_union3.data_ex, info);
+    MediateDataDto d5 = mapper.mapDdsDataEx(data_ex_union3.dto_to_change, data_ex_union3.data_ex, info);
     EXPECT_EQ(d5, data_ex_union3.dto);
 
     DataExUnion data_ex_union4 = getEqualDdsDataEx(0, 3);
-    DataDto d6 = mapper.mapDdsDataEx(data_ex_union4.dto_to_change, data_ex_union4.data_ex, info);
+    MediateDataDto d6 = mapper.mapDdsDataEx(data_ex_union4.dto_to_change, data_ex_union4.data_ex, info);
     EXPECT_EQ(d6, data_ex_union4.dto);
 }
 

@@ -7,7 +7,7 @@
 struct WsDataUnion
 {
     DDSData dds_data;
-    DataDto data_dto;
+    MediateDataDto data_dto;
     WsDataDto::Wrapper ws_dto;
 };
 

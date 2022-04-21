@@ -13,8 +13,8 @@
 class DdsTopicToMediateDtoMapper
 {
 public:
-	DataDto mapDdsData(DDSData data, const AdditionalTopicInfo& info);
-	DataDto mapDdsDataEx(DataDto prev_dto, const DDSDataEx& cur_data_ex, const AdditionalTopicInfo& info);
+	MediateDataDto mapDdsData(DDSData data, const AdditionalTopicInfo& info);
+	MediateDataDto mapDdsDataEx(MediateDataDto prev_dto, const DDSDataEx& cur_data_ex, const AdditionalTopicInfo& info);
 	AlarmDto mapDdsAlarm(DDSAlarm data, const AdditionalTopicInfo& info);
 	AlarmDto mapDdsAlarmEx(AlarmDto prev_dto, const DDSAlarmEx& cur_data_ex, const AdditionalTopicInfo& info);
 
@@ -25,14 +25,14 @@ public:
 class DirectDtoMapper
 {
 public:
-	WsDataDto mapDataDto(DataDto data);
+	WsDataDto mapDataDto(MediateDataDto data);
 
 };
 
 class MediateDtoToWsDtoMapper
 {
 public:
-	WsDataDto::Wrapper mapDataDto(const DataDto& data);
+	WsDataDto::Wrapper mapDataDto(const MediateDataDto& data);
 
 private:
 	template<class OatppT, class T>
@@ -51,7 +51,7 @@ public:
 	void update(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
 	void update(const DDSDataEx& data, const AdditionalTopicInfo& info);
 	void update(const DDSDataEx& data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
-	std::deque<DataDto> getDataCacheCopy() const;
+	std::deque<MediateDataDto> getDataCacheCopy() const;
 
 	bool sendDdsAlarm();
 	void update(DDSAlarm data, const AdditionalTopicInfo& info);
@@ -62,7 +62,7 @@ public:
 
 private:
 	bool stop_sending_data_;
-	ThreadSafeDeque<DataDto> data_cache_;
+	ThreadSafeDeque<MediateDataDto> data_cache_;
 
 	bool stop_sending_alarm_;
 	ThreadSafeDeque<AlarmDto> alarm_cache_;

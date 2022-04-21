@@ -313,7 +313,7 @@ void SubscriberService::setVectorSizesInDataTopic()
 	scada_ate::typetopics::SetMaxSizeDDSAlarmExVectorAlarms(config_.MaxSizeDDSExVectorAlarms);
 }
 
-std::deque<DataDto> SubscriberService::getDataCacheCopy() const
+std::deque<MediateDataDto> SubscriberService::getDataCacheCopy() const
 {
 	return observer_.getDataCacheCopy();
 }

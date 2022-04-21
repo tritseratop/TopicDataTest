@@ -2,7 +2,7 @@
 
 #include "DataObserver.h"
 
-DataDto DdsTopicToMediateDtoMapper::mapDdsData(DDSData data, const AdditionalTopicInfo& info)
+MediateDataDto DdsTopicToMediateDtoMapper::mapDdsData(DDSData data, const AdditionalTopicInfo& info)
 {
 	std::vector<std::vector<char>> data_char;
 	data_char.reserve(data.data_char().value().size());
@@ -18,7 +18,7 @@ DataDto DdsTopicToMediateDtoMapper::mapDdsData(DDSData data, const AdditionalTop
 		data_char.push_back(std::move(data.data_char().value()[i].value()));
 	}
 
-	DataDto	result{
+	MediateDataDto	result{
 		data.time_service(),
 		{ 
 			std::vector(data.data_int().value().size(), data.time_source()),
@@ -48,7 +48,7 @@ DataDto DdsTopicToMediateDtoMapper::mapDdsData(DDSData data, const AdditionalTop
 	return result;
 }
 
-DataDto DdsTopicToMediateDtoMapper::mapDdsDataEx(DataDto prev_dto, const DDSDataEx& cur_data_ex, const AdditionalTopicInfo& info)
+MediateDataDto DdsTopicToMediateDtoMapper::mapDdsDataEx(MediateDataDto prev_dto, const DDSDataEx& cur_data_ex, const AdditionalTopicInfo& info)
 {
 	prev_dto.time_service = cur_data_ex.time_service();
 	fillChanged(prev_dto.data_int, cur_data_ex.data_int(), info.tag_to_index.at(DataCollectiionType::DATA_INT));
@@ -98,7 +98,7 @@ void DdsTopicToMediateDtoMapper::fillChanged(DtoDataCollection& prev_dto_collect
 	}
 }
 
-WsDataDto::Wrapper MediateDtoToWsDtoMapper::mapDataDto(const DataDto& data)
+WsDataDto::Wrapper MediateDtoToWsDtoMapper::mapDataDto(const MediateDataDto& data)
 {
 	auto collect_int = WsDataCollectionInt::createShared();
 	fillVector(collect_int->tsrc, data.data_int.time_source);
@@ -209,8 +209,8 @@ void DataObserver::update(const DDSDataEx& data, const AdditionalTopicInfo& info
 	}
 	else
 	{
-		//TODO datadto default constructor check
-		data_cache_.push_back(mapper_.mapDdsDataEx(DataDto(), data, info));
+		//TODO MediateDataDto default constructor check
+		data_cache_.push_back(mapper_.mapDdsDataEx(MediateDataDto(), data, info));
 	}
 }
 
@@ -224,7 +224,7 @@ void DataObserver::update(const DDSAlarmEx& data, const AdditionalTopicInfo& inf
 
 }
 
-std::deque<DataDto> DataObserver::getDataCacheCopy() const
+std::deque<MediateDataDto> DataObserver::getDataCacheCopy() const
 {
 	return data_cache_.getDequeCopy();
 }

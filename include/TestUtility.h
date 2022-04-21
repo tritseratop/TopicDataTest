@@ -55,7 +55,7 @@ AdditionalTopicInfo getAdditionalTopicInfo(size_t size = 4)
     return info;
 }
 
-std::pair<DDSData, DataDto> getEqualDdsData(size_t size = 4)
+std::pair<DDSData, MediateDataDto> getEqualDdsData(size_t size = 4)
 {
     DDSData data1;
 
@@ -76,7 +76,7 @@ std::pair<DDSData, DataDto> getEqualDdsData(size_t size = 4)
     data1.data_char().value(getFilledVector(size, data_char));
     data1.data_char().quality(getFilledVector(size, 'a'));
 
-    DataDto	dto{
+    MediateDataDto	dto{
         100,
         {
             getFilledVector<int64_t>(size, 101),
@@ -171,8 +171,8 @@ struct DataExUnion
 {
     DDSData data_;
     DDSDataEx data_ex;
-    DataDto dto_to_change;
-    DataDto dto;
+    MediateDataDto dto_to_change;
+    MediateDataDto dto;
 };
 
 DataExUnion getEqualDdsDataEx(size_t size_ex = 2, size_t size_data = 4)
@@ -222,7 +222,7 @@ DataExUnion getEqualDdsDataEx(size_t size_ex = 2, size_t size_data = 4)
     data2.data_char().value(getFilledVector(size_ex, data_char));
     data2.data_char().quality(getDefaultVector(size_ex));
 
-    DataDto	dto_to_change{
+    MediateDataDto	dto_to_change{
         100,
         {
             getFilledVector<int64_t>(size_data, 101),
@@ -250,7 +250,7 @@ DataExUnion getEqualDdsDataEx(size_t size_ex = 2, size_t size_data = 4)
         }
     };
 
-    DataDto	result_dto = dto_to_change;
+    MediateDataDto	result_dto = dto_to_change;
 
     if (size_data < size_ex)
     {

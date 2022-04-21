@@ -187,7 +187,7 @@ bool operator==(const DataCollection<std::vector<T>>& lhs, const DataCollection<
 		&& std::equal(lhs.quality.begin(), lhs.quality.end(), rhs.quality.begin(), rhs.quality.end());
 }
 
-struct DataDto
+struct MediateDataDto
 {
 	int64_t time_service;
 
@@ -199,7 +199,7 @@ struct DataDto
 	int64_t dispatch_time;
 	std::string topic_name = "";
 
-	friend bool operator==(const DataDto& lhs, const DataDto& rhs)
+	friend bool operator==(const MediateDataDto& lhs, const MediateDataDto& rhs)
 	{
 		return lhs.time_service == rhs.time_service
 			&& lhs.data_int == rhs.data_int
@@ -208,7 +208,7 @@ struct DataDto
 			&& lhs.topic_name == rhs.topic_name;
 	}
 
-	friend bool operator<(const DataDto& lhs, const DataDto& rhs)
+	friend bool operator<(const MediateDataDto& lhs, const MediateDataDto& rhs)
 	{
 		return std::tie(lhs.topic_name, lhs.time_service)
 			< std::tie(rhs.topic_name, rhs.time_service);
