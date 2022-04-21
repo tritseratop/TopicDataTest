@@ -41,10 +41,10 @@ private:
 	void fillVector(oatpp::String& oatpp_v, const std::vector<char>& v);
 };
 
-class DataHandler
+class DataObserver
 {
 public:
-	DataHandler(IServer* server);
+	DataObserver(IServer* server);
 
 	bool sendDdsData();
 	void cache(DDSData data, const AdditionalTopicInfo& info);

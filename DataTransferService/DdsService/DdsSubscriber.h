@@ -44,7 +44,7 @@ private:
 	ServiceConfig<SubscriberConfig> config_;
 
 	SubscriberFactory factory_;
-	DataHandler observer_;
+	DataObserver observer_;
 
 	//  онтейнеры с пользовательскими типам
 	std::vector<AbstractDdsSubscriber*> subscribers_;

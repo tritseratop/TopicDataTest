@@ -1,6 +1,6 @@
 #include <utility>
 
-#include "DataHandler.h"
+#include "DataObserver.h"
 
 DataDto DataMapper::mapDdsData(DDSData data, const AdditionalTopicInfo& info)
 {
@@ -164,14 +164,14 @@ void WsDtoMapper::fillVector(oatpp::String& oatpp_v, const std::vector<char>& v)
 	oatpp_v = oatpp::String(str.c_str());
 }
 
-DataHandler::DataHandler(IServer* server)
+DataObserver::DataObserver(IServer* server)
 	: server_(server)
 	, stop_sending_data_(false)
 	, stop_sending_alarm_(false)
 {
 }
 
-bool DataHandler::sendDdsData()
+bool DataObserver::sendDdsData()
 {
 	if (server_ != nullptr)
 	{
@@ -186,22 +186,22 @@ bool DataHandler::sendDdsData()
 	return false;
 }
 
-bool DataHandler::sendDdsAlarm()
+bool DataObserver::sendDdsAlarm()
 {
 	return false;
 }
 
-void DataHandler::cache(DDSData data, const AdditionalTopicInfo& info)
+void DataObserver::cache(DDSData data, const AdditionalTopicInfo& info)
 {
 	data_cache_.push_back(mapper_.mapDdsData(std::move(data), info));
 }
 
-void DataHandler::cache(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info)
+void DataObserver::cache(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info)
 {
 	data_cache_.push_back(mapper_.mapDdsData(std::move(data), info));
 }
 
-void DataHandler::cache(const DDSDataEx& data, const AdditionalTopicInfo& info)
+void DataObserver::cache(const DDSDataEx& data, const AdditionalTopicInfo& info)
 {
 	if (!data_cache_.empty())
 	{
@@ -214,17 +214,17 @@ void DataHandler::cache(const DDSDataEx& data, const AdditionalTopicInfo& info)
 	}
 }
 
-void DataHandler::cache(DDSAlarm data, const AdditionalTopicInfo& info)
+void DataObserver::cache(DDSAlarm data, const AdditionalTopicInfo& info)
 {
 
 }
 
-void DataHandler::cache(const DDSAlarmEx& data, const AdditionalTopicInfo& info)
+void DataObserver::cache(const DDSAlarmEx& data, const AdditionalTopicInfo& info)
 {
 
 }
 
-std::deque<DataDto> DataHandler::getDataCacheCopy() const
+std::deque<DataDto> DataObserver::getDataCacheCopy() const
 {
 	return data_cache_.getDequeCopy();
 }

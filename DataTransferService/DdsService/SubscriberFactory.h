@@ -9,7 +9,7 @@
 #include <fastdds/dds/subscriber/DataReader.hpp>
 #include <fastdds/dds/subscriber/DataReaderListener.hpp>
 
-#include "../../include/DataHandler.h"
+#include "../../include/DataObserver.h"
 #include "../ThreadSafeQueue/ThreadSafeQueue.h"
 #include "../../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "../../include/DdsCommonClasses.h"
@@ -31,7 +31,7 @@ public:
 	ConcreteSubscriber(
 		eprosima::fastdds::dds::DomainParticipant* participant,
 		const SubscriberConfig& config,
-		DataHandler* observer)
+		DataObserver* observer)
 		: participant_(participant)
 		, subscriber_(nullptr)
 		, reader_(nullptr)
@@ -130,7 +130,7 @@ public:
 private:
 	T data_sample_;
 
-	DataHandler* observer_;
+	DataObserver* observer_;
 
 	std::atomic<bool> stop_;
 
@@ -233,7 +233,7 @@ public:
 	AbstractDdsSubscriber* createSubscriber(
 		eprosima::fastdds::dds::DomainParticipant* participant,
 		const SubscriberConfig& config,
-		DataHandler* observer) const;
+		DataObserver* observer) const;
 protected:
 
 };
