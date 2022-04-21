@@ -237,7 +237,7 @@ TEST(WsDataTransmitionTest, DdsDataTransmition) {
             << " size: " << conf.configs[0].vector_size << std::endl;
         mysub->changeSubsConfig(conf);
         std::thread ws_thread([](SubscriberService* mysub) {
-            mysub->runWsService();
+            mysub->notifyingWsService();
             }, mysub);
         mysub->runSubscribers();
         ws_thread.join();

@@ -47,17 +47,17 @@ public:
 	DataObserver(IServer* server);
 
 	bool sendDdsData();
-	void update(DDSData data, const AdditionalTopicInfo& info);
-	void update(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
-	void update(const DDSDataEx& data, const AdditionalTopicInfo& info);
-	void update(const DDSDataEx& data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
+	void cache(DDSData data, const AdditionalTopicInfo& info);
+	void cache(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
+	void cache(const DDSDataEx& data, const AdditionalTopicInfo& info);
+	void cache(const DDSDataEx& data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
 	std::deque<MediateDataDto> getDataCacheCopy() const;
 
 	bool sendDdsAlarm();
-	void update(DDSAlarm data, const AdditionalTopicInfo& info);
-	void update(DDSAlarm data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
-	void update(const DDSAlarmEx& data, const AdditionalTopicInfo& info);
-	void update(const DDSAlarmEx& data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
+	void cache(DDSAlarm data, const AdditionalTopicInfo& info);
+	void cache(DDSAlarm data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
+	void cache(const DDSAlarmEx& data, const AdditionalTopicInfo& info);
+	void cache(const DDSAlarmEx& data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
 	std::deque<MediateAlarmDto> getAlarmCacheCopy() const;
 
 private:

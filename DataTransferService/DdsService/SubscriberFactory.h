@@ -144,7 +144,7 @@ private:
 	void setDataSize() {};
 
 	void cacheData(const T& data_) {
-		observer_->update(data_, config_.info);
+		observer_->cache(data_, config_.info);
 	}
 
 	void runDataSending();

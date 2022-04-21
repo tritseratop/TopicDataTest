@@ -250,7 +250,7 @@ void SubscriberService::runSubscribers()
 	stop_ws_server_ = true;
 }
 
-void SubscriberService::runWsService()
+void SubscriberService::notifyingWsService()
 {
 	while (!stop_ws_server_)
 	{

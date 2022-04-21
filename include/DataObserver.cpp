@@ -191,17 +191,17 @@ bool DataObserver::sendDdsAlarm()
 	return false;
 }
 
-void DataObserver::update(DDSData data, const AdditionalTopicInfo& info)
+void DataObserver::cache(DDSData data, const AdditionalTopicInfo& info)
 {
 	data_cache_.push_back(mapper_.mapDdsData(std::move(data), info));
 }
 
-void DataObserver::update(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info)
+void DataObserver::cache(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info)
 {
 	data_cache_.push_back(mapper_.mapDdsData(std::move(data), info));
 }
 
-void DataObserver::update(const DDSDataEx& data, const AdditionalTopicInfo& info)
+void DataObserver::cache(const DDSDataEx& data, const AdditionalTopicInfo& info)
 {
 	if (!data_cache_.empty())
 	{
@@ -214,12 +214,12 @@ void DataObserver::update(const DDSDataEx& data, const AdditionalTopicInfo& info
 	}
 }
 
-void DataObserver::update(DDSAlarm data, const AdditionalTopicInfo& info)
+void DataObserver::cache(DDSAlarm data, const AdditionalTopicInfo& info)
 {
 
 }
 
-void DataObserver::update(const DDSAlarmEx& data, const AdditionalTopicInfo& info)
+void DataObserver::cache(const DDSAlarmEx& data, const AdditionalTopicInfo& info)
 {
 
 }
