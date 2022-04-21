@@ -15,8 +15,8 @@ class DdsTopicToMediateDtoMapper
 public:
 	MediateDataDto mapDdsData(DDSData data, const AdditionalTopicInfo& info);
 	MediateDataDto mapDdsDataEx(MediateDataDto prev_dto, const DDSDataEx& cur_data_ex, const AdditionalTopicInfo& info);
-	AlarmDto mapDdsAlarm(DDSAlarm data, const AdditionalTopicInfo& info);
-	AlarmDto mapDdsAlarmEx(AlarmDto prev_dto, const DDSAlarmEx& cur_data_ex, const AdditionalTopicInfo& info);
+	MediateAlarmDto mapDdsAlarm(DDSAlarm data, const AdditionalTopicInfo& info);
+	MediateAlarmDto mapDdsAlarmEx(MediateAlarmDto prev_dto, const DDSAlarmEx& cur_data_ex, const AdditionalTopicInfo& info);
 
 	template<class DtoDataCollection, class DdsSample>
 	void fillChanged(DtoDataCollection& prev_dto_collection, const std::vector<DdsSample>& cur_samples, const TagToIndex& tag_to_index);
@@ -58,14 +58,14 @@ public:
 	void update(DDSAlarm data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
 	void update(const DDSAlarmEx& data, const AdditionalTopicInfo& info);
 	void update(const DDSAlarmEx& data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
-	std::deque<AlarmDto> getAlarmCacheCopy() const;
+	std::deque<MediateAlarmDto> getAlarmCacheCopy() const;
 
 private:
 	bool stop_sending_data_;
 	ThreadSafeDeque<MediateDataDto> data_cache_;
 
 	bool stop_sending_alarm_;
-	ThreadSafeDeque<AlarmDto> alarm_cache_;
+	ThreadSafeDeque<MediateAlarmDto> alarm_cache_;
 
 	DdsTopicToMediateDtoMapper mapper_;
 	MediateDtoToWsDtoMapper ws_mapper_;

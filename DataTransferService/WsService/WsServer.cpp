@@ -43,7 +43,7 @@ bool WebsockServer::sendData(WsDataDto::Wrapper data) {
 	return true;
 }
 
-//bool WebsockServer::sendAlarm(AlarmDto data) {
+//bool WebsockServer::sendAlarm(MediateAlarmDto data) {
 //	OATPP_COMPONENT(std::shared_ptr<WsSocketListener>, sock_listener);
 //	//TODO маппинг
 //	sock_listener->sendMessageToAllAsync(oatpp::String("I'm here"));

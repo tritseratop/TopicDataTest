@@ -215,7 +215,7 @@ struct MediateDataDto
 	}
 };
 
-struct AlarmDto
+struct MediateAlarmDto
 {
 	int64_t time_service;
 	std::vector<int64_t> time_source;
@@ -244,7 +244,7 @@ struct AlarmDto
 		quality.resize(size);
 	}
 
-	friend bool operator==(const AlarmDto& lhs, const AlarmDto& rhs)
+	friend bool operator==(const MediateAlarmDto& lhs, const MediateAlarmDto& rhs)
 	{
 		return std::equal(lhs.time_source.begin(), lhs.time_source.end(), rhs.time_source.begin(), rhs.time_source.end())
 			&& std::equal(lhs.id_tag.begin(), lhs.id_tag.end(), rhs.id_tag.begin(), rhs.id_tag.end())

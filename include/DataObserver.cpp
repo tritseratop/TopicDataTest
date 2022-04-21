@@ -59,12 +59,12 @@ MediateDataDto DdsTopicToMediateDtoMapper::mapDdsDataEx(MediateDataDto prev_dto,
 	return prev_dto;
 }
 
-AlarmDto DdsTopicToMediateDtoMapper::mapDdsAlarm(DDSAlarm data,const AdditionalTopicInfo& info)
+MediateAlarmDto DdsTopicToMediateDtoMapper::mapDdsAlarm(DDSAlarm data,const AdditionalTopicInfo& info)
 {
 	auto tags = info.tags.at(DataCollectiionType::ALARM_UINT32);
 	tags.resize(data.alarms().size());
 
-	AlarmDto result{
+	MediateAlarmDto result{
 		data.time_service(),
 		std::vector(data.alarms().size(), data.time_source()),
 		std::move(tags),
@@ -74,7 +74,7 @@ AlarmDto DdsTopicToMediateDtoMapper::mapDdsAlarm(DDSAlarm data,const AdditionalT
 	return result;
 }
 
-AlarmDto DdsTopicToMediateDtoMapper::mapDdsAlarmEx(AlarmDto prev_dto, const DDSAlarmEx& cur_data_ex, const AdditionalTopicInfo& info)
+MediateAlarmDto DdsTopicToMediateDtoMapper::mapDdsAlarmEx(MediateAlarmDto prev_dto, const DDSAlarmEx& cur_data_ex, const AdditionalTopicInfo& info)
 {
 	prev_dto.time_service = cur_data_ex.time_service();
 	fillChanged(prev_dto, cur_data_ex.alarms(), info.tag_to_index.at(DataCollectiionType::ALARM_UINT32));

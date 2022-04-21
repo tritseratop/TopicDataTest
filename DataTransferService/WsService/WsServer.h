@@ -15,7 +15,7 @@ public:
 	void run();
 	void stop();
 	virtual bool sendData(WsDataDto::Wrapper data) override;
-	//virtual bool sendAlarm(AlarmDto data) override;
+	//virtual bool sendAlarm(MediateAlarmDto data) override;
 private:
 	std::shared_ptr<oatpp::parser::json::mapping::ObjectMapper> json_object_mapper;
 	const Configure config_;
