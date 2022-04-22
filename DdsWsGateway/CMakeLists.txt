@@ -1,9 +1,9 @@
-﻿# CMakeList.txt : CMake project for PublisherProject, include source and define
+﻿# CMakeList.txt : CMake project for SubscriberProject, include source and define
 # project specific logic here.
 #
 cmake_minimum_required (VERSION 3.8)
 
-project(PublisherProject)
+project(DdsWsGateway)
 
 # Find requirements
 if(NOT fastcdr_FOUND)
@@ -24,20 +24,29 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANG OR
     endif()
 endif()
 
+find_package(oatpp REQUIRED)
+find_package(oatpp-websocket REQUIRED)
+
 message(STATUS "Configuring HelloWorld example...")
 
-file(GLOB DDS_PUBLISHER_CPP 
-        "PublisherFactory.h" 
-        "PublisherFactory.cpp" 
+file(GLOB DATA_TRANSFER_PROJECT_CPP
+        "DdsService/*.h" 
+        "DdsService/*.cpp"
+        "WsService/*.cpp"
+        "WsService/*.h"
         "*.cpp" 
+        "*.h" 
 )
 
 # Add source to this project's executable.
-add_executable (PublisherProject  ${DDS_PUBLISHER_CPP})
-target_link_libraries(PublisherProject 
-    fastrtps 
-    fastcdr
-    DdsWsGatewayUtilities
+add_library (DdsWsGateway  ${DATA_TRANSFER_PROJECT_CPP})
+target_link_libraries(DdsWsGateway 
+        PUBLIC fastrtps 
+        PUBLIC fastcdr
+        PUBLIC oatpp::oatpp
+        PUBLIC oatpp::oatpp-test
+        PUBLIC oatpp::oatpp-websocket
+        PUBLIC DdsWsGatewayUtilities
 )
 
 # TODO: Add tests and install targets if needed.

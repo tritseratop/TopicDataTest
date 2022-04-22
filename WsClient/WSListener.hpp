@@ -1,12 +1,12 @@
 #ifndef WSListener_hpp
 #define WSListener_hpp
 
+#include "../DdsWsGatewayUtilities/DdsCommonClasses.h"
+#include "../DdsWsGatewayUtilities/WsDto.h"
+
 #include "oatpp-websocket/ConnectionHandler.hpp"
 #include "oatpp-websocket/AsyncWebSocket.hpp"
 #include "oatpp-websocket/Connector.hpp"
-
-#include "../include/DdsCommonClasses.h"
-#include "../include/WsDto.h"
 
 class WSClient;
 

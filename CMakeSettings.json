@@ -23,7 +23,7 @@
         },
         {
           "name": "oatpp-websocket_DIR",
-          "value": "C:\\Program Files (x86)\\oatpp-websocket\\lib\\cmake\\oatpp-1.3.0",
+          "value": "C:\\Program Files (x86)\\oatpp-websocket\\lib\\cmake\\oatpp-websocket-1.3.0",
           "type": "PATH"
         }
       ]

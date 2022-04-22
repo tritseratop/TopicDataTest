@@ -64,16 +64,16 @@ int main(
 
         if (argc > 2)
         {
-            if (argv[2] = "UDP")
+            if (std::string(argv[2]) == "UDP")
             {
                 transport = Transport::UDP;
             }
 
-            if (argc > 3)
+            if (std::string(argv[3]) == "1")
             {
-                isSync = argv[3];
+                isSync = true;
             }
-            
+
         }
     }
 

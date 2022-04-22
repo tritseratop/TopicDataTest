@@ -1,8 +1,9 @@
-#include "../DataTransferService/DdsService/DdsSubscriber.h"
-#include "../DataTransferService/WsService/WsServer.h"
+#include "../DdsWsGateway/DdsSubscriber.h"
+#include "../DdsWsGateway/WsService/WsServer.h"
 #include <gtest/gtest.h>
-#include "../include/TestUtility.h"
-#include "../include/WsTestUtility.h"
+#include "../DdsWsGatewayUtilities/DdsTestUtility.h"
+#include "../DdsWsGatewayUtilities/WsTestUtility.h"
+#include "../DdsWsGatewayUtilities/DataObserver.h"
 
 std::vector<SubscriberConfig> configs({
         {0, 100, "DDSData1", "DDSData", TopicType::DDS_DATA, 100, 100},

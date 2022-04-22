@@ -1,8 +1,9 @@
 #ifndef PUBLISHER_FACTORY_H_
 #define PUBLISHER_FACTORY_H_
 
-#include <thread>
-#include <mutex>
+#include "../DdsWsGatewayUtilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "../DdsWsGatewayUtilities/TimeConverter/TimeConverter.hpp"
+#include "../DdsWsGatewayUtilities/DdsCommonClasses.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/topic/TypeSupport.hpp>
@@ -12,9 +13,8 @@
 
 #include <fastrtps/transport/TCPv4TransportDescriptor.h>
 
-#include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "../include/TimeConverter/TimeConverter.hpp"
-#include "../include/DdsCommonClasses.h"
+#include <thread>
+#include <mutex>
 
 using eprosima::fastrtps::types::ReturnCode_t;
 
@@ -106,6 +106,12 @@ public:
 		wqos.reliability().kind = eprosima::fastdds::dds::RELIABLE_RELIABILITY_QOS;
 		wqos.durability().kind = eprosima::fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
 		wqos.deadline().period.nanosec = config_.sleep * 1000;
+
+		if (config_.isSync)
+		{
+			wqos.publish_mode().kind = eprosima::fastdds::dds::SYNCHRONOUS_PUBLISH_MODE;
+		}
+
 		writer_ = publisher_->create_datawriter(topic_, wqos, &listener_);
 		if (writer_ == nullptr)
 		{

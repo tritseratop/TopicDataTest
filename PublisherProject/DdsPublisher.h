@@ -1,8 +1,10 @@
 #ifndef DDSPUBLISHER_H_
 #define DDSPUBLISHER_H_
 
-#include <thread>
-#include <mutex>
+#include "../DdsWsGatewayUtilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "../DdsWsGatewayUtilities/ConfigTopic/ConfigTopicPubSubTypes.h"
+#include "../DdsWsGatewayUtilities/DdsCommonClasses.h"
+#include "PublisherFactory.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/topic/TypeSupport.hpp>
@@ -10,10 +12,8 @@
 #include <fastdds/dds/publisher/DataWriter.hpp>
 #include <fastdds/dds/publisher/DataWriterListener.hpp>
 
-#include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "../ConfigTopic/ConfigTopicPubSubTypes.h"
-#include "../include/DdsCommonClasses.h"
-#include "PublisherFactory.h"
+#include <thread>
+#include <mutex>
 
 class PublisherService
 {
