@@ -13,8 +13,12 @@ set(CMAKE_BUILD_TYPE Debug)
 add_executable( RunUnitTests Tests.cpp)
 # set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc" "-static-libstdc++")
 # Link test executable against gtest & gtest_main
-target_link_libraries(RunUnitTests ${GTEST_BOTH_LIBRARIES} DataTransferService)
-add_test( RunUnitTests RunUnitTests)
+target_link_libraries(RunUnitTests ${GTEST_BOTH_LIBRARIES} 
+	DdsWsGateway
+	DdsWsGatewayUtilities
+
+)
+add_test(RunUnitTests RunUnitTests)
 
 #include(GoogleTest)
 #gtest_discover_tests(RunUnitTests)

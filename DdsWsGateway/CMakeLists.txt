@@ -34,6 +34,8 @@ file(GLOB DATA_TRANSFER_PROJECT_CPP
         "DdsService/*.cpp"
         "WsService/*.cpp"
         "WsService/*.h"
+        "DataObserver/*.cpp"
+        "DataObserver/*.h"
         "*.cpp" 
         "*.h" 
 )

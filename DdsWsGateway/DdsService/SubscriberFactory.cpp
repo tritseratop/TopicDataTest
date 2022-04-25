@@ -32,7 +32,7 @@ void ConcreteSubscriber<DDSData, DDSDataPubSubType>::runDataSending()
 AbstractDdsSubscriber* SubscriberFactory::createSubscriber(
 	eprosima::fastdds::dds::DomainParticipant* participant,
 	const SubscriberConfig& config,
-	DataObserver* observer) const
+	DataCacher* observer) const
 {
 	switch (config.topic_type)
 	{

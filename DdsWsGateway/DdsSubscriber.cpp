@@ -12,7 +12,7 @@
 using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
 
-SubscriberService::SubscriberService(const ServiceConfig<SubscriberConfig>& config, IServer* server)
+SubscriberService::SubscriberService(const ServiceConfig<SubscriberConfig>& config, std::vector<IServer*> servers)
 	: participant_(nullptr)
 	, config_(config)
 	, config_subscriber_(nullptr)
@@ -20,7 +20,8 @@ SubscriberService::SubscriberService(const ServiceConfig<SubscriberConfig>& conf
 	, config_topic_(nullptr)
 	, config_type_(new ConfigTopicPubSubType())
 	, config_listener_(this)
-	, observer_(server)
+	, cacher_(5)
+	, observer_(servers, &cacher_)
 	, stop_ws_server_(false)
 {
 	//TODO где вызывать?
@@ -223,7 +224,7 @@ bool SubscriberService::initSubscribers()
 bool SubscriberService::createNewSubscriber(const SubscriberConfig& config)
 {
 	// TODO: узнать че менять в SUBSCRIBER_QOS_DEFAULT
-	AbstractDdsSubscriber* sub = factory_.createSubscriber(participant_, config, &observer_);
+	AbstractDdsSubscriber* sub = factory_.createSubscriber(participant_, config, &cacher_);
 	if (sub == nullptr)
 	{
 		return false;
@@ -315,5 +316,5 @@ void SubscriberService::setVectorSizesInDataTopic()
 
 std::deque<MediateDataDto> SubscriberService::getDataCacheCopy() const
 {
-	return observer_.getDataCacheCopy();
+	return cacher_.getDataCacheCopy();
 }

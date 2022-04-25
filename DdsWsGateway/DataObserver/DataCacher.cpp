@@ -1,12 +1,12 @@
 #include <utility>
 
-#include "DataObserver.h"
+#include "DataCacher.h"
 
 MediateDataDto DdsTopicToMediateDtoMapper::mapDdsData(DDSData data, const AdditionalTopicInfo& info)
 {
 	std::vector<std::vector<char>> data_char;
 	data_char.reserve(data.data_char().value().size());
-	
+
 	auto tags = info.tags;
 	for (auto& [type, tag] : tags)
 	{
@@ -20,23 +20,23 @@ MediateDataDto DdsTopicToMediateDtoMapper::mapDdsData(DDSData data, const Additi
 
 	MediateDataDto	result{
 		data.time_service(),
-		{ 
+		{
 			std::vector(data.data_int().value().size(), data.time_source()),
 			std::move(tags.at(DataCollectiionType::DATA_INT)),
 			std::move(data.data_int().value()),
-			std::move(data.data_int().quality()) 
+			std::move(data.data_int().quality())
 		},
-		{ 
+		{
 			std::vector(data.data_float().value().size(), data.time_source()),
 			std::move(tags.at(DataCollectiionType::DATA_FLOAT)),
 			std::move(data.data_float().value()),
-			std::move(data.data_float().quality()) 
+			std::move(data.data_float().quality())
 		},
 		{
 			std::vector(data.data_double().value().size(), data.time_source()),
 			std::move(tags.at(DataCollectiionType::DATA_DOUBLE)),
 			std::move(data.data_double().value()),
-			std::move(data.data_double().quality()) 
+			std::move(data.data_double().quality())
 		},
 		{
 			std::vector(data.data_char().value().size(), data.time_source()),
@@ -59,7 +59,7 @@ MediateDataDto DdsTopicToMediateDtoMapper::mapDdsDataEx(MediateDataDto prev_dto,
 	return prev_dto;
 }
 
-MediateAlarmDto DdsTopicToMediateDtoMapper::mapDdsAlarm(DDSAlarm data,const AdditionalTopicInfo& info)
+MediateAlarmDto DdsTopicToMediateDtoMapper::mapDdsAlarm(DDSAlarm data, const AdditionalTopicInfo& info)
 {
 	auto tags = info.tags.at(DataCollectiionType::ALARM_UINT32);
 	tags.resize(data.alarms().size());
@@ -146,7 +146,7 @@ void MediateDtoToWsDtoMapper::fillVector(oatpp::Vector<OatppT>& oatpp_v, const s
 }
 
 void MediateDtoToWsDtoMapper::fillVector(
-	oatpp::Vector<oatpp::String>& oatpp_v, 
+	oatpp::Vector<oatpp::String>& oatpp_v,
 	const std::vector<std::vector<char>>& v)
 {
 	oatpp_v = {};
@@ -164,44 +164,22 @@ void MediateDtoToWsDtoMapper::fillVector(oatpp::String& oatpp_v, const std::vect
 	oatpp_v = oatpp::String(str.c_str());
 }
 
-DataObserver::DataObserver(IServer* server)
-	: server_(server)
-	, stop_sending_data_(false)
-	, stop_sending_alarm_(false)
+DataCacher::DataCacher(size_t depth)
+	: depth_(depth)
 {
 }
 
-bool DataObserver::sendDdsData()
-{
-	if (server_ != nullptr)
-	{
-		auto data = data_cache_.pop_front();
-		if (data.has_value())
-		{
-			auto ws_dto = ws_mapper_.mapDataDto(data.value());
-			server_->sendData(ws_dto);
-		}
-		return true;
-	}
-	return false;
-}
-
-bool DataObserver::sendDdsAlarm()
-{
-	return false;
-}
-
-void DataObserver::cache(DDSData data, const AdditionalTopicInfo& info)
+void DataCacher::cache(DDSData data, const AdditionalTopicInfo& info)
 {
 	data_cache_.push_back(mapper_.mapDdsData(std::move(data), info));
 }
 
-void DataObserver::cache(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info)
+void DataCacher::cache(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info)
 {
 	data_cache_.push_back(mapper_.mapDdsData(std::move(data), info));
 }
 
-void DataObserver::cache(const DDSDataEx& data, const AdditionalTopicInfo& info)
+void DataCacher::cache(const DDSDataEx& data, const AdditionalTopicInfo& info)
 {
 	if (!data_cache_.empty())
 	{
@@ -214,17 +192,23 @@ void DataObserver::cache(const DDSDataEx& data, const AdditionalTopicInfo& info)
 	}
 }
 
-void DataObserver::cache(DDSAlarm data, const AdditionalTopicInfo& info)
+
+std::optional<MediateDataDto> DataCacher::popDdsDto()
+{
+	return data_cache_.pop_front();
+}
+
+void DataCacher::cache(DDSAlarm data, const AdditionalTopicInfo& info)
 {
 
 }
 
-void DataObserver::cache(const DDSAlarmEx& data, const AdditionalTopicInfo& info)
+void DataCacher::cache(const DDSAlarmEx& data, const AdditionalTopicInfo& info)
 {
 
 }
 
-std::deque<MediateDataDto> DataObserver::getDataCacheCopy() const
+std::deque<MediateDataDto> DataCacher::getDataCacheCopy() const
 {
 	return data_cache_.getDequeCopy();
 }

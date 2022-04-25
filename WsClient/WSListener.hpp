@@ -1,7 +1,7 @@
 #ifndef WSListener_hpp
 #define WSListener_hpp
 
-#include "../DdsWsGatewayUtilities/DdsCommonClasses.h"
+#include "../DdsWsGatewayUtilities/WsCommonClasses.h"
 #include "../DdsWsGatewayUtilities/WsDto.h"
 
 #include "oatpp-websocket/ConnectionHandler.hpp"

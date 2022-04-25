@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include "../DdsWsGatewayUtilities/DdsTestUtility.h"
 #include "../DdsWsGatewayUtilities/WsTestUtility.h"
-#include "../DdsWsGatewayUtilities/DataObserver.h"
+#include "../DdsWsGateway/DataObserver/DataObserver.h"
 
 std::vector<SubscriberConfig> configs({
         {0, 100, "DDSData1", "DDSData", TopicType::DDS_DATA, 100, 100},
@@ -228,8 +228,9 @@ TEST(WsDataTransmitionTest, DdsDataTransmition) {
     std::thread tcp_thread([](WebsockServer& server) {
         server.run();
         }, std::ref(server));
-
-    SubscriberService* mysub = new SubscriberService(default_service_config, &server);
+    std::vector<IServer*> servers;
+    servers.push_back(&server);
+    SubscriberService* mysub = new SubscriberService(default_service_config, servers);
     
     int i = 1;
     for (auto conf : configs)

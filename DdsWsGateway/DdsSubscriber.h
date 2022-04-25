@@ -18,7 +18,7 @@
 
 class SubscriberService {
 public: 
-	SubscriberService(const ServiceConfig<SubscriberConfig>& config, IServer* server);
+	SubscriberService(const ServiceConfig<SubscriberConfig>& config, std::vector<IServer*> servers);
 	virtual ~SubscriberService();
 
 	bool initConfigSubscriber();
@@ -45,6 +45,7 @@ private:
 
 	SubscriberFactory factory_;
 	DataObserver observer_;
+	DataCacher cacher_;
 
 	//  онтейнеры с пользовательскими типам
 	std::vector<AbstractDdsSubscriber*> subscribers_;

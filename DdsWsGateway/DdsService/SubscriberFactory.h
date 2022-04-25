@@ -2,7 +2,7 @@
 #define SUBSCRIBER_FACTORY_H_
 
 
-#include "../../DdsWsGatewayUtilities/DataObserver.h"
+#include "../DataObserver/DataObserver.h"
 #include "../../DdsWsGatewayUtilities/ThreadSafeQueue/ThreadSafeQueue.h"
 #include "../../DdsWsGatewayUtilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "../../DdsWsGatewayUtilities/DdsCommonClasses.h"
@@ -31,7 +31,7 @@ public:
 	ConcreteSubscriber(
 		eprosima::fastdds::dds::DomainParticipant* participant,
 		const SubscriberConfig& config,
-		DataObserver* observer)
+		DataCacher* observer)
 		: participant_(participant)
 		, subscriber_(nullptr)
 		, reader_(nullptr)
@@ -130,7 +130,7 @@ public:
 private:
 	T data_sample_;
 
-	DataObserver* observer_;
+	DataCacher* observer_;
 
 	std::atomic<bool> stop_;
 
@@ -233,7 +233,7 @@ public:
 	AbstractDdsSubscriber* createSubscriber(
 		eprosima::fastdds::dds::DomainParticipant* participant,
 		const SubscriberConfig& config,
-		DataObserver* observer) const;
+		DataCacher* observer) const;
 protected:
 
 };

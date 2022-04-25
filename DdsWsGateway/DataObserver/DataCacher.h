@@ -1,11 +1,10 @@
-#ifndef DATA_OBSERVER_H_
-#define DATA_OBSERVER_H_
+#ifndef DATA_CACHER_H_
+#define DATA_CACHER_H_
 
-#include "ThreadSafeQueue/ThreadSafeQueue.h"
-#include "TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "DdsCommonClasses.h"
-#include "WsCommonClasses.h"
-#include "WsDto.h"
+#include "../../DdsWsGatewayUtilities/ThreadSafeQueue/ThreadSafeQueue.h"
+#include "../../DdsWsGatewayUtilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "../../DdsWsGatewayUtilities/DdsCommonClasses.h"
+#include "../../DdsWsGatewayUtilities/WsDto.h"
 
 #include <deque>
 #include <unordered_map>
@@ -15,6 +14,7 @@ class DdsTopicToMediateDtoMapper
 public:
 	MediateDataDto mapDdsData(DDSData data, const AdditionalTopicInfo& info);
 	MediateDataDto mapDdsDataEx(MediateDataDto prev_dto, const DDSDataEx& cur_data_ex, const AdditionalTopicInfo& info);
+
 	MediateAlarmDto mapDdsAlarm(DDSAlarm data, const AdditionalTopicInfo& info);
 	MediateAlarmDto mapDdsAlarmEx(MediateAlarmDto prev_dto, const DDSAlarmEx& cur_data_ex, const AdditionalTopicInfo& info);
 
@@ -41,35 +41,32 @@ private:
 	void fillVector(oatpp::String& oatpp_v, const std::vector<char>& v);
 };
 
-class DataObserver
+class DataCacher
 {
 public:
-	DataObserver(IServer* server);
+	DataCacher(size_t depth);
 
-	bool sendDdsData();
 	void cache(DDSData data, const AdditionalTopicInfo& info);
 	void cache(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
 	void cache(const DDSDataEx& data, const AdditionalTopicInfo& info);
 	void cache(const DDSDataEx& data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
+	std::optional<MediateDataDto> popDdsDto();
 	std::deque<MediateDataDto> getDataCacheCopy() const;
 
-	bool sendDdsAlarm();
 	void cache(DDSAlarm data, const AdditionalTopicInfo& info);
 	void cache(DDSAlarm data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
 	void cache(const DDSAlarmEx& data, const AdditionalTopicInfo& info);
 	void cache(const DDSAlarmEx& data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info);
+	//std::optional<WsDataDto::Wrapper> popDdsAlarm();
 	std::deque<MediateAlarmDto> getAlarmCacheCopy() const;
 
 private:
-	bool stop_sending_data_;
-	ThreadSafeDeque<MediateDataDto> data_cache_;
+	size_t depth_;
 
-	bool stop_sending_alarm_;
+	ThreadSafeDeque<MediateDataDto> data_cache_;
 	ThreadSafeDeque<MediateAlarmDto> alarm_cache_;
 
 	DdsTopicToMediateDtoMapper mapper_;
-	MediateDtoToWsDtoMapper ws_mapper_;
-	IServer* server_;
 };
 
-#endif//!DATA_OBSERVER_H_
+#endif//!DATA_CACHER_H_

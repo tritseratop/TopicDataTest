@@ -12,6 +12,6 @@ add_subdirectory ("PublisherProject")
 add_subdirectory ("DdsWsGateway")
 add_subdirectory ("DdsWsGatewayUtilities")
 add_subdirectory ("WsClient")
-add_subdirectory ("TestService")
+add_subdirectory ("TestDdsWsGateway")
 
 # target_include_directories(SubscriberProject ${SOURCE_DIR}/src ${SOURCE_DIR} src)

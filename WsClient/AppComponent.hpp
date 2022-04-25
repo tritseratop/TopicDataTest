@@ -1,11 +1,11 @@
 #ifndef AppComponent_hpp
 #define AppComponent_hpp
 
+#include "../DdsWsGatewayUtilities/WsCommonClasses.h"
+
 #include "oatpp/core/async/Executor.hpp"
 #include "oatpp/network/tcp/client/ConnectionProvider.hpp"
 #include "oatpp/core/macro/component.hpp"
-
-#include "../DdsWsGatewayUtilities/WsCommonClasses.h"
 
 class AppComponent {
 private:
