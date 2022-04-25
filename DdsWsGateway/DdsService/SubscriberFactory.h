@@ -6,6 +6,7 @@
 #include "../../DdsWsGatewayUtilities/ThreadSafeQueue/ThreadSafeQueue.h"
 #include "../../DdsWsGatewayUtilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "../../DdsWsGatewayUtilities/DdsCommonClasses.h"
+#include "../../DdsWsGatewayUtilities/PackageAnalyser.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/subscriber/Subscriber.hpp>
@@ -96,13 +97,13 @@ public:
 		}
 
 		eprosima::fastdds::dds::DataReaderQos rqos;
-		rqos.history().kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
+		/*rqos.history().kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
 		rqos.history().depth = 30;
 		rqos.resource_limits().max_samples = 50;
 		rqos.resource_limits().allocated_samples = 20;
 		rqos.reliability().kind = eprosima::fastdds::dds::RELIABLE_RELIABILITY_QOS;
 		rqos.durability().kind = eprosima::fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
-		rqos.deadline().period.nanosec = config_.sleep * 1000;
+		rqos.deadline().period.nanosec = config_.sleep * 1000;*/
 		reader_ = subscriber_->create_datareader(
 			topic_,
 			rqos,
@@ -156,6 +157,7 @@ private:
 			ConcreteSubscriber* subscriber)
 			: matched_(0)
 			, samples_(0)
+			, first_(false)
 			, sub_(subscriber)
 		{
 		}
@@ -170,6 +172,19 @@ private:
 			eprosima::fastdds::dds::SampleInfo info;
 			if (reader->take_next_sample(&data_sample_, &info) == ReturnCode_t::RETCODE_OK)
 			{
+				auto timestamp = TimeConverter::GetTime_LLmcs();
+				if (first_ == false)
+				{
+					analyser_ = PackageAnalyser::getInstance();
+					analyser_->resetStart();
+					first_ = true;
+				}
+				analyser_->pushPackageTimestamp({
+					data_sample_.time_service(),
+					timestamp,
+					timestamp - data_sample_.time_service(),
+					T::getCdrSerializedSize(data_sample_)
+					});
 				if (info.valid_data)
 				{
 					samples_++;
@@ -222,6 +237,8 @@ private:
 		int matched_;
 		uint32_t samples_; // TODO atomic??
 		T data_sample_;
+		bool first_;
+		PackageAnalyser* analyser_;
 		ConcreteSubscriber* sub_;
 	} listener_;
 };

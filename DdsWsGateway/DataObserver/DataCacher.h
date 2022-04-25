@@ -5,6 +5,7 @@
 #include "../../DdsWsGatewayUtilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "../../DdsWsGatewayUtilities/DdsCommonClasses.h"
 #include "../../DdsWsGatewayUtilities/WsDto.h"
+#include "../../DdsWsGatewayUtilities/PackageAnalyser.h"
 
 #include <deque>
 #include <unordered_map>
@@ -67,6 +68,8 @@ private:
 	ThreadSafeDeque<MediateAlarmDto> alarm_cache_;
 
 	DdsTopicToMediateDtoMapper mapper_;
+
+	PackageAnalyser* analyser_;
 };
 
 #endif//!DATA_CACHER_H_

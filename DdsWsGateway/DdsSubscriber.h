@@ -4,6 +4,7 @@
 #include "../DdsWsGatewayUtilities/ConfigTopic/ConfigTopicPubSubTypes.h"
 #include "../DdsWsGatewayUtilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "../DdsWsGatewayUtilities/WsCommonClasses.h"
+#include "../DdsWsGatewayUtilities/PackageAnalyser.h"
 #include "DdsService/SubscriberFactory.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
@@ -46,6 +47,8 @@ private:
 	SubscriberFactory factory_;
 	DataObserver observer_;
 	DataCacher cacher_;
+
+	PackageAnalyser* analyser_;
 
 	//  онтейнеры с пользовательскими типам
 	std::vector<AbstractDdsSubscriber*> subscribers_;

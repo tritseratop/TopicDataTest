@@ -8,9 +8,9 @@ project ("TopicDataTest")
 set(CMAKE_CXX_STANDARD 17)
 
 # Include sub-projects.
+add_subdirectory ("DdsWsGatewayUtilities")
 add_subdirectory ("PublisherProject")
 add_subdirectory ("DdsWsGateway")
-add_subdirectory ("DdsWsGatewayUtilities")
 add_subdirectory ("WsClient")
 add_subdirectory ("TestDdsWsGateway")
 

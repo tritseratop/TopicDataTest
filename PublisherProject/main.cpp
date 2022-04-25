@@ -1,56 +1,12 @@
 #include "DdsPublisher.h"
 
-#define TEST_MODE
-#ifdef TEST_MODE
-
-std::vector<PublisherConfig> configs({
-        {0, 100, "DDSData1", "DDSData", TopicType::DDS_DATA, 100, 100}, 
-//        {1, 10000, "DDSData2", "DDSData", TopicType::DDS_DATA, 100, 50},
-//        {2, 10000, "DDSData3", "DDSData", TopicType::DDS_DATA, 100, 10}
-    });
-
-ServiceConfig<PublisherConfig> config({
-    "Participant_pub",
-    Transport::TCP,
-    "127.0.0.1",
-    4042,
-    {"127.0.0.1"},
-    configs,
-    1000, 
-    1000,
-    1000,
-    1000,
-    1000,
-    1000,
-    1000,
-    1000,
-    1000,
-    1000,
-    1000,
-    1000
-    });
-
-#endif
-
-DDSData getDdsData()
-{
-    DDSData ddsData;
-    ddsData.time_source(0);
-    ddsData.time_service(0);
-    //std::vector<int> v(10, 1);
-    //DataCollectionInt dataCollectionInt;
-    //dataCollectionInt.value(v);
-    //ddsData.data_int(dataCollectionInt);
-    return ddsData;
-}
-
 int main(
     int argc,
     char** argv)
 {
-    std::vector<uint16_t> sizes = { 10 };
+    std::vector<uint16_t> sizes = { 100, 500, 1000, 2000, 4000, 7500, 10000 };
     std::vector<uint32_t> v_sleep = { 100 };
-    uint32_t samples = 50;
+    uint32_t samples = 3000;
 
     // изменяемые настройки
     std::string ip = "127.0.0.1";
@@ -83,7 +39,7 @@ int main(
         ip,
         4042,
         {"127.0.0.1"},
-        configs,
+        {},
         10000,
         10000,
         10000,
@@ -98,10 +54,10 @@ int main(
         10000
     });
     PublisherConfig ddsdata_config = {
-        0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 1000, 
+        0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 1000, isSync
     };
     PublisherConfig ddsdataex_config = {
-        0, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, samples, 1000
+        0, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, samples, 1000, isSync
     };
 
     std::vector<ServiceConfig<PublisherConfig>> configs;
@@ -122,10 +78,7 @@ int main(
         }
     }
 
-    PublisherService* mypub = new PublisherService(config);
-    /*mypub->initPublishers();
-    mypub->setData();
-    mypub->runPublishers();*/
+    PublisherService* mypub = new PublisherService();
 
     int i = 1;
     for (auto conf : configs)

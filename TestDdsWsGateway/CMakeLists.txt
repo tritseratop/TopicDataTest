@@ -3,10 +3,10 @@ project(TestService)
 
 # GTest
 enable_testing()
-find_package(GTest REQUIRED)
+#find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
-set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Debug)
 
 # Unit Tests
 # Add test cpp file
@@ -18,7 +18,7 @@ target_link_libraries(RunUnitTests ${GTEST_BOTH_LIBRARIES}
 	DdsWsGatewayUtilities
 
 )
-add_test(RunUnitTests RunUnitTests)
+#add_test(RunUnitTests RunUnitTests)
 
 #include(GoogleTest)
 #gtest_discover_tests(RunUnitTests)

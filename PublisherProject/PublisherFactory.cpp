@@ -15,13 +15,15 @@ bool operator==(const PublisherConfig& lhs, const PublisherConfig& rhs)
 template<>
 void ConcretePublisher<DDSData, DDSDataPubSubType>::setData()
 {
-	data_ = getDdsData(config_.vector_size);
+	size_t char_size = config_.vector_size / 5 < 100 ? config_.vector_size / 5 : 100;
+	data_ = getDdsData(config_.vector_size, char_size);
 }
 
 template<>
 void ConcretePublisher<DDSDataEx, DDSDataExPubSubType>::setData()
 {
-	data_ = getDdsDataEx(config_.vector_size);
+	size_t char_size = config_.vector_size / 5 < 100 ? config_.vector_size / 5 : 100;
+	data_ = getDdsDataEx(config_.vector_size, char_size);
 }
 
 template<>

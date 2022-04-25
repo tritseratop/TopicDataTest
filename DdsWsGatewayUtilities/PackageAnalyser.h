@@ -11,7 +11,7 @@ struct PackageTimestamp
     int64_t dispatch_time;
     int64_t receiving_time;
     int64_t delivery_time;
-    uint64_t size;
+    size_t size;
 };
 
 
@@ -20,7 +20,7 @@ struct TransitionInfo
     int64_t delivery_time = 0;
     int64_t max_delivery_time = 0;
     int64_t min_delivery_time = 0;
-    uint64_t size = 0;
+    size_t size = 0;
 };
 
 class PackageAnalyser {
@@ -31,11 +31,6 @@ protected:
  
     // ctor
     explicit PackageAnalyser(const char* fname = "logger.txt");
-    void resetStart();
-    void resetStart(int64_t start);
-    void addDataToAnalyse(std::string name);
-    void pushDataTimestamp(std::string name, int64_t distance);
-    void pushPackageTimestamp(PackageTimestamp timestamp);
     // dtor
     ~PackageAnalyser();
 
@@ -44,7 +39,13 @@ public:
     PackageAnalyser(const PackageAnalyser&) = delete;
     void operator= (const PackageAnalyser&) = delete;
 
+    void resetStart();
+    void resetStart(int64_t start);
+    void addDataToAnalyse(std::string name);
+    void pushDataTimestamp(std::string name, int64_t distance);
+    void pushPackageTimestamp(PackageTimestamp timestamp);
     void writeResults() const;
+    void clear();
 
 private:
     int64_t start = 0;

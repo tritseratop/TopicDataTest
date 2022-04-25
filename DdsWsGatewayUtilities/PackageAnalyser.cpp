@@ -33,7 +33,7 @@ void PackageAnalyser::addDataToAnalyse(std::string name)
 }
 void PackageAnalyser::pushDataTimestamp(std::string name, int64_t distance)
 {
-	data_to_analyse.at(name).push_back(distance);
+	data_to_analyse[name].push_back(distance);
 }
 void PackageAnalyser::pushPackageTimestamp(PackageTimestamp timestamp)
 {
@@ -58,13 +58,16 @@ void PackageAnalyser::writeResults() const
 			info.delivery_time += p.delivery_time;
 			info.size += p.size;
 		}
-		file << "Package size:\t\t\t" << dds_package_size;
-		file << "Losted packages:\t\t" + packages_number - packages_.size();
-		file << "Sum of delivery time:\t" + info.delivery_time;
-		file << "Total delivery time:\t" + finish - start;
-		file << "Average delivery time:\t" + info.delivery_time / packages_.size();
-		file << "Max delivery time:\t\t" + info.max_delivery_time;
-		file << "Min delivery time:\t\t" + info.min_delivery_time;
+		file << "Package size:\t\t\t" << dds_package_size << std::endl;
+		file << "Total delivery time:\t" << TimeConverter::GetTime_LLmcs() - start << std::endl;
+		if (packages_number != 0)
+		{
+			file << "Losted packages:\t\t" << packages_number - packages_.size() << std::endl;
+		}
+		file << "Sum of delivery time:\t" << info.delivery_time << std::endl;
+		file << "Avrg delivery time:\t\t" << info.delivery_time / packages_.size() << std::endl;
+		file << "Max delivery time:\t\t" << info.max_delivery_time << std::endl;
+		file << "Min delivery time:\t\t" << info.min_delivery_time << std::endl;
 	}
 	for (const auto& d : data_to_analyse)
 	{
@@ -75,9 +78,15 @@ void PackageAnalyser::writeResults() const
 			{
 				sum += p;
 			}
-			file << "Average time for" + d.first + ":\t" << sum / d.second.size();
+			file << "Average time for " + d.first + ":\t" << sum / d.second.size() << std::endl;
 		}
 	}
+}
+
+void PackageAnalyser::clear()
+{
+	packages_.clear();
+	data_to_analyse.clear();
 }
 
 PackageAnalyser* PackageAnalyser::analyser_ = nullptr;

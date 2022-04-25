@@ -167,11 +167,18 @@ void MediateDtoToWsDtoMapper::fillVector(oatpp::String& oatpp_v, const std::vect
 DataCacher::DataCacher(size_t depth)
 	: depth_(depth)
 {
+	analyser_ = PackageAnalyser::getInstance();
+	analyser_->addDataToAnalyse("DDSData to Dto");
+	analyser_->addDataToAnalyse("DDSDataEx to Dto");
 }
 
 void DataCacher::cache(DDSData data, const AdditionalTopicInfo& info)
 {
+	auto start = TimeConverter::GetTime_LLmcs();
+
 	data_cache_.push_back(mapper_.mapDdsData(std::move(data), info));
+
+	analyser_->pushDataTimestamp("DDSData to Dto", TimeConverter::GetTime_LLmcs() - start);
 }
 
 void DataCacher::cache(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info)
@@ -181,6 +188,8 @@ void DataCacher::cache(DDSData data, const AdditionalTopicInfo& info, const Addi
 
 void DataCacher::cache(const DDSDataEx& data, const AdditionalTopicInfo& info)
 {
+	auto start = TimeConverter::GetTime_LLmcs();
+
 	if (!data_cache_.empty())
 	{
 		data_cache_.push_back(mapper_.mapDdsDataEx(data_cache_.back().value(), data, info));
@@ -190,6 +199,8 @@ void DataCacher::cache(const DDSDataEx& data, const AdditionalTopicInfo& info)
 		//TODO MediateDataDto default constructor check
 		data_cache_.push_back(mapper_.mapDdsDataEx(MediateDataDto(), data, info));
 	}
+
+	analyser_->pushDataTimestamp("DDSDataEx to Dto", TimeConverter::GetTime_LLmcs() - start);
 }
 
 

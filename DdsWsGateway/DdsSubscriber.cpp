@@ -160,7 +160,7 @@ DomainParticipantQos SubscriberService::getParticipantQos()
 
 	DomainParticipantQos qos;
 
-	if (config_.transport = Transport::TCP)
+	if (config_.transport == Transport::TCP)
 	{
 		Locator_t initial_peer_locator;
 		initial_peer_locator.kind = LOCATOR_KIND_TCPv4;
@@ -168,11 +168,11 @@ DomainParticipantQos SubscriberService::getParticipantQos()
 
 		std::shared_ptr<TCPv4TransportDescriptor> descriptor = std::make_shared<TCPv4TransportDescriptor>();
 
-		for (std::string ip : config_.whitelist)
+		/*for (std::string ip : config_.whitelist)
 		{
 			descriptor->interfaceWhiteList.push_back(ip);
 			std::cout << "Whitelisted " << ip << std::endl;
-		}
+		}*/
 		IPLocator::setIPv4(initial_peer_locator, config_.ip);
 		qos.wire_protocol().builtin.initialPeersList.push_back(initial_peer_locator); // Publisher's meta channel
 
@@ -186,7 +186,13 @@ DomainParticipantQos SubscriberService::getParticipantQos()
 		qos.transport().user_transports.push_back(descriptor);
 	}
 	else
-	{ 
+	{
+		Locator_t initial_peer_locator;
+		initial_peer_locator.kind = LOCATOR_KIND_UDPv4;
+		IPLocator::setIPv4(initial_peer_locator, config_.ip);
+		qos.wire_protocol().builtin.initialPeersList.push_back(initial_peer_locator);
+		//initial_peer_locator.port = config_.port;
+
 		std::shared_ptr<UDPv4TransportDescriptor> descriptor = std::make_shared<UDPv4TransportDescriptor>();
 
 		descriptor->sendBufferSize = 0;
@@ -239,6 +245,7 @@ void SubscriberService::runSubscribers()
 {
 	stop_ws_server_ = false;
 	std::vector<std::thread> threads;
+	analyser_ = PackageAnalyser::getInstance(config_.log_file_name.c_str());
 	for (auto& sub : subscribers_)
 	{
 		threads.push_back( std::thread([&](){sub->run(); }) );
@@ -246,9 +253,14 @@ void SubscriberService::runSubscribers()
 
 	for (auto& t : threads)
 	{
-		t.join();
+		if (t.joinable())
+		{
+			t.join();
+		}
 	}
 	stop_ws_server_ = true;
+	analyser_->writeResults();
+	analyser_->clear();
 }
 
 void SubscriberService::notifyingWsService()

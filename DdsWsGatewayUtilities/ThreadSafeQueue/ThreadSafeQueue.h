@@ -69,6 +69,11 @@ public:
         queue_.push_back(item);
     }
 
+    void clear() {
+        std::unique_lock<std::shared_mutex> w_lock(mutex_);
+        queue_.clear();
+    }
+
     std::deque<T> getDequeCopy() const
     {
         return queue_;

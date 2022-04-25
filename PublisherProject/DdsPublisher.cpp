@@ -1,6 +1,7 @@
 #include <fastdds/dds/domain/DomainParticipantFactory.hpp>
 
 #include <fastrtps/transport/TCPv4TransportDescriptor.h>
+#include <fastrtps/transport/UDPv4TransportDescriptor.h>
 
 #include "DdsPublisher.h"
 
@@ -155,23 +156,35 @@ bool PublisherService::initPublishers()
 
 	qos.transport().use_builtin_transports = false;
 
-	std::shared_ptr<TCPv4TransportDescriptor> descriptor = std::make_shared<TCPv4TransportDescriptor>();
-
-	std::vector<std::string> whitelist({ "127.0.0.1" });
-	/*for (std::string ip : whitelist)
+	if (config_.transport == Transport::TCP)
 	{
-		descriptor->interfaceWhiteList.push_back(ip);
-		std::cout << "Whitelisted " << ip << std::endl;
-	}*/
+		std::shared_ptr<TCPv4TransportDescriptor> descriptor = std::make_shared<TCPv4TransportDescriptor>();
 
-	descriptor->sendBufferSize = 0;
-	descriptor->receiveBufferSize = 0;
+		/*std::vector<std::string> whitelist({ "127.0.0.1" });
+		for (std::string ip : whitelist)
+		{
+			descriptor->interfaceWhiteList.push_back(ip);
+			std::cout << "Whitelisted " << ip << std::endl;
+		}*/
 
-	descriptor->set_WAN_address("127.0.0.1");
+		descriptor->sendBufferSize = 0;
+		descriptor->receiveBufferSize = 0;
 
-	descriptor->add_listener_port(4042);
+		descriptor->set_WAN_address(config_.ip);
 
-	qos.transport().user_transports.push_back(descriptor);
+		descriptor->add_listener_port(config_.port);
+
+		qos.transport().user_transports.push_back(descriptor);
+	}
+	else
+	{
+		std::shared_ptr<UDPv4TransportDescriptor> descriptor = std::make_shared<UDPv4TransportDescriptor>();
+
+		descriptor->sendBufferSize = 0;
+		descriptor->receiveBufferSize = 0;
+
+		qos.transport().user_transports.push_back(descriptor);
+	}
 
 	if (participant_ == nullptr)
 	{
@@ -304,11 +317,13 @@ void PublisherService::DdsPublisherListener::on_publication_matched(
 
 void PublisherService::setVectorSizesInDataTopic()
 {
+	scada_ate::typetopics::SetMaxSizeDataChar(config_.MaxSizeSizeDataChar);
 	scada_ate::typetopics::SetMaxSizeDataCollectionInt(config_.MaxSizeDataCollectionInt);
 	scada_ate::typetopics::SetMaxSizeDataCollectionFloat(config_.MaxSizeDataCollectionFloat);
 	scada_ate::typetopics::SetMaxSizeDataCollectionDouble(config_.MaxSizeDataCollectionDouble);
 	scada_ate::typetopics::SetMaxSizeDataCollectionChar(config_.MaxSizeDataCollectionChar);
 
+	scada_ate::typetopics::SetMaxSizeDataExVectorChar(config_.MaxSizeSizeDataExVectorChar);
 	scada_ate::typetopics::SetMaxSizeDDSDataExVectorInt(config_.MaxSizeDDSDataExVectorInt);
 	scada_ate::typetopics::SetMaxSizeDDSDataExVectorFloat(config_.MaxSizeDDSDataExVectorFloat);
 	scada_ate::typetopics::SetMaxSizeDDSDataExVectorDouble(config_.MaxSizeDDSDataExVectorDouble);

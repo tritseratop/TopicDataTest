@@ -51,7 +51,7 @@ AdditionalTopicInfo getAdditionalTopicInfo(size_t size)
     return info;
 }
 
-DDSData getDdsData(size_t size)
+DDSData getDdsData(size_t size, size_t char_size)
 {
     DDSData data1;
 
@@ -68,14 +68,14 @@ DDSData getDdsData(size_t size)
     data1.data_double().quality(getDefaultVector(size));
 
     DataChar data_char;
-    data_char.value(getFilledVector(1, 'a'));
+    data_char.value(getFilledVector(char_size, 'a'));
     data1.data_char().value(getFilledVector(size, data_char));
     data1.data_char().quality(getDefaultVector(size));
 
     return data1;
 }
 
-DDSDataEx getDdsDataEx(size_t size)
+DDSDataEx getDdsDataEx(size_t size, size_t char_size)
 {
     DDSDataEx data1;
     data1.time_service(100);
@@ -93,7 +93,7 @@ DDSDataEx getDdsDataEx(size_t size)
     data_ex_double.quality('b');
     DataExChar data_ex_char;
     data_ex_char.time_source(102);
-    data_ex_char.value(getDefaultVector(1));
+    data_ex_char.value(getDefaultVector(char_size));
     data_ex_char.quality('b');
 
     for (int i = 0; i < size; ++i)

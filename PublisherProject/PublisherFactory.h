@@ -99,13 +99,13 @@ public:
 		}
 
 		eprosima::fastdds::dds::DataWriterQos wqos;
-		wqos.history().kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
+		/*wqos.history().kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
 		wqos.history().depth = 30;
 		wqos.resource_limits().max_samples = 50;
 		wqos.resource_limits().allocated_samples = 20;
 		wqos.reliability().kind = eprosima::fastdds::dds::RELIABLE_RELIABILITY_QOS;
 		wqos.durability().kind = eprosima::fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
-		wqos.deadline().period.nanosec = config_.sleep * 1000;
+		wqos.deadline().period.nanosec = config_.sleep * 1000;*/
 
 		if (config_.isSync)
 		{

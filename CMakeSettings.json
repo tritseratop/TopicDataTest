@@ -27,6 +27,34 @@
           "type": "PATH"
         }
       ]
+    },
+    {
+      "name": "x64-Release",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "buildRoot": "${projectDir}\\build\\${name}",
+      "installRoot": "${projectDir}\\build\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "variables": [
+        {
+          "name": "GTest_DIR",
+          "value": "C:/googletest/build",
+          "type": "PATH"
+        },
+        {
+          "name": "oatpp_DIR",
+          "value": "C:/Program Files (x86)/oatpp-release/oatpp/lib/cmake/oatpp-1.3.0",
+          "type": "PATH"
+        },
+        {
+          "name": "oatpp-websocket_DIR",
+          "value": "C:/Program Files (x86)/oatpp-release/oatpp-websocket/lib/cmake/oatpp-websocket-1.3.0",
+          "type": "PATH"
+        }
+      ]
     }
   ]
 }

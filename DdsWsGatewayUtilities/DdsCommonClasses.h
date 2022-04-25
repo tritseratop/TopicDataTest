@@ -88,6 +88,8 @@ struct ServiceConfig
 	uint32_t ws_data_sleep = 100;
 	uint32_t ws_alarm_sleep = 100;
 
+	std::string log_file_name = "log.txt";
+
 	friend bool operator==(const ServiceConfig& lhs, const ServiceConfig& rhs)
 	{
 		return lhs.participant_name == rhs.participant_name

@@ -16,9 +16,9 @@ AdditionalTopicInfo getAdditionalTopicInfo(size_t size = 4);
 
 std::pair<DDSData, MediateDataDto> getEqualDdsData(size_t size = 4);
 
-DDSData getDdsData(size_t size = 4);
+DDSData getDdsData(size_t size = 4, size_t char_size = 100);
 
-DDSDataEx getDdsDataEx(size_t size = 4);
+DDSDataEx getDdsDataEx(size_t size = 4, size_t char_size = 100);
 
 struct DataExUnion
 {
