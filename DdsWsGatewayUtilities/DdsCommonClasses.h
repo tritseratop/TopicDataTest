@@ -253,20 +253,4 @@ struct MediateAlarmDto
 	}
 };
 
-struct TransitionInfo
-{
-	int64_t delivery_time = 0;
-	int64_t max_delivery_time = 0;
-	int64_t min_delivery_time = 0;
-	uint64_t size = 0;
-};
-
-struct PacketInfo
-{
-	int64_t dispatch_time;
-	int64_t receiving_time;
-	int64_t delivery_time;
-	uint64_t size;
-};
-
 #endif //!DDS_COMMON_CLASSES_H_

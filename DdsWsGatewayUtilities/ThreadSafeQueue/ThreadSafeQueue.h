@@ -36,7 +36,7 @@ public:
         return queue_.empty();
     }
 
-    std::optional<T> front() {
+    std::optional<T> front() const {
         std::shared_lock<std::shared_mutex> r_lock(mutex_);
         if (queue_.empty()) {
             return {};
@@ -45,7 +45,7 @@ public:
         return tmp;
     }
 
-    std::optional<T> back() {
+    std::optional<T> back() const {
         std::shared_lock<std::shared_mutex> r_lock(mutex_);
         if (queue_.empty()) {
             return {};
