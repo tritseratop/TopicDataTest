@@ -1,13 +1,24 @@
 #include "DdsPublisher.h"
+#include "../DdsWsGatewayUtilities/DdsTestUtility.h"
 
 int main(
     int argc,
     char** argv)
 {
-    std::vector<uint16_t> sizes = { 100, 500, 1000, 2000, 4000, 7500, 10000 };
+    std::vector<uint16_t> sizes = {  10000 };
     std::vector<uint32_t> v_sleep = { 100 };
     uint32_t samples = 3000;
 
+    std::vector<uint16_t> sizes2 = { 100, 500, 1000, 2000, 4000, 7500, 10000 };
+    for (auto s : sizes2)
+    {
+        size_t char_size = s / 5 < 100 ? s / 5 : 100;
+        auto data_ = getDdsData(s, char_size);
+        std::cout << s << " " << DDSData::getCdrSerializedSize(data_) << std::endl;
+
+        auto data_ex = getDdsDataEx(s, char_size);
+        std::cout << s << " " << DDSDataEx::getCdrSerializedSize(data_ex) << std::endl;
+    }
     // изменяемые настройки
     std::string ip = "127.0.0.1";
     bool isWsServerRun = false;

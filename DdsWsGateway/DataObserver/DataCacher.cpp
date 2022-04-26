@@ -179,11 +179,23 @@ void DataCacher::cache(DDSData data, const AdditionalTopicInfo& info)
 	data_cache_.push_back(mapper_.mapDdsData(std::move(data), info));
 
 	analyser_->pushDataTimestamp("DDSData to Dto", TimeConverter::GetTime_LLmcs() - start);
+
+	std::lock_guard<std::mutex> guard(std::mutex());
+	if (data_cache_.size() > depth_)
+	{
+		data_cache_.pop_front();
+	}
 }
 
 void DataCacher::cache(DDSData data, const AdditionalTopicInfo& info, const AdditionalPackageInfo& package_info)
 {
 	data_cache_.push_back(mapper_.mapDdsData(std::move(data), info));
+
+	std::lock_guard<std::mutex> guard(std::mutex());
+	if (data_cache_.size() > depth_)
+	{
+		data_cache_.pop_front();
+	}
 }
 
 void DataCacher::cache(const DDSDataEx& data, const AdditionalTopicInfo& info)
@@ -201,6 +213,12 @@ void DataCacher::cache(const DDSDataEx& data, const AdditionalTopicInfo& info)
 	}
 
 	analyser_->pushDataTimestamp("DDSDataEx to Dto", TimeConverter::GetTime_LLmcs() - start);
+
+	std::lock_guard<std::mutex> guard(std::mutex());
+	if (data_cache_.size() > depth_)
+	{
+		data_cache_.pop_front();
+	}
 }
 
 

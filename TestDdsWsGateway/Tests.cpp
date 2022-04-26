@@ -256,7 +256,7 @@
 
 int main(int argc, char* argv[])
 {
-    std::vector<uint16_t> sizes = { 100, 500, 1000, 2000, 4000, 7500, 10000 };
+    std::vector<uint16_t> sizes = { 10000 };
     std::vector<uint32_t> v_sleep = { 100 };
     uint32_t samples = 3000;
 
