@@ -1,12 +1,14 @@
 #ifndef WSListener_hpp
 #define WSListener_hpp
 
-#include "../DdsWsGatewayUtilities/WsCommonClasses.h"
-#include "../DdsWsGatewayUtilities/WsDto.h"
+#include "../DdsWsGatewayService/Utilities/WsCommonClasses.h"
+#include "../DdsWsGatewayService/Utilities/WsDto.h"
+#include "../DdsWsGatewayService/Utilities/PackageAnalyser.h"
 
 #include "oatpp-websocket/ConnectionHandler.hpp"
 #include "oatpp-websocket/AsyncWebSocket.hpp"
 #include "oatpp-websocket/Connector.hpp"
+#include "oatpp/parser/json/mapping/ObjectMapper.hpp"
 
 class WSClient;
 
@@ -24,6 +26,13 @@ private:
     oatpp::data::stream::BufferOutputStream m_messageBuffer;
     std::string login;
     WSClient* client;
+    std::shared_ptr<oatpp::parser::json::mapping::ObjectMapper> json_object_mapper;
+
+    PackageAnalyser* analyser;
+    bool first_package;
+    WsDataDto::Wrapper dto;
+    size_t prev_size;
+
 public:
 
     /*WSListener(std::mutex& writeMutex)
@@ -36,11 +45,21 @@ public:
         : client(client_) 
         , m_writeMutex(writeMutex)
     {}*/
-    WSListener() {}
+    WSListener()
+        : client(nullptr)
+        , first_package(false)
+        , prev_size(0)
+    {
+        json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
+    }
 
     WSListener(WSClient* client_)
         : client(client_)
-    {}
+        , first_package(false)
+        , prev_size(0)
+    {
+        json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
+    }
 
     void setLogin(std::string login_);
     std::string getLogin();
@@ -65,21 +84,6 @@ public:
      */
     CoroutineStarter readMessage(const std::shared_ptr<AsyncWebSocket>& socket, v_uint8 opcode, p_char8 data, oatpp::v_io_size size) override;
 
-};
-
-class ClientSenderCoroutine : public oatpp::async::Coroutine<ClientSenderCoroutine> {
-private:
-    std::shared_ptr<oatpp::websocket::AsyncWebSocket> m_socket;
-    oatpp::String m_message;
-public:
-    ClientSenderCoroutine(const std::shared_ptr<oatpp::websocket::AsyncWebSocket>& socket, oatpp::String message = "Hello")
-        : m_socket(socket)
-        , m_message(message)
-    {}
-    Action act() override {
-        //return m_socket->sendOneFrameTextAsync("hello").next(yieldTo(&ClientSenderCoroutine::act));
-        return m_socket->sendOneFrameTextAsync(m_message).next(finish()); // TODO падает исключение иногда. Защитить mutex
-    }
 };
 
 class ClientCoroutine : public oatpp::async::Coroutine<ClientCoroutine> {

@@ -1,0 +1,15 @@
+
+/// <summary>
+/// Topic status
+/// </summary>
+
+struct TopicStatus
+{
+	long long time_messege;
+	unsigned long id_source;
+	unsigned long id_target;
+	unsigned long code_command;
+	unsigned long code_status;
+	char description[256];
+};
+

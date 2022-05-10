@@ -1,0 +1,45 @@
+
+/// <summary>
+/// Topic data extended
+/// </summary>
+
+struct DataExInt
+{
+	long long time_source;
+	unsigned long id_tag;
+	long value;
+	char quality;
+};
+
+struct DataExFloat
+{
+	long long time_source;
+	unsigned long id_tag;
+	float value;
+	char quality;
+};
+
+struct DataExDouble
+{
+	long long time_source;
+	unsigned long id_tag;
+	double value;
+	char quality;
+};
+
+struct DataExChar
+{
+	long long time_source;
+	unsigned long id_tag;
+	sequence<char> value;
+	char quality;
+};
+
+struct DDSDataEx
+{
+	long long time_service;
+	sequence<DataExInt> data_int;
+	sequence<DataExFloat> data_float;
+	sequence<DataExDouble> data_double;
+	sequence<DataExChar> data_char;
+};

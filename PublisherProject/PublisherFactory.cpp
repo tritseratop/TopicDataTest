@@ -1,5 +1,5 @@
 #include "PublisherFactory.h"
-#include "../DdsWsGatewayUtilities/DdsTestUtility.h"
+#include "../DdsWsGatewayService/Utilities/DdsTestUtility.h"
 
 using namespace eprosima::fastdds::dds;
 
@@ -15,15 +15,13 @@ bool operator==(const PublisherConfig& lhs, const PublisherConfig& rhs)
 template<>
 void ConcretePublisher<DDSData, DDSDataPubSubType>::setData()
 {
-	size_t char_size = config_.vector_size / 5 < 100 ? config_.vector_size / 5 : 100;
-	data_ = getDdsData(config_.vector_size, char_size);
+	data_ = getDdsData(config_.vector_size, config_.char_vector_size);
 }
 
 template<>
 void ConcretePublisher<DDSDataEx, DDSDataExPubSubType>::setData()
 {
-	size_t char_size = config_.vector_size / 5 < 100 ? config_.vector_size / 5 : 100;
-	data_ = getDdsDataEx(config_.vector_size, char_size);
+	data_ = getDdsDataEx(config_.vector_size, config_.char_vector_size);
 }
 
 template<>

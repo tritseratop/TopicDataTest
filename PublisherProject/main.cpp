@@ -1,50 +1,25 @@
 #include "DdsPublisher.h"
-#include "../DdsWsGatewayUtilities/DdsTestUtility.h"
+#include "../DdsWsGatewayService/Utilities/DdsTestUtility.h"
+#include "../DdsWsGatewayService/Utilities/nlohmann/json.hpp"
+
+#include <fstream>
 
 int main(
     int argc,
     char** argv)
 {
-    std::vector<uint16_t> sizes = {  10000 };
-    std::vector<uint32_t> v_sleep = { 100 };
-    uint32_t samples = 3000;
+    std::ifstream ifile("test.json");
+    nlohmann::json json;
+    ifile >> json;
+    GlobalTestConditions conditions = parseJsonToGlobalTestConditions(json);
 
-    std::vector<uint16_t> sizes2 = { 100, 500, 1000, 2000, 4000, 7500, 10000 };
-    for (auto s : sizes2)
-    {
-        size_t char_size = s / 5 < 100 ? s / 5 : 100;
-        auto data_ = getDdsData(s, char_size);
-        std::cout << s << " " << DDSData::getCdrSerializedSize(data_) << std::endl;
-
-        auto data_ex = getDdsDataEx(s, char_size);
-        std::cout << s << " " << DDSDataEx::getCdrSerializedSize(data_ex) << std::endl;
-    }
     // изменяемые настройки
-    std::string ip = "127.0.0.1";
-    bool isWsServerRun = false;
     Transport transport = Transport::TCP;
-    bool isSync = false;
+    std::string ip = conditions.ip;
+    bool isWsServerRun = conditions.isWsServerRun;
+    bool isSync = conditions.isSync;
 
-    if (argc > 1)
-    {
-        ip = std::string(argv[1]);
-
-        if (argc > 2)
-        {
-            if (std::string(argv[2]) == "UDP")
-            {
-                transport = Transport::UDP;
-            }
-
-            if (std::string(argv[3]) == "1")
-            {
-                isSync = true;
-            }
-
-        }
-    }
-
-    ServiceConfig<PublisherConfig> default_service_config({
+    ServiceConfigForTest<PublisherConfig> default_service_config({
         "Participant_pub",
         transport,
         ip,
@@ -65,28 +40,29 @@ int main(
         10000
     });
     PublisherConfig ddsdata_config = {
-        0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 1000, isSync
+        0, 10, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 0, 1000, isSync
     };
     PublisherConfig ddsdataex_config = {
-        0, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, samples, 1000, isSync
+        0, 10, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, 0, 1000, isSync
     };
 
-    std::vector<ServiceConfig<PublisherConfig>> configs;
-    for (auto size : sizes)
+    std::vector<ServiceConfigForTest<PublisherConfig>> configs;
+
+    for (const auto& c : conditions.conditions)
     {
-        ddsdata_config.vector_size = size;
-        ddsdataex_config.vector_size = size;
-        for (auto sleep : v_sleep)
-        {
-            ddsdata_config.sleep = sleep;
-            default_service_config.configs = { ddsdata_config };
-            configs.push_back(default_service_config);
+        ddsdata_config.samples = c.samples_number;
+        ddsdata_config.sleep = c.publication_interval;
+        ddsdata_config.vector_size = c.all_vectors_sizes;
+        ddsdata_config.char_vector_size = c.char_vector_sizes;
+        default_service_config.configs = { ddsdata_config };
+        configs.push_back(default_service_config);
 
-            ddsdataex_config.sleep = sleep;
-            default_service_config.configs = { ddsdataex_config };
-            configs.push_back(default_service_config);
-
-        }
+        ddsdataex_config.samples = c.samples_number;
+        ddsdataex_config.sleep = c.publication_interval;
+        ddsdataex_config.vector_size = c.all_vectors_sizes;
+        ddsdataex_config.char_vector_size = c.char_vector_sizes;
+        default_service_config.configs = { ddsdataex_config };
+        configs.push_back(default_service_config);
     }
 
     PublisherService* mypub = new PublisherService();

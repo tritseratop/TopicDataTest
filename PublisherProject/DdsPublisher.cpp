@@ -8,7 +8,7 @@
 using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
 
-PublisherService::PublisherService(const ServiceConfig<PublisherConfig>& config)
+PublisherService::PublisherService(const ServiceConfigForTest<PublisherConfig>& config)
 	: participant_(nullptr)
 	, config_(config)
 	, publisher_(nullptr)
@@ -226,7 +226,7 @@ void PublisherService::runPublishers()
 	}
 }
 
-void PublisherService::changeSubsConfig(const ServiceConfig<PublisherConfig>& config)
+void PublisherService::changeSubsConfig(const ServiceConfigForTest<PublisherConfig>& config)
 {
 	if (config_ == config)
 	{

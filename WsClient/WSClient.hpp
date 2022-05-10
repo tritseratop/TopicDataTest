@@ -10,6 +10,7 @@ private:
 public:
 	WSClient(const Configure& config_) : config(config_) {}
 	void run();
+	void stop();
 	void setLogin(std::string login_);
 };
 

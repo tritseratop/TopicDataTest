@@ -1,9 +1,9 @@
 #ifndef DDSPUBLISHER_H_
 #define DDSPUBLISHER_H_
 
-#include "../DdsWsGatewayUtilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "../DdsWsGatewayUtilities/ConfigTopic/ConfigTopicPubSubTypes.h"
-#include "../DdsWsGatewayUtilities/DdsCommonClasses.h"
+#include "../DdsWsGatewayService/Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "../DdsWsGatewayService/Utilities/ConfigTopic/ConfigTopicPubSubTypes.h"
+#include "../DdsWsGatewayService/Utilities/DdsCommonClasses.h"
 #include "PublisherFactory.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
@@ -19,7 +19,7 @@ class PublisherService
 {
 public:
 
-    PublisherService(const ServiceConfig<PublisherConfig>& config);
+    PublisherService(const ServiceConfigForTest<PublisherConfig>& config);
     PublisherService();
     virtual ~PublisherService();
 
@@ -30,7 +30,7 @@ public:
 
     bool initPublishers();
     void runPublishers();
-    void changeSubsConfig(const ServiceConfig<PublisherConfig>& config);
+    void changeSubsConfig(const ServiceConfigForTest<PublisherConfig>& config);
     void setData();
     void setDdsData(DDSData* data);
     void setDdsDataEx(DDSDataEx* data);
@@ -38,7 +38,7 @@ public:
     bool createNewPublisher(const PublisherConfig& config);
 
 private:
-    ServiceConfig<PublisherConfig> config_;
+    ServiceConfigForTest<PublisherConfig> config_;
 
     PublisherFactory factory_;
     std::vector<AbstractDdsPublisher*> publishers_;

@@ -1,9 +1,9 @@
 #include "WSListener.hpp"
 #include "WSClient.hpp"
 
-#include <iostream>
-
 #include "oatpp/parser/json/Beautifier.hpp"
+
+#include <iostream>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // WSListener
@@ -33,10 +33,32 @@ oatpp::async::CoroutineStarter WSListener::onClose(const std::shared_ptr<AsyncWe
 }
 
 oatpp::async::CoroutineStarter WSListener::readMessage(const std::shared_ptr<AsyncWebSocket>& socket, v_uint8 opcode, p_char8 data, oatpp::v_io_size size) {
-    if (size == 0) { // message transfer finished        
-        auto wholeMessage = m_messageBuffer.toString();
+    if (first_package == false)
+    {
+        analyser = PackageAnalyser::getInstance();
+        first_package = true;
+    }
+    if (size == 0) { // message transfer finished   
+        auto timestamp = TimeConverter::GetTime_LLmcs();
+        oatpp::String wholeMessage = m_messageBuffer.toString();
+        if (prev_size != 0 && prev_size != wholeMessage->size())
+        {
+            std::cout << "recieved" << std::endl;
+            analyser->writeResults();
+            analyser->clear();
+        }
+        prev_size = wholeMessage->size();
+        std::string time_s = wholeMessage->substr(8, 16);
+        int64_t time = std::stoll(time_s);
+        //auto data_dto = json_object_mapper->readFromString<WsDataDto::Wrapper>(wholeMessage);
+        analyser->pushPackageTimestamp({
+            time,
+            timestamp,
+            timestamp - time,
+            wholeMessage->size()
+            });
+
         m_messageBuffer.setCurrentPosition(0);
-        std::cout << wholeMessage->c_str() << std::endl;
     }
     else if (size > 0) { // message frame received
         m_messageBuffer.writeSimple(data, size);
@@ -60,5 +82,8 @@ oatpp::async::Action ClientCoroutine::onConnected(const oatpp::provider::Resourc
 }
 
 oatpp::async::Action ClientCoroutine::onFinishListen() {
+    PackageAnalyser* analyser = PackageAnalyser::getInstance();
+    analyser->writeResults();
+    client->stop();
     return finish();
 }

@@ -53,6 +53,21 @@
           "name": "oatpp-websocket_DIR",
           "value": "C:/Program Files (x86)/oatpp-release/oatpp-websocket/lib/cmake/oatpp-websocket-1.3.0",
           "type": "PATH"
+        },
+        {
+          "name": "fastcdr_DIR",
+          "value": "C:\\Program Files\\eProsima\\fastrtps 2.5.0\\cmake",
+          "type": "PATH"
+        },
+        {
+          "name": "fastrtps_DIR",
+          "value": "C:\\Program Files\\eProsima\\fastrtps 2.5.0\\cmake",
+          "type": "PATH"
+        },
+        {
+          "name": "foonathan_memory_DIR",
+          "value": "C:\\Program Files\\eProsima\\fastrtps 2.5.0\\cmake",
+          "type": "PATH"
         }
       ]
     }

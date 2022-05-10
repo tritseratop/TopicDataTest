@@ -30,6 +30,7 @@ target_link_libraries(WsClient
         PUBLIC oatpp::oatpp
         PUBLIC oatpp::oatpp-test
         PUBLIC oatpp::oatpp-websocket
+        PUBLIC DdsWsGatewayUtilities
 )
 
 # TODO: Add tests and install targets if needed.
