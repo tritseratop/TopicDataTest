@@ -25,7 +25,7 @@ public:
 protected:
 };
 
-template <class T, class TPubSubType>
+template<class T, class TPubSubType>
 class ConcreteSubscriber : public AbstractDdsSubscriber
 {
 public:
@@ -45,16 +45,16 @@ public:
 
 	~ConcreteSubscriber() override
 	{
-		if (reader_ != nullptr)
-		{
-			auto res = subscriber_->delete_datareader(reader_);
-			if (res != ReturnCode_t::RETCODE_OK)
-			{
-				std::cout << "Error: " + std::to_string(res());
-			}
-		}
 		if (subscriber_ != nullptr)
 		{
+			if (reader_ != nullptr)
+			{
+				auto res = subscriber_->delete_datareader(reader_);
+				if (res != ReturnCode_t::RETCODE_OK)
+				{
+					std::cout << "Error: " + std::to_string(res());
+				}
+			}
 			subscriber_->delete_contained_entities();
 			auto res = participant_->delete_subscriber(subscriber_);
 			if (res != ReturnCode_t::RETCODE_OK)
@@ -152,6 +152,8 @@ private:
 
 	void runDataSending();
 
+	void setDataSize(){};
+
 	class SubscriberListener : public eprosima::fastdds::dds::DataReaderListener
 	{
 	public:
@@ -174,8 +176,8 @@ private:
 				{
 					analyser_ = PackageAnalyser::getInstance();
 					analyser_->resetStart();
-					analyser_->setInitialInfo(sub_->config_.topic_type_name + " " +
-											  std::to_string(sub_->config_.vector_size));
+					analyser_->setInitialInfo(sub_->config_.topic_type_name + " "
+											  + std::to_string(sub_->config_.vector_size));
 					first_ = true;
 				}
 				analyser_->pushPackageTimestamp({data_sample_.time_service(),

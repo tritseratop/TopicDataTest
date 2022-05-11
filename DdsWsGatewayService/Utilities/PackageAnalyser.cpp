@@ -1,6 +1,6 @@
 #include "PackageAnalyser.h"
 
-PackageAnalyser* PackageAnalyser::getInstance(const char* fname)
+PackageAnalyser* PackageAnalyser::getInstance(const std::string& fname)
 {
 	{
 		std::lock_guard<std::mutex> guard(PackageAnalyser::gen_instance_);
@@ -12,7 +12,7 @@ PackageAnalyser* PackageAnalyser::getInstance(const char* fname)
 	return analyser_;
 }
 
-PackageAnalyser::PackageAnalyser(const char* fname)
+PackageAnalyser::PackageAnalyser(const std::string& fname)
 {
 	start = TimeConverter::GetTime_LLmcs();
 	file.open(fname, std::ofstream::out | std::ofstream::trunc);
@@ -59,11 +59,13 @@ void PackageAnalyser::writeResults() const
 		info.min_delivery_time = packages_.front().value().delivery_time;
 		for (const auto& p : packages_.getDequeCopy())
 		{
-			info.max_delivery_time =
-				info.max_delivery_time > p.delivery_time ? info.max_delivery_time : p.delivery_time;
+			info.max_delivery_time = info.max_delivery_time > p.delivery_time
+										 ? info.max_delivery_time
+										 : p.delivery_time;
 
-			info.min_delivery_time =
-				info.min_delivery_time < p.delivery_time ? info.min_delivery_time : p.delivery_time;
+			info.min_delivery_time = info.min_delivery_time < p.delivery_time
+										 ? info.min_delivery_time
+										 : p.delivery_time;
 
 			info.delivery_time += p.delivery_time;
 			info.size += p.size;

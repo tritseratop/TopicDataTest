@@ -21,10 +21,11 @@ public:
 	bool sendClose() override;
 	//virtual bool sendAlarm(MediateAlarmDto data) override;
 private:
-	std::shared_ptr<oatpp::parser::json::mapping::ObjectMapper> json_object_mapper;
-	const Configure config_;
 	std::shared_ptr<oatpp::parser::json::mapping::ObjectMapper>
 	createMapper(bool useBeautifier = false);
+
+	std::shared_ptr<oatpp::parser::json::mapping::ObjectMapper> json_object_mapper;
+	const Configure config_;
 	bool stop_ = false;
 	AppComponent components;
 	std::shared_ptr<oatpp::network::Server> server_p;

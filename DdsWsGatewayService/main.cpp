@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 
 		delete mysub;
 	}
-	else if (true || !isDdsRun && isWsRun)
+	else if (!isDdsRun && isWsRun)
 	{
 		oatpp::base::Environment::init();
 
@@ -156,7 +156,38 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		PackageAnalyser* analyser = PackageAnalyser::getInstance();
+		/*std::ifstream ifile("dto_to_str.json");
+		nlohmann::json json;
+		ifile >> json;
+		auto result = parseJsonToGlobalTestConditions(json);*/
+
+		auto serializeConfig = oatpp::parser::json::mapping::Serializer::Config::createShared();
+		auto deserializeConfig = oatpp::parser::json::mapping::Deserializer::Config::createShared();
+
+		auto json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared(
+			serializeConfig, deserializeConfig);
+
+		PackageAnalyser* analyser = PackageAnalyser::getInstance("dto_to_str_res.txt");
+
+		for (auto cond : conditions.conditions)
+		{
+			std::string test_name = "vectors" + std::to_string(cond.all_vectors_sizes)
+									+ " char vectors" + std::to_string(cond.char_vector_sizes);
+			analyser->addDataToAnalyse(test_name);
+			WsDataDto::Wrapper ws_data =
+				getWsDataUnion(cond.all_vectors_sizes, cond.char_vector_sizes).ws_dto;
+			for (auto i = 0; i < cond.samples_number; ++i)
+			{
+				auto start = TimeConverter::GetTime_LLmcs();
+				json_object_mapper->writeToString(ws_data);
+				auto finish = TimeConverter::GetTime_LLmcs();
+				analyser->pushDataTimestamp(test_name, finish - start);
+			}
+		}
+
+		analyser->writeResults();
+
+		delete analyser;
 	}
 
 	system("pause");

@@ -15,7 +15,7 @@ std::vector<T> getFilledVector(size_t size, T filler);
 
 AdditionalTopicInfo getAdditionalTopicInfo(size_t size = 4);
 
-std::pair<DDSData, MediateDataDto> getEqualDdsData(size_t size = 4);
+std::pair<DDSData, MediateDataDto> getEqualDdsData(size_t size, size_t char_size = 1);
 
 DDSData getDdsData(size_t size = 4, size_t char_size = 100);
 

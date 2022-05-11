@@ -29,13 +29,13 @@ protected:
 	static PackageAnalyser* analyser_;
 	static std::mutex gen_instance_;
 
-	// ctor
-	explicit PackageAnalyser(const char* fname = "logger.txt");
-	// dtor
+	explicit PackageAnalyser(const std::string& fname = "logger.txt");
+
+public:
 	~PackageAnalyser();
 
 public:
-	static PackageAnalyser* getInstance(const char* fname = "logger.txt");
+	static PackageAnalyser* getInstance(const std::string& = "logger.txt");
 	PackageAnalyser(const PackageAnalyser&) = delete;
 	void operator=(const PackageAnalyser&) = delete;
 

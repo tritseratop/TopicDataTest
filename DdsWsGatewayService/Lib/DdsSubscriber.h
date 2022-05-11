@@ -24,9 +24,6 @@ public:
 					  std::vector<IServer*> servers);
 	virtual ~SubscriberService();
 
-	bool initConfigSubscriber();
-	void runConfigSubscriber(uint32_t samples);
-
 	void changeSubsConfig(const ServiceConfigForTest<SubscriberConfig>& config);
 
 	bool createParticipant();
@@ -39,6 +36,9 @@ public:
 	void setVectorSizesInDataTopic();
 
 	std::deque<MediateDataDto> getDataCacheCopy() const;
+
+	bool initConfigSubscriber();
+	void runConfigSubscriber(uint32_t samples);
 
 private:
 	bool stop_ws_server_;

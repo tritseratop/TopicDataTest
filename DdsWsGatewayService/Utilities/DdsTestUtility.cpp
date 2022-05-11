@@ -111,7 +111,7 @@ DDSDataEx getDdsDataEx(size_t size, size_t char_size)
 	return data1;
 }
 
-std::pair<DDSData, MediateDataDto> getEqualDdsData(size_t size)
+std::pair<DDSData, MediateDataDto> getEqualDdsData(size_t size, size_t char_size)
 {
 	DDSData data1;
 
@@ -128,7 +128,7 @@ std::pair<DDSData, MediateDataDto> getEqualDdsData(size_t size)
 	data1.data_double().quality(getFilledVector(size, 'a'));
 
 	DataChar data_char;
-	data_char.value(getFilledVector(size, 'a'));
+	data_char.value(getFilledVector(char_size, 'a'));
 	data1.data_char().value(getFilledVector(size, data_char));
 	data1.data_char().quality(getFilledVector(size, 'a'));
 
@@ -147,7 +147,7 @@ std::pair<DDSData, MediateDataDto> getEqualDdsData(size_t size)
 						getFilledVector(size, 'a')},
 					   {getFilledVector<int64_t>(size, 101),
 						getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_CHAR),
-						getFilledVector(size, getFilledVector(size, 'a')),
+						getFilledVector(size, getFilledVector(char_size, 'a')),
 						getFilledVector(size, 'a')}};
 
 	return std::make_pair(data1, dto);

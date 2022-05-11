@@ -14,7 +14,7 @@ struct WsDataUnion
 WsDataUnion getWsDataUnion(size_t size = 4, size_t char_size = 1)
 {
 	WsDataUnion data_union;
-	auto buf = getEqualDdsData(size);
+	auto buf = getEqualDdsData(size, char_size);
 	data_union.dds_data = buf.first;
 	data_union.data_dto = buf.second;
 
@@ -24,7 +24,7 @@ WsDataUnion getWsDataUnion(size_t size = 4, size_t char_size = 1)
 	auto collect_char = WsDataCollectionChar::createShared();
 
 	AdditionalTopicInfo info = getAdditionalTopicInfo(size);
-	std::string quality(char_size, 'a');
+	std::string quality(size, 'a');
 
 	collect_int->qlt = quality.c_str();
 	collect_float->qlt = quality.c_str();
@@ -46,6 +46,7 @@ WsDataUnion getWsDataUnion(size_t size = 4, size_t char_size = 1)
 	collect_char->tsrc = {};
 	collect_char->tag = {};
 	collect_char->val = {};
+	std::string char_val(char_size, 'a');
 
 	for (int i = 0; i < size; ++i)
 	{
@@ -66,7 +67,7 @@ WsDataUnion getWsDataUnion(size_t size = 4, size_t char_size = 1)
 		collect_char->tsrc->push_back(oatpp::Int64(101));
 		collect_char->tag->push_back(
 			oatpp::UInt32(info.tags.at(DataCollectiionType::DATA_CHAR)[i]));
-		collect_char->val->push_back(oatpp::String(quality.c_str()));
+		collect_char->val->push_back(oatpp::String(char_val.c_str()));
 	}
 
 	data_union.ws_dto = WsDataDto::createShared();
