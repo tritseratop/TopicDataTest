@@ -16,6 +16,7 @@ class IServer
 {
 public:
 	virtual bool sendData(WsDataDto::Wrapper data) = 0;
+	virtual bool sendData(oatpp::String data) = 0;
 	virtual void stop() = 0;
 	virtual bool isConnected() const = 0;
 	virtual bool sendClose() = 0;

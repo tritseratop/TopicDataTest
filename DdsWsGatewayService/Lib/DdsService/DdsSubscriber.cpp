@@ -14,18 +14,13 @@ using eprosima::fastrtps::types::ReturnCode_t;
 
 SubscriberService::SubscriberService(const ServiceConfigForTest<SubscriberConfig>& config,
 									 std::vector<IServer*> servers)
-	: participant_(nullptr)
-	, config_(config)
-	, config_subscriber_(nullptr)
-	, config_reader_(nullptr)
-	, config_topic_(nullptr)
-	, config_type_(new ConfigTopicPubSubType())
-	, config_listener_(this)
+	: config_(config)
+	, participant_(nullptr)
 	, cacher_(5)
 	, observer_(servers, &cacher_)
+	, config_subscriber(nullptr)
 	, stop_ws_server_(false)
 {
-	//TODO где вызывать?
 	setVectorSizesInDataTopic();
 }
 
@@ -36,117 +31,48 @@ SubscriberService::~SubscriberService()
 	// TODO: надо ли проверять на nullptr??
 	if (participant_ != nullptr)
 	{
-		participant_->delete_topic(config_topic_);
-		if (config_subscriber_ != nullptr)
-		{
-			config_subscriber_->delete_datareader(config_reader_);
-			participant_->delete_subscriber(config_subscriber_);
-		}
 		if (participant_->delete_contained_entities() != ReturnCode_t::RETCODE_OK)
 		{
 			std::cout << "Participant's entities deletion failed" << std::endl;
 		}
-		if (DomainParticipantFactory::get_instance()->delete_participant(participant_) !=
-			ReturnCode_t::RETCODE_OK)
+		if (DomainParticipantFactory::get_instance()->delete_participant(participant_)
+			!= ReturnCode_t::RETCODE_OK)
 		{
 			std::cout << "Participant deletion failed" << std::endl;
 		}
 	}
 }
 
-bool SubscriberService::initConfigSubscriber()
+bool SubscriberService::initSubscribers()
 {
-	if (participant_ == nullptr)
-	{
-		DomainParticipantQos participantQos;
-		participantQos.name("Participant_subscriber");
-		participant_ =
-			DomainParticipantFactory::get_instance()->create_participant(0, participantQos);
-	}
-	if (participant_ == nullptr)
-	{
-		return false;
-	}
+	initParticipant();
 
-	config_type_.register_type(participant_);
-
-	config_topic_ = participant_->create_topic("ConfigTopic", "ConfigTopic", TOPIC_QOS_DEFAULT);
-	if (config_topic_ == nullptr)
+	if (!config_.configs.empty())
 	{
-		return false;
-	}
-
-	config_subscriber_ = participant_->create_subscriber(SUBSCRIBER_QOS_DEFAULT, nullptr);
-	if (config_subscriber_ == nullptr)
-	{
-		return false;
-	}
-
-	config_reader_ = config_subscriber_->create_datareader(
-		config_topic_, DATAREADER_QOS_DEFAULT, &config_listener_);
-	if (config_reader_ == nullptr)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-void SubscriberService::runConfigSubscriber(uint32_t samples)
-{
-	while (config_listener_.samples_ < samples)
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-	}
-}
-
-void SubscriberService::changeSubsConfig(const ServiceConfigForTest<SubscriberConfig>& config)
-{
-	if (config_ == config)
-	{
-		std::cout << "This subscriber's configuration has been already runConfigPub" << std::endl;
+		for (const auto& config : config_.configs)
+		{
+			initSubscriber(config);
+		}
 	}
 	else
 	{
-		// TODO сравнение параметров
-		config_ = config;
-		deleteSubscribers();
-		initSubscribers();
+		std::cout << "Configuration for subscribers is not found" << std::endl;
+		return false;
 	}
-}
 
-SubscriberService::ConfigSubscriberListener::ConfigSubscriberListener(SubscriberService* subscriber)
-	: subscriber_(subscriber)
-	, samples_(0)
-	, matched_(0)
-{ }
-SubscriberService::ConfigSubscriberListener::~ConfigSubscriberListener() { }
-
-void SubscriberService::ConfigSubscriberListener::on_data_available(
-	eprosima::fastdds::dds::DataReader* reader)
-{
-	SampleInfo info;
-	if (reader->take_next_sample(&(subscriber_->config_topic_data_), &info) ==
-		ReturnCode_t::RETCODE_OK)
+	for (auto& sub : subscribers_)
 	{
-		if (info.valid_data)
-		{
-			samples_++;
-			std::cout << "Subscriber id: " << subscriber_->config_topic_data_.subscriber_id()
-					  << " with vector size: " << subscriber_->config_topic_data_.vector_size()
-					  << " with topic type name: "
-					  << subscriber_->config_topic_data_.topictype_name() << " RECEIVED."
-					  << std::endl;
-		}
+		sub->init();
 	}
+	return true;
 }
 
-bool SubscriberService::createParticipant()
+bool SubscriberService::initParticipant()
 {
 	if (participant_ == nullptr)
 	{
-		participant_ =
-			DomainParticipantFactory::get_instance()->create_participant(0, getParticipantQos());
+		participant_ = DomainParticipantFactory::get_instance()->create_participant(
+			0, getParticipantQos());
 		if (participant_ == nullptr)
 		{
 			return false;
@@ -181,8 +107,8 @@ DomainParticipantQos SubscriberService::getParticipantQos()
 			initial_peer_locator); // Publisher's meta channel
 
 		qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
-		qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod =
-			Duration_t(5, 0);
+		qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(
+			5, 0);
 		qos.name(config_.participant_name);
 
 		qos.transport().use_builtin_transports = false;
@@ -210,33 +136,11 @@ DomainParticipantQos SubscriberService::getParticipantQos()
 	return qos;
 }
 
-bool SubscriberService::initSubscribers()
-{
-	createParticipant();
-	if (!config_.configs.empty())
-	{
-		for (const auto& config : config_.configs)
-		{
-			createNewSubscriber(config);
-		}
-	}
-	else
-	{
-		std::cout << "Configuration for subscribers is not found" << std::endl;
-		return false;
-	}
-	for (auto& sub : subscribers_)
-	{
-		sub->init();
-	}
-	return true;
-}
-
-bool SubscriberService::createNewSubscriber(const SubscriberConfig& config)
+bool SubscriberService::initSubscriber(const SubscriberConfig& config)
 {
 	// TODO: узнать че менять в SUBSCRIBER_QOS_DEFAULT
-	AbstractDdsSubscriber* sub =
-		factory_.createSubscriber(participant_, config, config.isCache ? &cacher_ : nullptr);
+	AbstractDdsSubscriber* sub = factory_.createSubscriber(
+		participant_, config, config.isCache ? &cacher_ : nullptr);
 	if (sub == nullptr)
 	{
 		return false;
@@ -245,6 +149,15 @@ bool SubscriberService::createNewSubscriber(const SubscriberConfig& config)
 	std::lock_guard<std::mutex> guard(std::mutex());
 	subscribers_.push_back(sub);
 	return true;
+}
+
+void SubscriberService::deleteSubscribers()
+{
+	for (auto& sub : subscribers_)
+	{
+		delete sub;
+	}
+	subscribers_.clear();
 }
 
 void SubscriberService::runSubscribers()
@@ -279,38 +192,30 @@ void SubscriberService::notifyingWsService()
 	}
 }
 
+void SubscriberService::changeSubscribersConfig(
+	const ServiceConfigForTest<SubscriberConfig>& config)
+{
+	if (config_ == config)
+	{
+		std::cout << "This subscriber's configuration has been already runConfigPub" << std::endl;
+	}
+	else
+	{
+		// TODO сравнение параметров
+		config_ = config;
+		deleteSubscribers();
+		initSubscribers();
+	}
+}
+
 std::vector<AbstractDdsSubscriber*> SubscriberService::getSubscribers() const
 {
 	return subscribers_;
 }
 
-void SubscriberService::ConfigSubscriberListener::on_subscription_matched(
-	eprosima::fastdds::dds::DataReader* reader,
-	const eprosima::fastdds::dds::SubscriptionMatchedStatus& info)
+std::deque<MediateDataDto> SubscriberService::getDataCacheCopy() const
 {
-	if (info.current_count_change == 1)
-	{
-		std::cout << "Subscriber matched." << std::endl;
-	}
-	else if (info.current_count_change == -1)
-	{
-		std::cout << "Subscriber unmatched." << std::endl;
-	}
-	else
-	{
-		std::cout << info.current_count_change
-				  << " is not a valid value for SubscriptionMatchedStatus current count change"
-				  << std::endl;
-	}
-}
-
-void SubscriberService::deleteSubscribers()
-{
-	for (auto& sub : subscribers_)
-	{
-		delete sub;
-	}
-	subscribers_.clear();
+	return cacher_.getDataCacheCopy();
 }
 
 // TODO: сделать макрос?
@@ -331,9 +236,4 @@ void SubscriberService::setVectorSizesInDataTopic()
 	scada_ate::typetopics::SetMaxSizeDDSAlarmExVectorAlarms(config_.MaxSizeDDSAlarmVectorAlarm);
 
 	scada_ate::typetopics::SetMaxSizeDDSAlarmExVectorAlarms(config_.MaxSizeDDSExVectorAlarms);
-}
-
-std::deque<MediateDataDto> SubscriberService::getDataCacheCopy() const
-{
-	return cacher_.getDataCacheCopy();
 }

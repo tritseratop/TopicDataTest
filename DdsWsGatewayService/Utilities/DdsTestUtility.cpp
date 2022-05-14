@@ -1,4 +1,5 @@
 #include "DdsTestUtility.h"
+#include "TimeConverter/TimeConverter.hpp"
 
 template<class T>
 std::vector<T> getDefaultVector(size_t size, T offset)
@@ -132,25 +133,30 @@ std::pair<DDSData, MediateDataDto> getEqualDdsData(size_t size, size_t char_size
 	data1.data_char().value(getFilledVector(size, data_char));
 	data1.data_char().quality(getFilledVector(size, 'a'));
 
-	MediateDataDto dto{100,
-					   {getFilledVector<int64_t>(size, 101),
-						getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_INT),
-						getFilledVector<int32_t>(size, 1),
-						getFilledVector(size, 'a')},
-					   {getFilledVector<int64_t>(size, 101),
-						getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_FLOAT),
-						getFilledVector<float>(size, 1),
-						getFilledVector(size, 'a')},
-					   {getFilledVector<int64_t>(size, 101),
-						getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_DOUBLE),
-						getFilledVector<double>(size, 1),
-						getFilledVector(size, 'a')},
-					   {getFilledVector<int64_t>(size, 101),
-						getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_CHAR),
-						getFilledVector(size, getFilledVector(char_size, 'a')),
-						getFilledVector(size, 'a')}};
+	MediateDataDto dto = getMediateDataDto(size, char_size);
 
 	return std::make_pair(data1, dto);
+}
+
+MediateDataDto getMediateDataDto(size_t size, size_t char_size)
+{
+	return MediateDataDto{100,
+						  {getFilledVector<int64_t>(size, 101),
+						   getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_INT),
+						   getFilledVector<int32_t>(size, 1),
+						   getFilledVector(size, 'a')},
+						  {getFilledVector<int64_t>(size, 101),
+						   getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_FLOAT),
+						   getFilledVector<float>(size, 1),
+						   getFilledVector(size, 'a')},
+						  {getFilledVector<int64_t>(size, 101),
+						   getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_DOUBLE),
+						   getFilledVector<double>(size, 1),
+						   getFilledVector(size, 'a')},
+						  {getFilledVector<int64_t>(size, 101),
+						   getAdditionalTopicInfo(size).tags.at(DataCollectiionType::DATA_CHAR),
+						   getFilledVector(size, getFilledVector(char_size, 'a')),
+						   getFilledVector(size, 'a')}};
 }
 
 DataExUnion getEqualDdsDataEx(size_t size_ex, size_t size_data)
@@ -273,7 +279,6 @@ DataExUnion getEqualDdsDataEx(size_t size_ex, size_t size_data)
 bool OneTestConditions::operator==(const OneTestConditions& rhs) const
 {
 	return rhs.all_vectors_sizes == all_vectors_sizes && rhs.char_vector_sizes == char_vector_sizes
-		   && rhs.samples_number == samples_number
 		   && rhs.publication_interval == publication_interval;
 }
 
@@ -281,7 +286,8 @@ bool operator==(const GlobalTestConditions& lhs, const GlobalTestConditions& rhs
 {
 	return lhs.isSync == rhs.isSync && lhs.isWsServerRun == rhs.isWsServerRun
 		   && lhs.isDdsServerRun == rhs.isDdsServerRun && lhs.ip == rhs.ip
-		   && std::equal(lhs.conditions.begin(), lhs.conditions.end(), rhs.conditions.begin());
+		   && std::equal(lhs.conditions.begin(), lhs.conditions.end(), rhs.conditions.begin())
+		   && lhs.samples_number == rhs.samples_number;
 }
 
 GlobalTestConditions parseJsonToGlobalTestConditions(const nlohmann::json& json)
@@ -291,15 +297,32 @@ GlobalTestConditions parseJsonToGlobalTestConditions(const nlohmann::json& json)
 	conditions.isSync = json["isSync"].get<bool>();
 	conditions.isWsServerRun = json["isWsServerRun"].get<bool>();
 	conditions.isDdsServerRun = json["isDdsServerRun"].get<bool>();
+	conditions.samples_number = json["samples_number"].get<size_t>();
 	for (const auto& c : json["conditions"])
 	{
 		OneTestConditions condition{
 			c["all_vectors_sizes"].get<size_t>(),
 			c["char_vector_sizes"].get<size_t>(),
-			c["samples_number"].get<size_t>(),
 			c["publication_interval"].get<uint64_t>(),
 		};
 		conditions.conditions.push_back(condition);
 	}
 	return conditions;
+}
+
+void insertTimeToJson(oatpp::String str)
+{
+	std::string time = std::to_string(TimeConverter::GetTime_LLmcs());
+	auto first = str->find_first_of(':') + 1;
+	auto last = str->find_first_of(',');
+	str->erase(first, last - first);
+	str->insert(str->find_first_of(':') + 1, time);
+}
+
+void replaceTimeToJson(oatpp::String str)
+{
+	std::string time = std::to_string(TimeConverter::GetTime_LLmcs());
+	auto first = str->find_first_of(':') + 1;
+	auto last = str->find_first_of(',');
+	str->replace(first, last - first, time);
 }

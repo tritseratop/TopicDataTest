@@ -1,4 +1,5 @@
 #include "ClientListener.h"
+#include "../../Utilities/DdsTestUtility.h"
 #include "../../Utilities/TimeConverter/TimeConverter.hpp"
 #include "WsSocketListener.h"
 
@@ -66,8 +67,7 @@ void ClientListener::sendMessageAsync(const oatpp::String& message)
 
 		Action act() override
 		{
-			std::string time = std::to_string(TimeConverter::GetTime_LLmcs());
-			message->replace(message->find_first_of(':') + 1, 16, time);
+			replaceTimeToJson(message);
 			return oatpp::async::synchronize(m_lock, websocket->sendOneFrameTextAsync(message))
 				.next(finish());
 		}

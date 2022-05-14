@@ -1,5 +1,5 @@
 #include "Lib/DataObserver/DataObserver.h"
-#include "Lib/DdsSubscriber.h"
+#include "Lib/DdsService/DdsSubscriber.h"
 #include "Lib/WsService/WsServer.h"
 #include "Utilities/DdsTestUtility.h"
 #include "Utilities/WsTestUtility.h"
@@ -10,13 +10,17 @@ void sendingDataDto(IServer* server, const GlobalTestConditions& conditions)
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
+	auto json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
 	for (auto cond : conditions.conditions)
 	{
 		WsDataUnion ws_data = getWsDataUnion(cond.all_vectors_sizes, cond.char_vector_sizes);
-		for (auto i = 0; i < cond.samples_number; ++i)
+		ws_data.ws_dto->tsrv = TimeConverter::GetTime_LLmcs();
+
+		oatpp::String data = json_object_mapper->writeToString(ws_data.ws_dto);
+
+		for (auto i = 0; i < conditions.samples_number; ++i)
 		{
-			ws_data.ws_dto->tsrv = TimeConverter::GetTime_LLmcs();
-			server->sendData(ws_data.ws_dto);
+			server->sendData(data);
 			std::this_thread::sleep_for(std::chrono::milliseconds(cond.publication_interval));
 		}
 	}
@@ -63,14 +67,14 @@ int main(int argc, char* argv[])
 
 	for (const auto& c : conditions.conditions)
 	{
-		ddsdata_config.samples = c.samples_number;
+		ddsdata_config.samples = conditions.samples_number;
 		ddsdata_config.sleep = c.publication_interval;
 		ddsdata_config.vector_size = c.all_vectors_sizes;
 		ddsdata_config.info = getAdditionalTopicInfo(c.all_vectors_sizes);
 		default_service_config.configs = {ddsdata_config};
 		configs.push_back(default_service_config);
 
-		ddsdataex_config.samples = c.samples_number;
+		ddsdataex_config.samples = conditions.samples_number;
 		ddsdataex_config.sleep = c.publication_interval;
 		ddsdataex_config.vector_size = c.all_vectors_sizes;
 		ddsdataex_config.info = getAdditionalTopicInfo(c.all_vectors_sizes);
@@ -97,7 +101,7 @@ int main(int argc, char* argv[])
 								 + conf.configs[0].topic_type_name
 								 + " size: " + std::to_string(conf.configs[0].vector_size)
 						  << std::endl;
-				mysub->changeSubsConfig(conf);
+				mysub->changeSubscribersConfig(conf);
 				std::thread ws_thread([](SubscriberService* mysub) { mysub->notifyingWsService(); },
 									  mysub);
 				mysub->runSubscribers();
@@ -129,7 +133,7 @@ int main(int argc, char* argv[])
 							 + conf.configs[0].topic_type_name
 							 + " size: " + std::to_string(conf.configs[0].vector_size)
 					  << std::endl;
-			mysub->changeSubsConfig(conf);
+			mysub->changeSubscribersConfig(conf);
 			mysub->runSubscribers();
 		}
 
@@ -156,11 +160,6 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		/*std::ifstream ifile("dto_to_str.json");
-		nlohmann::json json;
-		ifile >> json;
-		auto result = parseJsonToGlobalTestConditions(json);*/
-
 		auto serializeConfig = oatpp::parser::json::mapping::Serializer::Config::createShared();
 		auto deserializeConfig = oatpp::parser::json::mapping::Deserializer::Config::createShared();
 
@@ -169,26 +168,140 @@ int main(int argc, char* argv[])
 
 		PackageAnalyser* analyser = PackageAnalyser::getInstance("dto_to_str_res.txt");
 
-		for (auto cond : conditions.conditions)
+		for (const auto& cond : conditions.conditions)
 		{
-			std::string test_name = "vectors" + std::to_string(cond.all_vectors_sizes)
-									+ " char vectors" + std::to_string(cond.char_vector_sizes);
-			analyser->addDataToAnalyse(test_name);
-			WsDataDto::Wrapper ws_data =
-				getWsDataUnion(cond.all_vectors_sizes, cond.char_vector_sizes).ws_dto;
-			for (auto i = 0; i < cond.samples_number; ++i)
 			{
-				auto start = TimeConverter::GetTime_LLmcs();
-				json_object_mapper->writeToString(ws_data);
-				auto finish = TimeConverter::GetTime_LLmcs();
-				analyser->pushDataTimestamp(test_name, finish - start);
+				std::string test_name = "\nDTO TO WS\n\tv = "
+										+ std::to_string(cond.all_vectors_sizes)
+										+ " cv = " + std::to_string(cond.char_vector_sizes);
+				analyser->addDataToAnalyse(test_name);
+				MediateDataDto dto = getMediateDataDto(cond.all_vectors_sizes,
+													   cond.char_vector_sizes);
+				MediateDtoMapper mapper;
+				for (auto i = 0; i < conditions.samples_number; ++i)
+				{
+					auto start = TimeConverter::GetTime_LLmcs();
+					auto tmp = mapper.toWsDataDto(dto);
+					auto finish = TimeConverter::GetTime_LLmcs();
+					analyser->pushDataTimestamp(test_name, finish - start);
+				}
+				analyser->writeResults();
+				analyser->clear();
+			}
+			{
+				std::string test_name = "WS TO STR\n\tv = " + std::to_string(cond.all_vectors_sizes)
+										+ " cv = " + std::to_string(cond.char_vector_sizes);
+				analyser->addDataToAnalyse(test_name);
+				WsDataDto::Wrapper ws_data =
+					getWsDataUnion(cond.all_vectors_sizes, cond.char_vector_sizes).ws_dto;
+				for (auto i = 0; i < conditions.samples_number; ++i)
+				{
+					auto start = TimeConverter::GetTime_LLmcs();
+					auto tmp = json_object_mapper->writeToString(ws_data);
+					auto finish = TimeConverter::GetTime_LLmcs();
+					analyser->pushDataTimestamp(test_name, finish - start);
+				}
+				analyser->writeResults();
+				analyser->clear();
+			}
+
+			{
+				std::string test_name = "DTO TO WS TO STR\n\tv = "
+										+ std::to_string(cond.all_vectors_sizes)
+										+ " cv = " + std::to_string(cond.char_vector_sizes);
+				analyser->addDataToAnalyse(test_name);
+				MediateDataDto dto = getMediateDataDto(cond.all_vectors_sizes,
+													   cond.char_vector_sizes);
+				MediateDtoMapper mapper;
+				for (auto i = 0; i < conditions.samples_number; ++i)
+				{
+					auto start = TimeConverter::GetTime_LLmcs();
+					auto tmp = mapper.toWsDataDto(dto);
+					auto str = json_object_mapper->writeToString(tmp);
+					auto finish = TimeConverter::GetTime_LLmcs();
+					analyser->pushDataTimestamp(test_name, finish - start);
+				}
+				analyser->writeResults();
+				analyser->clear();
+			}
+
+			{
+				std::string test_name = "DTO TO STR (CHARS AS STR)\n\tv = "
+										+ std::to_string(cond.all_vectors_sizes)
+										+ " cv = " + std::to_string(cond.char_vector_sizes);
+				analyser->addDataToAnalyse(test_name);
+				MediateDataDto dto = getMediateDataDto(cond.all_vectors_sizes,
+													   cond.char_vector_sizes);
+				MediateDtoMapper mapper;
+				for (auto i = 0; i < conditions.samples_number; ++i)
+				{
+					auto start = TimeConverter::GetTime_LLmcs();
+					auto tmp = mapper.toString(dto);
+					auto finish = TimeConverter::GetTime_LLmcs();
+					analyser->pushDataTimestamp(test_name, finish - start);
+				}
+				analyser->writeResults();
+				analyser->clear();
+			}
+
+			{
+				std::string test_name = "DTO TO STR (CHARS AS VEC)\n\tv = "
+										+ std::to_string(cond.all_vectors_sizes)
+										+ " cv = " + std::to_string(cond.char_vector_sizes);
+				analyser->addDataToAnalyse(test_name);
+				MediateDataDto dto = getMediateDataDto(cond.all_vectors_sizes,
+													   cond.char_vector_sizes);
+				MediateDtoMapper mapper;
+				for (auto i = 0; i < conditions.samples_number; ++i)
+				{
+					auto start = TimeConverter::GetTime_LLmcs();
+					auto tmp = mapper.toStringWithCharVectors(dto);
+					auto finish = TimeConverter::GetTime_LLmcs();
+					analyser->pushDataTimestamp(test_name, finish - start);
+				}
+				analyser->writeResults();
+				analyser->clear();
+			}
+
+			{
+				std::string test_name = "DDSDATA TO DTO\n\tv = "
+										+ std::to_string(cond.all_vectors_sizes)
+										+ " cv = " + std::to_string(cond.char_vector_sizes);
+				analyser->addDataToAnalyse(test_name);
+				auto data = getDdsData(cond.all_vectors_sizes, cond.char_vector_sizes);
+				auto additional_info = getAdditionalTopicInfo(cond.all_vectors_sizes);
+				DdsDataMapper mapper;
+				for (auto i = 0; i < conditions.samples_number; ++i)
+				{
+					auto start = TimeConverter::GetTime_LLmcs();
+					auto tmp = mapper.toMediateDataDto(data, additional_info);
+					auto finish = TimeConverter::GetTime_LLmcs();
+					analyser->pushDataTimestamp(test_name, finish - start);
+				}
+				analyser->writeResults();
+				analyser->clear();
+			}
+
+			{
+				std::string test_name = "DDSDATAEX TO DTO\n\tv = "
+										+ std::to_string(cond.all_vectors_sizes)
+										+ " cv = " + std::to_string(cond.char_vector_sizes);
+				analyser->addDataToAnalyse(test_name);
+				auto data = getDdsDataEx(cond.all_vectors_sizes, cond.char_vector_sizes);
+				auto additional_info = getAdditionalTopicInfo(cond.all_vectors_sizes);
+				DdsDataExMapper mapper;
+				for (auto i = 0; i < conditions.samples_number; ++i)
+				{
+					auto start = TimeConverter::GetTime_LLmcs();
+					auto tmp = mapper.toMediateDataDto(data, additional_info, MediateDataDto());
+					auto finish = TimeConverter::GetTime_LLmcs();
+					analyser->pushDataTimestamp(test_name, finish - start);
+				}
+				analyser->writeResults();
+				analyser->clear();
 			}
 		}
 
-		analyser->writeResults();
-
 		delete analyser;
 	}
-
-	system("pause");
 }

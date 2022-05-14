@@ -8,21 +8,16 @@ using namespace eprosima::fastdds::dds;
 
 bool operator==(const SubscriberConfig& lhs, const SubscriberConfig& rhs)
 {
-	return lhs.subscriber_id == rhs.subscriber_id && lhs.vector_size == rhs.subscriber_id &&
-		   lhs.topic_name == rhs.topic_name && lhs.topic_type_name == rhs.topic_type_name &&
-		   lhs.topic_type == rhs.topic_type;
+	return lhs.subscriber_id == rhs.subscriber_id && lhs.vector_size == rhs.subscriber_id
+		   && lhs.topic_name == rhs.topic_name && lhs.topic_type_name == rhs.topic_type_name
+		   && lhs.topic_type == rhs.topic_type;
 }
 
-template <>
+template<>
 void ConcreteSubscriber<DDSData, DDSDataPubSubType>::setDataSize()
-{
-	std::vector<int> v(10, 0);
-	DataCollectionInt dataCollectionInt;
-	dataCollectionInt.value(v);
-	data_sample_.data_int(dataCollectionInt);
-}
+{ }
 
-template <>
+template<>
 void ConcreteSubscriber<DDSData, DDSDataPubSubType>::runDataSending()
 { }
 

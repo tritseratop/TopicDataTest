@@ -91,7 +91,7 @@ void PackageAnalyser::writeResults() const
 			{
 				sum += p;
 			}
-			file << "Average time for " + d.first + ":\t" << sum / d.second.size() << std::endl;
+			file << d.first + ":\t" << sum / d.second.size() << std::endl;
 		}
 	}
 }

@@ -56,6 +56,13 @@ bool WebsockServer::sendData(WsDataDto::Wrapper data)
 	return true;
 }
 
+bool WebsockServer::sendData(oatpp::String data)
+{
+	OATPP_COMPONENT(std::shared_ptr<WsSocketListener>, sock_listener);
+	sock_listener->sendMessageToAllAsync(data);
+	return true;
+}
+
 bool WebsockServer::sendClose()
 {
 	OATPP_COMPONENT(std::shared_ptr<WsSocketListener>, sock_listener);

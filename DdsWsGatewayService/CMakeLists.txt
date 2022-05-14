@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD 17)
 add_subdirectory ("Lib")
 add_subdirectory ("Utilities")
 
-add_executable(DdsWsGatewayService "main.cpp")
+add_executable(DdsWsGatewayService "main.cpp" "Lib/Gateway.h")
 
 target_link_libraries(DdsWsGatewayService ${GTEST_BOTH_LIBRARIES} 
 	DdsWsGateway

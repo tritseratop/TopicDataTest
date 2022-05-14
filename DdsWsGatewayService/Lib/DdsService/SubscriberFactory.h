@@ -21,8 +21,6 @@ public:
 	virtual bool init() = 0;
 	virtual void run() = 0;
 	virtual void setConfig(const SubscriberConfig& config) = 0;
-
-protected:
 };
 
 template<class T, class TPubSubType>
@@ -115,6 +113,7 @@ public:
 
 		return true;
 	}
+
 	void run() override
 	{
 		while (!stop_)
@@ -129,19 +128,6 @@ public:
 	}
 
 private:
-	T data_sample_;
-
-	DataCacher* cacher_;
-
-	std::atomic<bool> stop_;
-
-	eprosima::fastdds::dds::DomainParticipant* participant_;
-	eprosima::fastdds::dds::Subscriber* subscriber_;
-	eprosima::fastdds::dds::DataReader* reader_;
-	eprosima::fastdds::dds::Topic* topic_;
-	eprosima::fastdds::dds::TypeSupport support_type_; // TODO не нужна как поле ?
-	SubscriberConfig config_;
-
 	void cacheData(T data_)
 	{
 		if (cacher_ != nullptr)
@@ -154,6 +140,19 @@ private:
 
 	void setDataSize(){};
 
+private:
+	eprosima::fastdds::dds::DomainParticipant* participant_;
+	eprosima::fastdds::dds::Subscriber* subscriber_;
+	eprosima::fastdds::dds::DataReader* reader_;
+	eprosima::fastdds::dds::Topic* topic_;
+	eprosima::fastdds::dds::TypeSupport support_type_; // TODO не нужна как поле ?
+
+	SubscriberConfig config_;
+
+	DataCacher* cacher_;
+
+	std::atomic<bool> stop_;
+
 	class SubscriberListener : public eprosima::fastdds::dds::DataReaderListener
 	{
 	public:
@@ -163,9 +162,9 @@ private:
 			, first_(false)
 			, sub_(subscriber)
 		{ }
+
 		~SubscriberListener() override { }
 
-		// TODO может ли вызываться в разных потоках?
 		void on_data_available(eprosima::fastdds::dds::DataReader* reader) override
 		{
 			eprosima::fastdds::dds::SampleInfo info;
@@ -222,10 +221,10 @@ private:
 			}
 			else
 			{
-				std::cout
-					<< "ConcreteSubscriber: " << info.current_count_change
-					<< " is not a valid value for SubscriptionMatchedStatus current count change"
-					<< std::endl;
+				std::cout << "ConcreteSubscriber: " << info.current_count_change
+						  << " is not a valid value for SubscriptionMatchedStatus current count "
+							 "change"
+						  << std::endl;
 			}
 		}
 
@@ -236,12 +235,14 @@ private:
 			std::cout << "Deadline was missed" << std::endl;
 		}
 
-		int matched_;
-		uint32_t samples_; // TODO atomic??
-		T data_sample_;
-		bool first_;
-		PackageAnalyser* analyser_;
 		ConcreteSubscriber* sub_;
+		T data_sample_;
+
+		uint32_t samples_; // TODO atomic??
+		int matched_;
+		bool first_;
+
+		PackageAnalyser* analyser_;
 	} listener_;
 };
 

@@ -1,5 +1,5 @@
 #include "../DdsWsGatewayService/Lib/DataObserver/DataObserver.h"
-#include "../DdsWsGatewayService/Lib/DdsSubscriber.h"
+#include "../DdsWsGatewayService/Lib/DdsService/DdsSubscriber.h"
 #include "../DdsWsGatewayService/Lib/WsService/WsServer.h"
 #include "../DdsWsGatewayService/Utilities/DdsTestUtility.h"
 #include "../DdsWsGatewayService/Utilities/PackageAnalyser.h"
@@ -47,43 +47,44 @@ TEST(HelloTest, BasicAssertions)
 TEST(DtoTest, DdsDataConversation)
 {
 	auto dds_data = getEqualDdsData(4);
-	DdsTopicToMediateDtoMapper mapper;
+	DdsDataMapper ddsdata_mapper;
+	DdsDataExMapper ddsdataex_mapper;
 
 	AdditionalTopicInfo info = getAdditionalTopicInfo(4);
 
-	MediateDataDto d = mapper.mapDdsData(std::move(dds_data.first), info);
+	MediateDataDto d = ddsdata_mapper.toMediateDataDto(std::move(dds_data.first), info);
 	EXPECT_EQ(dds_data.second, d);
 
 	DataExUnion data_ex_union = getEqualDdsDataEx(3, 5);
-	MediateDataDto d2 = mapper.mapDdsDataEx(
-		data_ex_union.dto_to_change, data_ex_union.data_ex, info);
+	MediateDataDto d2 = ddsdataex_mapper.toMediateDataDto(
+		data_ex_union.data_ex, info, data_ex_union.dto_to_change);
 	EXPECT_EQ(d2, data_ex_union.dto);
 
 	DataExUnion data_ex_union1 = getEqualDdsDataEx(3, 0);
-	MediateDataDto d3 = mapper.mapDdsDataEx(
-		data_ex_union1.dto_to_change, data_ex_union1.data_ex, info);
+	MediateDataDto d3 = ddsdataex_mapper.toMediateDataDto(
+		data_ex_union1.data_ex, info, data_ex_union1.dto_to_change);
 	EXPECT_EQ(d3, data_ex_union1.dto);
 
 	info = getAdditionalTopicInfo(500);
 	DataExUnion data_ex_union2 = getEqualDdsDataEx(500, 1000);
-	MediateDataDto d4 = mapper.mapDdsDataEx(
-		data_ex_union2.dto_to_change, data_ex_union2.data_ex, info);
+	MediateDataDto d4 = ddsdataex_mapper.toMediateDataDto(
+		data_ex_union2.data_ex, info, data_ex_union2.dto_to_change);
 	EXPECT_EQ(d4, data_ex_union2.dto);
 
 	DataExUnion data_ex_union3 = getEqualDdsDataEx(0, 0);
-	MediateDataDto d5 = mapper.mapDdsDataEx(
-		data_ex_union3.dto_to_change, data_ex_union3.data_ex, info);
+	MediateDataDto d5 = ddsdataex_mapper.toMediateDataDto(
+		data_ex_union3.data_ex, info, data_ex_union3.dto_to_change);
 	EXPECT_EQ(d5, data_ex_union3.dto);
 
 	DataExUnion data_ex_union4 = getEqualDdsDataEx(0, 3);
-	MediateDataDto d6 = mapper.mapDdsDataEx(
-		data_ex_union4.dto_to_change, data_ex_union4.data_ex, info);
+	MediateDataDto d6 = ddsdataex_mapper.toMediateDataDto(
+		data_ex_union4.data_ex, info, data_ex_union4.dto_to_change);
 	EXPECT_EQ(d6, data_ex_union4.dto);
 }
 
 TEST(DtoTest, WsDataConversation)
 {
-	MediateDtoToWsDtoMapper ws_mapper;
+	MediateDtoMapper mapper;
 	auto serializeConfig = oatpp::parser::json::mapping::Serializer::Config::createShared();
 	auto deserializeConfig = oatpp::parser::json::mapping::Deserializer::Config::createShared();
 
@@ -93,34 +94,81 @@ TEST(DtoTest, WsDataConversation)
 		serializeConfig, deserializeConfig);
 
 	auto data = getWsDataUnion(20, 1);
-	auto dto = ws_mapper.mapDataDto(data.data_dto);
+	auto dto = mapper.toWsDataDto(data.data_dto);
 	EXPECT_EQ(json_object_mapper->writeToString(data.ws_dto),
 			  json_object_mapper->writeToString(dto));
 
 	auto data1 = getWsDataUnion(0);
-	auto dto1 = ws_mapper.mapDataDto(data1.data_dto);
+	auto dto1 = mapper.toWsDataDto(data1.data_dto);
 	EXPECT_EQ(json_object_mapper->writeToString(data1.ws_dto),
 			  json_object_mapper->writeToString(dto1));
 }
 
+TEST(DtoTest, MediateDtoToString)
+{
+	MediateDtoMapper mapper;
+	auto data1 = getMediateDataDto(1, 1);
+	EXPECT_NE(mapper.toString(data1), mapper.toStringWithCharVectors(data1));
+}
+
 TEST(JsonParsing, JsonToTestConditionParsing)
 {
-	std::ifstream ifile("test.json");
+	std::istringstream is("{\n"
+						  "\"conditions\": [\n"
+						  "    {\n"
+						  "        \"all_vectors_sizes\": 10,\n"
+						  "        \"char_vector_sizes\": 10,\n"
+						  "        \"publication_interval\": 100\n"
+						  "    },\n"
+						  "    {\n"
+						  "        \"all_vectors_sizes\": 100,\n"
+						  "        \"char_vector_sizes\": 10,\n"
+						  "        \"publication_interval\": 100\n"
+						  "    },\n"
+						  "    {\n"
+						  "        \"all_vectors_sizes\": 500,\n"
+						  "        \"char_vector_sizes\": 10,\n"
+						  "        \"publication_interval\": 100\n"
+						  "    },\n"
+						  "    {\n"
+						  "        \"all_vectors_sizes\": 1000,\n"
+						  "        \"char_vector_sizes\": 10,\n"
+						  "        \"publication_interval\": 100\n"
+						  "    }\n"
+						  "],\n"
+						  "\"ip\": \"192.168.0.185\",\n"
+						  "\"isWsServerRun\": false,\n"
+						  "\"isDdsServerRun\": false,\n"
+						  "\"isSync\": false,\n"
+						  "\"samples_number\": 5\n"
+						  "}");
 	nlohmann::json json;
-	ifile >> json;
+	is >> json;
 	auto result = parseJsonToGlobalTestConditions(json);
 	GlobalTestConditions expected{{
-									  {10, 10, 5, 100},
-									  {100, 10, 5, 100},
-									  {500, 10, 5, 100},
-									  {1000, 10, 5, 100},
+									  {10, 10, 100},
+									  {100, 10, 100},
+									  {500, 10, 100},
+									  {1000, 10, 100},
 								  },
 								  "192.168.0.185",
 								  false,
 								  false,
-								  false};
+								  false,
+								  5};
 
 	EXPECT_EQ(result, expected);
+
+	expected.isSync = true;
+	EXPECT_FALSE(result == expected);
+
+	expected.isSync = false;
+	expected.isDdsServerRun = true;
+	EXPECT_FALSE(result == expected);
+
+	expected.isDdsServerRun = false;
+	expected.isWsServerRun = true;
+	EXPECT_FALSE(result == expected);
 }
 
 TEST(JsonParsing, WriteSizes)
@@ -145,40 +193,62 @@ TEST(JsonParsing, WriteSizes)
 	}
 }
 
-TEST(oatppDtoToStringSerialization, Mapping)
+//TEST(oatppDtoToStringSerialization, Mapping)
+//{
+//	std::ifstream ifile("dto_to_str.json");
+//	nlohmann::json json;
+//	ifile >> json;
+//	auto result = parseJsonToGlobalTestConditions(json);
+//
+//	auto serializeConfig = oatpp::parser::json::mapping::Serializer::Config::createShared();
+//	auto deserializeConfig = oatpp::parser::json::mapping::Deserializer::Config::createShared();
+//
+//	auto json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared(
+//		serializeConfig, deserializeConfig);
+//
+//	PackageAnalyser* analyser = PackageAnalyser::getInstance("dto_to_str_res.txt");
+//
+//	for (auto cond : result.conditions)
+//	{
+//		std::string test_name = "vectors" + std::to_string(cond.all_vectors_sizes) + " char vectors"
+//								+ std::to_string(cond.char_vector_sizes);
+//		analyser->addDataToAnalyse(test_name);
+//		WsDataDto::Wrapper ws_data =
+//			getWsDataUnion(cond.all_vectors_sizes, cond.char_vector_sizes).ws_dto;
+//		for (auto i = 0; i < cond.samples_number; ++i)
+//		{
+//			auto start = TimeConverter::GetTime_LLmcs();
+//			json_object_mapper->writeToString(ws_data);
+//			auto finish = TimeConverter::GetTime_LLmcs();
+//			analyser->pushDataTimestamp(test_name, finish - start);
+//		}
+//	}
+//
+//	analyser->writeResults();
+//
+//	delete analyser;
+//}
+
+TEST(setTimeToJsonTest, replace)
 {
-	std::ifstream ifile("dto_to_str.json");
-	nlohmann::json json;
-	ifile >> json;
-	auto result = parseJsonToGlobalTestConditions(json);
+	auto json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
+	WsDataUnion ws_data = getWsDataUnion(2, 1);
+	oatpp::String result = json_object_mapper->writeToString(ws_data.ws_dto);
+	replaceTimeToJson(result);
+	auto dto = json_object_mapper->readFromString<WsDataDto::Wrapper>(result);
+	auto expected = json_object_mapper->writeToString(dto);
+	EXPECT_EQ(result.getValue(""), expected.getValue(""));
+}
 
-	auto serializeConfig = oatpp::parser::json::mapping::Serializer::Config::createShared();
-	auto deserializeConfig = oatpp::parser::json::mapping::Deserializer::Config::createShared();
-
-	auto json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared(
-		serializeConfig, deserializeConfig);
-
-	PackageAnalyser* analyser = PackageAnalyser::getInstance("dto_to_str_res.txt");
-
-	for (auto cond : result.conditions)
-	{
-		std::string test_name = "vectors" + std::to_string(cond.all_vectors_sizes) + " char vectors"
-								+ std::to_string(cond.char_vector_sizes);
-		analyser->addDataToAnalyse(test_name);
-		WsDataDto::Wrapper ws_data =
-			getWsDataUnion(cond.all_vectors_sizes, cond.char_vector_sizes).ws_dto;
-		for (auto i = 0; i < cond.samples_number; ++i)
-		{
-			auto start = TimeConverter::GetTime_LLmcs();
-			json_object_mapper->writeToString(ws_data);
-			auto finish = TimeConverter::GetTime_LLmcs();
-			analyser->pushDataTimestamp(test_name, finish - start);
-		}
-	}
-
-	analyser->writeResults();
-
-	delete analyser;
+TEST(setTimeToJsonTest, insert)
+{
+	auto json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
+	WsDataUnion ws_data = getWsDataUnion(2, 1);
+	oatpp::String result = json_object_mapper->writeToString(ws_data.ws_dto);
+	insertTimeToJson(result);
+	auto dto = json_object_mapper->readFromString<WsDataDto::Wrapper>(result);
+	auto expected = json_object_mapper->writeToString(dto);
+	EXPECT_EQ(result.getValue(""), expected.getValue(""));
 }
 
 int main(int argc, char* argv[])

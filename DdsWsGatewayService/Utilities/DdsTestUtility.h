@@ -2,8 +2,11 @@
 #define TEST_UTILITY_H_
 
 #include "DdsCommonClasses.h"
+#include "MediateDto.h"
 #include "TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "nlohmann/json.hpp"
+
+#include "oatpp/core/Types.hpp"
 
 template<class T>
 std::vector<T> getDefaultVector(size_t size = 0, T offset = 0);
@@ -16,6 +19,8 @@ std::vector<T> getFilledVector(size_t size, T filler);
 AdditionalTopicInfo getAdditionalTopicInfo(size_t size = 4);
 
 std::pair<DDSData, MediateDataDto> getEqualDdsData(size_t size, size_t char_size = 1);
+
+MediateDataDto getMediateDataDto(size_t size, size_t char_size = 1);
 
 DDSData getDdsData(size_t size = 4, size_t char_size = 100);
 
@@ -35,7 +40,6 @@ struct OneTestConditions
 {
 	size_t all_vectors_sizes = 0;
 	size_t char_vector_sizes = 0;
-	size_t samples_number = 0;
 	uint64_t publication_interval = 100;
 
 	bool operator==(const OneTestConditions& rhs) const;
@@ -48,10 +52,15 @@ struct GlobalTestConditions
 	bool isWsServerRun = false;
 	bool isDdsServerRun = false;
 	bool isSync = false;
+	size_t samples_number = 0;
 
 	friend bool operator==(const GlobalTestConditions& lhs, const GlobalTestConditions& rhs);
 };
 
 GlobalTestConditions parseJsonToGlobalTestConditions(const nlohmann::json& json);
+
+void insertTimeToJson(oatpp::String str);
+
+void replaceTimeToJson(oatpp::String str);
 
 #endif //!TEST_UTILITY_H_

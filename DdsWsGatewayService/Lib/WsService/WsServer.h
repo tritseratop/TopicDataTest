@@ -18,6 +18,7 @@ public:
 	void stop() override;
 	bool isConnected() const override;
 	virtual bool sendData(WsDataDto::Wrapper data) override;
+	virtual bool sendData(oatpp::String data) override;
 	bool sendClose() override;
 	//virtual bool sendAlarm(MediateAlarmDto data) override;
 private:

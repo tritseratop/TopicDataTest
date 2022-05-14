@@ -18,7 +18,7 @@ bool DataObserver::sendDdsData()
 			auto data = cacher_->popDdsDto();
 			if (data.has_value())
 			{
-				auto ws_dto = ws_mapper_.mapDataDto(data.value());
+				auto ws_dto = mapper_.toWsDataDto(data.value());
 				server->sendData(ws_dto);
 			}
 		}

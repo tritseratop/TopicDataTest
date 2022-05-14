@@ -56,7 +56,7 @@ class WsDataDto : public oatpp::DTO
 	DTO_INIT(WsDataDto, DTO)
 
 	DTO_FIELD(oatpp::Int64, tsrv);
-	DTO_FIELD(oatpp::Int64, disp);
+	//DTO_FIELD(oatpp::Int64, disp);
 	DTO_FIELD(oatpp::Object<WsDataCollectionInt>, di);
 	DTO_FIELD(oatpp::Object<WsDataCollectionFloat>, df);
 	DTO_FIELD(oatpp::Object<WsDataCollectionDouble>, dd);
