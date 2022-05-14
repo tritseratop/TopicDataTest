@@ -1,7 +1,7 @@
 #ifndef DATA_OBSERVER_H_
 #define DATA_OBSERVER_H_
 
-#include "../../Utilities/WsCommonClasses.h"
+#include "Utilities/WsCommonClasses.h"
 #include "DataCacher.h"
 
 #include <deque>

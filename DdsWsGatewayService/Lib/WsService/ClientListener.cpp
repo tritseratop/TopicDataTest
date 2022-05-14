@@ -1,6 +1,6 @@
 #include "ClientListener.h"
-#include "../../Utilities/DdsTestUtility.h"
-#include "../../Utilities/TimeConverter/TimeConverter.hpp"
+#include "Utilities/DdsTestUtility.h"
+#include "Utilities/TimeConverter/TimeConverter.hpp"
 #include "WsSocketListener.h"
 
 v_int64 ClientListener::getClientId()

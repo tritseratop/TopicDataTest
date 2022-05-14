@@ -1,11 +1,11 @@
 #ifndef MAPPERS_H_
 #define MAPPERS_H_
 
-#include "../../Utilities/DdsCommonClasses.h"
-#include "../../Utilities/MediateDto.h"
-#include "../../Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "../../Utilities/WsDto.h"
-#include "../../Utilities/nlohmann/json.hpp"
+#include "Utilities/DdsCommonClasses.h"
+#include "Utilities/MediateDto.h"
+#include "Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "Utilities/WsDto.h"
+#include "Utilities/nlohmann/json.hpp"
 
 template<class T>
 void pushBackContainerWithChars(std::back_insert_iterator<T> result_it, std::vector<char> chars);

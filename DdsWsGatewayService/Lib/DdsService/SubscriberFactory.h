@@ -1,11 +1,11 @@
 #ifndef SUBSCRIBER_FACTORY_H_
 #define SUBSCRIBER_FACTORY_H_
 
-#include "../../Utilities/DdsCommonClasses.h"
-#include "../../Utilities/PackageAnalyser.h"
-#include "../../Utilities/ThreadSafeQueue/ThreadSafeQueue.h"
-#include "../../Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "../DataObserver/DataObserver.h"
+#include "Lib/DataObserver/DataObserver.h"
+#include "Utilities/DdsCommonClasses.h"
+#include "Utilities/PackageAnalyser.h"
+#include "Utilities/ThreadSafeQueue/ThreadSafeQueue.h"
+#include "Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/subscriber/DataReader.hpp>

@@ -1,7 +1,7 @@
 #ifndef CONFIG_SUBSCRIBER_H_
 #define CONFIG_SUBSCRIBER_H_
 
-#include "../../Utilities/ConfigTopic/ConfigTopicPubSubTypes.h"
+#include "Utilities/ConfigTopic/ConfigTopicPubSubTypes.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/subscriber/DataReader.hpp>

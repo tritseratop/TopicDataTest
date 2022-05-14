@@ -1,7 +1,7 @@
 #ifndef APP_COMPONENT_HPP
 #define APP_COMPONENT_HPP
 
-#include "../../Utilities/WsCommonClasses.h"
+#include "Utilities/WsCommonClasses.h"
 #include "WsSocketListener.h"
 
 #include "oatpp/core/macro/component.hpp"

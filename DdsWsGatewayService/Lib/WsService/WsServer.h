@@ -4,8 +4,8 @@
 #include "AppComponent.h"
 #include "Controller.h"
 
-#include "../../Utilities/WsCommonClasses.h"
-#include "../../Utilities/WsDto.h"
+#include "Utilities/WsCommonClasses.h"
+#include "Utilities/WsDto.h"
 
 #include "oatpp/network/Server.hpp"
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"

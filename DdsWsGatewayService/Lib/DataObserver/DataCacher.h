@@ -1,9 +1,9 @@
 #ifndef DATA_CACHER_H_
 #define DATA_CACHER_H_
 
-#include "../../Utilities/PackageAnalyser.h"
-#include "../../Utilities/ThreadSafeQueue/ThreadSafeQueue.h"
 #include "Mappers.h"
+#include "Utilities/PackageAnalyser.h"
+#include "Utilities/ThreadSafeQueue/ThreadSafeQueue.h"
 
 #include <deque>
 #include <unordered_map>
