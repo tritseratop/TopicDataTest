@@ -1,8 +1,8 @@
 #ifndef APP_COMPONENT_HPP
 #define APP_COMPONENT_HPP
 
+#include "Lib/WsService/WsSocketListener.h"
 #include "Utilities/WsCommonClasses.h"
-#include "WsSocketListener.h"
 
 #include "oatpp/core/macro/component.hpp"
 #include "oatpp/network/tcp/server/ConnectionProvider.hpp"

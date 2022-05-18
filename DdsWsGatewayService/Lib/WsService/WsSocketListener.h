@@ -1,7 +1,7 @@
 #ifndef WS_SOCKET_LISTENER_H_
 #define WS_SOCKET_LISTENER_H_
 
-#include "ClientListener.h"
+#include "Lib/WsService/ClientListener.h"
 
 #include <map>
 #include <queue>

@@ -1,8 +1,8 @@
 #ifndef WS_SERVER_H_
 #define WS_SERVER_H_
 
-#include "AppComponent.h"
-#include "Controller.h"
+#include "Lib/WsService/AppComponent.h"
+#include "Lib/WsService/Controller.h"
 
 #include "Utilities/WsCommonClasses.h"
 #include "Utilities/WsDto.h"

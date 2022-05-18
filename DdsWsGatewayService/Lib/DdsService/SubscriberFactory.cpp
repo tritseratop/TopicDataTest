@@ -2,7 +2,7 @@
 #include <fastdds/dds/subscriber/DataReader.hpp>
 #include <fastdds/dds/subscriber/DataReaderListener.hpp>
 
-#include "SubscriberFactory.h"
+#include "Lib/DdsService/SubscriberFactory.h"
 
 using namespace eprosima::fastdds::dds;
 

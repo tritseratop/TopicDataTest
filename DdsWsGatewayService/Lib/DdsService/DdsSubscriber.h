@@ -1,8 +1,8 @@
 #ifndef DDS_SUBSCRIBER_H_
 #define DDS_SUBSCRIBER_H_
 
-#include "ConfigSubscriber.h"
-#include "SubscriberFactory.h"
+#include "Lib/DdsService/ConfigSubscriber.h"
+#include "Lib/DdsService/SubscriberFactory.h"
 #include "Utilities/PackageAnalyser.h"
 #include "Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "Utilities/WsCommonClasses.h"

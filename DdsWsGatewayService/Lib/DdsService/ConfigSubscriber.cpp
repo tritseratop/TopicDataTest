@@ -1,4 +1,4 @@
-#include "ConfigSubscriber.h"
+#include "Lib/DdsService/ConfigSubscriber.h"
 
 ConfigSubscriber::ConfigSubscriber(eprosima::fastdds::dds::DomainParticipant* participant)
 	: participant_(participant)
