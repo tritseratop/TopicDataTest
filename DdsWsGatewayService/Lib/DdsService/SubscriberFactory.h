@@ -1,7 +1,7 @@
 #ifndef SUBSCRIBER_FACTORY_H_
 #define SUBSCRIBER_FACTORY_H_
 
-#include "Lib/DataObserver/DataObserver.h"
+#include "Lib/Notifier/Notifier.h"
 #include "Utilities/DdsCommonClasses.h"
 #include "Utilities/PackageAnalyser.h"
 #include "Utilities/ThreadSafeQueue/ThreadSafeQueue.h"
@@ -168,13 +168,13 @@ private:
 		void on_data_available(eprosima::fastdds::dds::DataReader* reader) override
 		{
 			eprosima::fastdds::dds::SampleInfo info;
-			if (reader->take_next_sample(&data_sample_, &info) == ReturnCode_t::RETCODE_OK)
+			auto res = reader->take_next_sample(&data_sample_, &info);
+			if (res == ReturnCode_t::RETCODE_OK)
 			{
 				auto timestamp = TimeConverter::GetTime_LLmcs();
-				if (first_ == false)
+				if (!first_)
 				{
 					analyser_ = PackageAnalyser::getInstance();
-					analyser_->resetStart();
 					analyser_->setInitialInfo(sub_->config_.topic_type_name + " "
 											  + std::to_string(sub_->config_.vector_size));
 					first_ = true;
@@ -235,6 +235,39 @@ private:
 			std::cout << "Deadline was missed" << std::endl;
 		}
 
+	private:
+		void recieveMessageTest()
+		{
+			auto timestamp = TimeConverter::GetTime_LLmcs();
+			if (!first_)
+			{
+				analyser_ = PackageAnalyser::getInstance();
+				analyser_->resetStart();
+				analyser_->setInitialInfo(sub_->config_.topic_type_name + " "
+										  + std::to_string(sub_->config_.vector_size));
+				first_ = true;
+			}
+			analyser_->pushPackageTimestamp({data_sample_.time_service(),
+											 timestamp,
+											 timestamp - data_sample_.time_service(),
+											 T::getCdrSerializedSize(data_sample_)});
+			if (info.valid_data)
+			{
+				samples_++;
+				//TODO по другому надо как то проверять
+				{
+					if (samples_ >= sub_->config_.samples)
+					{
+						sub_->stop_ = true;
+					}
+					sub_->cacheData(data_sample_);
+				}
+				std::cout << samples_ << ". Sub #" << sub_->config_.subscriber_id << " get data"
+						  << std::endl;
+			}
+		}
+
+	private:
 		ConcreteSubscriber* sub_;
 		T data_sample_;
 

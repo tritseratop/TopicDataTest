@@ -16,7 +16,7 @@ set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc" "-static-libstdc++")
 target_link_libraries(RunUnitTests ${GTEST_BOTH_LIBRARIES} 
 	DdsWsGatewayUtilities
 	DdsWsGatewayLib
-
+	WsClientLib
 )
 add_test(RunUnitTests RunUnitTests)
 

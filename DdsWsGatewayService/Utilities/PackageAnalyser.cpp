@@ -25,14 +25,6 @@ void PackageAnalyser::setInitialInfo(std::string info)
 	init_info = info;
 }
 
-void PackageAnalyser::resetStart()
-{
-	start = TimeConverter::GetTime_LLmcs();
-}
-void PackageAnalyser::resetStart(int64_t start)
-{
-	this->start = start;
-}
 void PackageAnalyser::addDataToAnalyse(std::string name)
 {
 	data_to_analyse[name];
@@ -72,15 +64,19 @@ void PackageAnalyser::writeResults() const
 		}
 
 		file << "Package size:\t\t\t" << packages_.front().value().size << std::endl;
-		file << "Total delivery time:\t" << TimeConverter::GetTime_LLmcs() - start << std::endl;
+		file << "Packages number:\t\t" << packages_.size() << std::endl;
 		if (packages_number != 0)
 		{
 			file << "Losted packages:\t\t" << packages_number - packages_.size() << std::endl;
 		}
+		file << "Total delivery time:\t"
+			 << packages_.back().value().receiving_time - packages_.front().value().receiving_time
+			 << std::endl;
 		file << "Sum of delivery time:\t" << info.delivery_time << std::endl;
 		file << "Avrg delivery time:\t\t" << info.delivery_time / packages_.size() << std::endl;
 		file << "Max delivery time:\t\t" << info.max_delivery_time << std::endl;
 		file << "Min delivery time:\t\t" << info.min_delivery_time << std::endl;
+		file << "First delivery time:\t\t" << packages_.front().value().delivery_time << std::endl;
 	}
 	for (const auto& d : data_to_analyse)
 	{
@@ -100,6 +96,7 @@ void PackageAnalyser::clear()
 {
 	packages_.clear();
 	data_to_analyse.clear();
+	init_info.clear();
 }
 
 PackageAnalyser* PackageAnalyser::analyser_ = nullptr;

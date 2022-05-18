@@ -13,13 +13,11 @@ using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
 
 SubscriberService::SubscriberService(const ServiceConfigForTest<SubscriberConfig>& config,
-									 std::vector<IServer*> servers)
+									 DataCacher& cacher)
 	: config_(config)
+	, cacher_(cacher)
 	, participant_(nullptr)
-	, cacher_(5)
-	, observer_(servers, &cacher_)
-	, config_subscriber(nullptr)
-	, stop_ws_server_(false)
+	, config_subscriber_(nullptr)
 {
 	setVectorSizesInDataTopic();
 }
@@ -45,6 +43,7 @@ SubscriberService::~SubscriberService()
 
 bool SubscriberService::initSubscribers()
 {
+	setVectorSizesInDataTopic();
 	initParticipant();
 
 	if (!config_.configs.empty())
@@ -180,16 +179,6 @@ void SubscriberService::runSubscribers()
 	stop_ws_server_ = true;
 	analyser_->writeResults();
 	analyser_->clear();
-}
-
-void SubscriberService::notifyingWsService()
-{
-	while (!stop_ws_server_)
-	{
-		if (!observer_.sendDdsData())
-			break;
-		std::this_thread::sleep_for(std::chrono::milliseconds(config_.ws_data_sleep));
-	}
 }
 
 void SubscriberService::changeSubscribersConfig(

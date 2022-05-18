@@ -59,8 +59,9 @@ struct GlobalTestConditions
 
 GlobalTestConditions parseJsonToGlobalTestConditions(const nlohmann::json& json);
 
-void insertTimeToJson(oatpp::String str);
+std::vector<ServiceConfigForTest<SubscriberConfig>>
+createDdsServiceConfigs(const GlobalTestConditions& conditions);
 
-void replaceTimeToJson(oatpp::String str);
+std::string formMappingTestName(std::string description, const OneTestConditions& cond);
 
 #endif //!TEST_UTILITY_H_

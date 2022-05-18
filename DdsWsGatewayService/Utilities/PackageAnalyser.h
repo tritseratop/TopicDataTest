@@ -40,8 +40,6 @@ public:
 	void operator=(const PackageAnalyser&) = delete;
 
 	void setInitialInfo(std::string info);
-	void resetStart();
-	void resetStart(int64_t start);
 	void addDataToAnalyse(std::string name);
 	void pushDataTimestamp(std::string name, int64_t distance);
 	void pushPackageTimestamp(PackageTimestamp timestamp);

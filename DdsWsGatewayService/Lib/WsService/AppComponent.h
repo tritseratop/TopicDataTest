@@ -22,7 +22,7 @@ public:
 
 	// создает асинхронный executor
 	OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor)
-	([] {
+	("executor", [] {
 		return std::make_shared<oatpp::async::Executor>(4, // кол-во потоков data-processing
 														1, // кол-во потоков ввода/вывода
 														1 // кол-во потоков таймеров
@@ -32,7 +32,7 @@ public:
 	// создает компонент, который слушает порт
 	OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>,
 						   serverConnectionProvider)
-	([this] {
+	("serverConnectionProvider", [this] {
 		return oatpp::network::tcp::server::ConnectionProvider::createShared(
 			{config_.WS_HOST.c_str(),
 			 static_cast<v_uint16>(config_.WS_PORT),
@@ -48,7 +48,7 @@ public:
 						   serverConnectionHandler)
 	("http", [] {
 		OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router);
-		OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor);
+		OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor, "executor");
 		return oatpp::web::server::AsyncHttpConnectionHandler::createShared(router, executor);
 	}());
 
@@ -63,7 +63,7 @@ public:
 	// обработчик подключения по протоколу websocket
 	OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>, wsConnectionHandler)
 	("websocket", [] {
-		OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor);
+		OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor, "executor");
 		OATPP_COMPONENT(std::shared_ptr<WsSocketListener>, sock_listener);
 		auto connectionHanler = oatpp::websocket::AsyncConnectionHandler::createShared(executor);
 		connectionHanler->setSocketInstanceListener(sock_listener);

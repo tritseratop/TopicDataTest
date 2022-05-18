@@ -1,4 +1,5 @@
 #include "WsServer.h"
+#include "Utilities/WsTestUtility.h"
 
 WebsockServer::WebsockServer(const Configure& config)
 	: config_(config)
@@ -10,9 +11,11 @@ WebsockServer::WebsockServer(const Configure& config)
 	auto myController = std::make_shared<Controller>();
 	router->addController(myController);
 	OATPP_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>, connectionHandler, "http");
-	OATPP_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>, connectionProvider);
+	OATPP_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>,
+					serverConnectionProvider,
+					"serverConnectionProvider");
 
-	server_p = oatpp::network::Server::createShared(connectionProvider, connectionHandler);
+	server_p = oatpp::network::Server::createShared(serverConnectionProvider, connectionHandler);
 
 	OATPP_COMPONENT(std::shared_ptr<WsSocketListener>, sock_listener);
 }
@@ -33,7 +36,7 @@ void WebsockServer::run()
 {
 	server_p->run([this]() { return !stop_; });
 
-	OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor);
+	OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor, "executor");
 	executor->stop();
 	executor->join();
 }
@@ -59,7 +62,7 @@ bool WebsockServer::sendData(WsDataDto::Wrapper data)
 bool WebsockServer::sendData(oatpp::String data)
 {
 	OATPP_COMPONENT(std::shared_ptr<WsSocketListener>, sock_listener);
-	sock_listener->sendMessageToAllAsync(data);
+	sock_listener->sendMessageToAllAsync(data, this);
 	return true;
 }
 
@@ -68,6 +71,16 @@ bool WebsockServer::sendClose()
 	OATPP_COMPONENT(std::shared_ptr<WsSocketListener>, sock_listener);
 	sock_listener->sendClose();
 	return true;
+}
+
+void WebsockServer::cache(int64_t disp)
+{
+	cache_.push_back(disp);
+}
+
+std::deque<int64_t> WebsockServer::getCache()
+{
+	return cache_;
 }
 
 //bool WebsockServer::sendAlarm(MediateAlarmDto data) {

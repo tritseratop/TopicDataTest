@@ -13,17 +13,19 @@
 
 void WSClient::run()
 {
-	oatpp::base::Environment::init();
+	//oatpp::base::Environment::init();
 	{
-		AppComponent component(config);
+		ClientAppComponent client_component(config);
 		OATPP_COMPONENT(std::shared_ptr<oatpp::network::ClientConnectionProvider>,
-						connectionProvider);
-		OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor);
+						connectionProvider,
+						"connectionProvider");
+		OATPP_COMPONENT(
+			std::shared_ptr<oatpp::async::Executor>, client_executor, "client_executor");
 
 		auto connector = oatpp::websocket::Connector::createShared(connectionProvider);
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-		executor->execute<ClientCoroutine>(connector, this);
+		client_executor->execute<ClientCoroutine>(connector, this);
 		/*oatpp::websocket::Config config;
         config.maskOutgoingMessages = true;
         config.readBufferSize = 64;
@@ -39,15 +41,15 @@ void WSClient::run()
             }
         });
         test_handler.join();*/
-		executor->join();
+		client_executor->join();
 	}
-	oatpp::base::Environment::destroy();
+	//oatpp::base::Environment::destroy();
 }
 
 void WSClient::stop()
 {
-	OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor);
-	executor->stop();
+	OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, client_executor, "client_executor");
+	client_executor->stop();
 }
 
 void WSClient::setLogin(std::string login_)
@@ -55,11 +57,25 @@ void WSClient::setLogin(std::string login_)
 	login = login_;
 }
 
-void main()
+void WSClient::cache(int64_t disp)
 {
-	Configure configure;
-	configure.WS_HOST = "192.168.0.186";
-	//configure.WS_HOST = "127.0.0.1";
-	WSClient wsclient(configure);
-	wsclient.run();
+	cache_.push_back(disp);
 }
+
+std::deque<int64_t> WSClient::getCache()
+{
+	return cache_;
+}
+
+//void main()
+//{
+//	Configure configure;
+//#ifdef _DEBUG
+//	configure.WS_HOST = "127.0.0.1";
+//#else
+//	configure.WS_HOST = "192.168.0.186";
+//#endif
+//	WSClient wsclient(configure);
+//	wsclient.run();
+//	system("pause");
+//}

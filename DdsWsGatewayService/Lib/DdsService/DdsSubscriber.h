@@ -1,11 +1,11 @@
 #ifndef DDS_SUBSCRIBER_H_
 #define DDS_SUBSCRIBER_H_
 
+#include "ConfigSubscriber.h"
+#include "SubscriberFactory.h"
 #include "Utilities/PackageAnalyser.h"
 #include "Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "Utilities/WsCommonClasses.h"
-#include "ConfigSubscriber.h"
-#include "SubscriberFactory.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/subscriber/DataReader.hpp>
@@ -20,8 +20,7 @@
 class SubscriberService
 {
 public:
-	SubscriberService(const ServiceConfigForTest<SubscriberConfig>& config,
-					  std::vector<IServer*> servers);
+	SubscriberService(const ServiceConfigForTest<SubscriberConfig>& config, DataCacher& cacher);
 	virtual ~SubscriberService();
 
 	bool initSubscribers();
@@ -57,10 +56,8 @@ private:
 	SubscriberFactory factory_;
 	std::vector<AbstractDdsSubscriber*> subscribers_;
 
-	DataCacher cacher_;
-	DataObserver observer_;
-
-	ConfigSubscriber* config_subscriber;
+	DataCacher& cacher_;
+	ConfigSubscriber* config_subscriber_;
 
 	PackageAnalyser* analyser_;
 

@@ -50,7 +50,6 @@ public:
 		: client(nullptr)
 		, first_package(false)
 		, prev_size(0)
-		, m_messageBuffer(10000)
 	{
 		json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
 	}
@@ -59,7 +58,6 @@ public:
 		: client(client_)
 		, first_package(false)
 		, prev_size(0)
-		, m_messageBuffer(10000)
 	{
 		json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
 	}

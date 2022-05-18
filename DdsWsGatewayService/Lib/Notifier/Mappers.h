@@ -8,18 +8,19 @@
 #include "Utilities/nlohmann/json.hpp"
 
 template<class T>
-void pushBackContainerWithChars(std::back_insert_iterator<T> result_it, std::vector<char> chars);
+void pushBackContainerWithChars(std::back_insert_iterator<T> result_it,
+								const std::vector<char>& chars);
 
 std::string convertCharVectorToString(const std::vector<char>& chars);
 
-template<class DtoDataCollection, class DdsSample>
-void fillChanged(DtoDataCollection& prev_dto_collection,
-				 const std::vector<DdsSample>& cur_samples,
+template<class T, class DdsSample>
+void fillChanged(DataSampleSequence<T>& prev_dto_collection,
+				 std::vector<DdsSample> cur_samples,
 				 const TagToIndex& tag_to_index);
 
-template<class DtoDataSample, class DdsSample>
-void fillChanged(std::vector<DtoDataSample>& prev_dto_collection,
-				 const std::vector<DdsSample>& cur_samples,
+template<class T, class DdsSample>
+void fillChanged(std::vector<DataSample<T>>& prev_dto_collection,
+				 std::vector<DdsSample> cur_samples,
 				 const TagToIndex& tag_to_index);
 
 class DdsDataMapper
@@ -29,7 +30,6 @@ public:
 	DdsDataMapper(const AdditionalTopicInfo& info)
 		: info_(info)
 	{ }
-	MediateDataDto toMediateDataDto(DDSData data);
 	MediateDataDto toMediateDataDto(DDSData data, const AdditionalTopicInfo& info);
 
 	MediateDataDtoWithVectorsOfStruct
@@ -47,27 +47,25 @@ public:
 		: info_(info)
 	{ }
 
-	MediateDataDto toMediateDataDto(const DDSDataEx& cur_data_ex,
+	MediateDataDto toMediateDataDto(DDSDataEx cur_data_ex,
 									const AdditionalTopicInfo& info,
 									MediateDataDto prev_dto = MediateDataDto());
 
-	MediateDataDto toMediateDataDto(const DDSDataEx& cur_data_ex,
-									MediateDataDto prev_dto = MediateDataDto());
+	MediateDataDtoWithVectorsOfStruct
+	toMediateDataDtoWithVectorsOfStruct(DDSDataEx, const AdditionalTopicInfo& info);
 
 	MediateDataDtoWithVectorsOfStruct
-	toMediateDataDtoWithVectorsOfStruct(const DDSDataEx&, const AdditionalTopicInfo& info);
-
-	MediateDataDtoWithVectorsOfStruct
-	toMediateDataDtoWithVectorsOfStruct(const DDSDataEx& cur_data_ex,
+	toMediateDataDtoWithVectorsOfStruct(DDSDataEx cur_data_ex,
 										MediateDataDtoWithVectorsOfStruct prev_dto,
 										const AdditionalTopicInfo& info);
 
 	MediateDataDtoWithVectorsOfStruct toMediateDataDtoWithVectorsOfStruct(
-		const DDSDataEx& cur_data_ex, MediateDataDtoWithVectorsOfStruct prev_dto);
+		DDSDataEx cur_data_ex, MediateDataDtoWithVectorsOfStruct prev_dto);
 
 private:
 	AdditionalTopicInfo info_;
 };
+
 class DdsAlarmMapper
 {
 public:
@@ -102,7 +100,7 @@ private:
 class MediateDtoMapper
 {
 public:
-	std::string toString(MediateDataDto dto);
+	std::string toString(const MediateDataDto& dto);
 
 	std::string toStringWithCharVectors(const MediateDataDto& dto);
 

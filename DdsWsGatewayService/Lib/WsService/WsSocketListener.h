@@ -24,7 +24,7 @@ public:
 	void removeClientById(v_int64 id);
 	std::shared_ptr<ClientListener> getClientById(v_int64 id);
 
-	void sendMessageToAllAsync(const oatpp::String& message);
+	void sendMessageToAllAsync(const oatpp::String& message, WebsockServer* server = nullptr);
 	void sendClose();
 
 	void onAfterCreate_NonBlocking(const std::shared_ptr<ClientListener::AsyncWebSocket>& socket,

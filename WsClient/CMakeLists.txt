@@ -25,12 +25,22 @@ message(STATUS "Configuring HelloWorld example...")
 file(GLOB WS_CLIENT "*.cpp" "*.h" "*.hpp")
 
 # Add source to this project's executable.
-add_executable (WsClient  ${WS_CLIENT})
-target_link_libraries(WsClient 
+#add_executable (WsClient  ${WS_CLIENT})
+add_library (WsClientLib  ${WS_CLIENT})
+
+#target_link_libraries(WsClient 
+#        PUBLIC oatpp::oatpp
+#        PUBLIC oatpp::oatpp-test
+#        PUBLIC oatpp::oatpp-websocket
+#        PUBLIC DdsWsGatewayUtilities
+#        PUBLIC DdsWsGatewayLib
+#)
+target_link_libraries(WsClientLib 
         PUBLIC oatpp::oatpp
         PUBLIC oatpp::oatpp-test
         PUBLIC oatpp::oatpp-websocket
         PUBLIC DdsWsGatewayUtilities
+        PUBLIC DdsWsGatewayLib
 )
 
 # TODO: Add tests and install targets if needed.

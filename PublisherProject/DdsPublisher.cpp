@@ -16,8 +16,7 @@ PublisherService::PublisherService(const ServiceConfigForTest<PublisherConfig>& 
 	, writer_(nullptr)
 	, type_(new ConfigTopicPubSubType())
 	, stop(false)
-{
-}
+{ }
 
 PublisherService::PublisherService()
 	: participant_(nullptr)
@@ -26,9 +25,7 @@ PublisherService::PublisherService()
 	, writer_(nullptr)
 	, type_(new ConfigTopicPubSubType())
 	, stop(false)
-{
-}
-
+{ }
 
 PublisherService::~PublisherService()
 {
@@ -63,13 +60,15 @@ bool PublisherService::initConfigPub()
 	qos.name(config_.participant_name);
 
 	qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
-	qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(5, 0);
+	qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(5,
+																							   0);
 
 	qos.transport().use_builtin_transports = false;
 
-	std::shared_ptr<TCPv4TransportDescriptor> descriptor = std::make_shared<TCPv4TransportDescriptor>();
+	std::shared_ptr<TCPv4TransportDescriptor> descriptor =
+		std::make_shared<TCPv4TransportDescriptor>();
 
-	std::vector<std::string> whitelist({ "127.0.0.1" });
+	std::vector<std::string> whitelist({"127.0.0.1"});
 	for (std::string ip : whitelist)
 	{
 		descriptor->interfaceWhiteList.push_back(ip);
@@ -121,9 +120,7 @@ bool PublisherService::initConfigPub()
 	return true;
 }
 
-void PublisherService::runConfigPub(
-	uint32_t number,
-	uint32_t sleep = 1000)
+void PublisherService::runConfigPub(uint32_t number, uint32_t sleep = 1000)
 {
 	uint32_t samples_sent = 0;
 	while (samples_sent < number)
@@ -132,9 +129,9 @@ void PublisherService::runConfigPub(
 		{
 			samples_sent++;
 			std::cout << "Subscriber id: " << config_topic_data_.subscriber_id()
-				<< " with vector size: " << config_topic_data_.vector_size()
-				<< " with topic type name: " << config_topic_data_.topictype_name()
-				<< " SENDED." << std::endl;
+					  << " with vector size: " << config_topic_data_.vector_size()
+					  << " with topic type name: " << config_topic_data_.topictype_name()
+					  << " SENDED." << std::endl;
 			break;
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
@@ -152,13 +149,15 @@ bool PublisherService::initPublishers()
 	qos.name(config_.participant_name);
 
 	qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
-	qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(5, 0);
+	qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(5,
+																							   0);
 
 	qos.transport().use_builtin_transports = false;
 
 	if (config_.transport == Transport::TCP)
 	{
-		std::shared_ptr<TCPv4TransportDescriptor> descriptor = std::make_shared<TCPv4TransportDescriptor>();
+		std::shared_ptr<TCPv4TransportDescriptor> descriptor =
+			std::make_shared<TCPv4TransportDescriptor>();
 
 		/*std::vector<std::string> whitelist({ "127.0.0.1" });
 		for (std::string ip : whitelist)
@@ -178,7 +177,8 @@ bool PublisherService::initPublishers()
 	}
 	else
 	{
-		std::shared_ptr<UDPv4TransportDescriptor> descriptor = std::make_shared<UDPv4TransportDescriptor>();
+		std::shared_ptr<UDPv4TransportDescriptor> descriptor =
+			std::make_shared<UDPv4TransportDescriptor>();
 
 		descriptor->sendBufferSize = 0;
 		descriptor->receiveBufferSize = 0;
@@ -213,12 +213,13 @@ bool PublisherService::initPublishers()
 	}
 	return true;
 }
+
 void PublisherService::runPublishers()
 {
 	std::vector<std::thread> threads;
 	for (auto& pub : publishers_)
 	{
-		threads.push_back(std::thread([&](){pub->run();}));
+		threads.push_back(std::thread([&]() { pub->run(); }));
 	}
 	for (auto& t : threads)
 	{
@@ -284,7 +285,9 @@ bool PublisherService::createNewPublisher(const PublisherConfig& config)
 	return true;
 }
 
-bool PublisherService::publish(DataWriter* writer, const DdsPublisherListener* listener, uint32_t samples_sent)
+bool PublisherService::publish(DataWriter* writer,
+							   const DdsPublisherListener* listener,
+							   uint32_t samples_sent)
 {
 	//std::lock_guard<std::mutex> guard(std::mutex());
 	if (listener > 0 && listener_.first_connected_)
@@ -311,7 +314,8 @@ void PublisherService::DdsPublisherListener::on_publication_matched(
 	else
 	{
 		std::cout << info.current_count_change
-			<< " is not a valid value for PublicationMatchedStatus current count change" << std::endl;
+				  << " is not a valid value for PublicationMatchedStatus current count change"
+				  << std::endl;
 	}
 }
 

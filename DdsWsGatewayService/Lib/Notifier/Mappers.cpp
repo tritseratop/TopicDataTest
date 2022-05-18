@@ -73,34 +73,34 @@ DdsDataMapper::toMediateDataDtoWithVectorsOfStruct(DDSData data, const Additiona
 	return result;
 }
 
-MediateDataDto DdsDataExMapper::toMediateDataDto(const DDSDataEx& cur_data_ex,
+MediateDataDto DdsDataExMapper::toMediateDataDto(DDSDataEx cur_data_ex,
 												 const AdditionalTopicInfo& info,
 												 MediateDataDto prev_dto)
 {
 	prev_dto.time_service = cur_data_ex.time_service();
 	fillChanged(prev_dto.data_int,
-				cur_data_ex.data_int(),
+				std::move(cur_data_ex.data_int()),
 				info.tag_to_index.at(DataCollectiionType::DATA_INT));
 	fillChanged(prev_dto.data_float,
-				cur_data_ex.data_float(),
+				std::move(cur_data_ex.data_float()),
 				info.tag_to_index.at(DataCollectiionType::DATA_FLOAT));
 	fillChanged(prev_dto.data_double,
-				cur_data_ex.data_double(),
+				std::move(cur_data_ex.data_double()),
 				info.tag_to_index.at(DataCollectiionType::DATA_DOUBLE));
 	fillChanged(prev_dto.data_char,
-				cur_data_ex.data_char(),
-				info.tag_to_index.at(DataCollectiionType::DATA_DOUBLE));
+				std::move(cur_data_ex.data_char()),
+				info.tag_to_index.at(DataCollectiionType::DATA_CHAR));
 
 	return prev_dto;
 }
 
-template<class DtoDataCollection, class DdsSample>
-void fillChanged(DtoDataCollection& prev_dto_collection,
-				 const std::vector<DdsSample>& cur_samples,
+template<class T, class DdsSample>
+void fillChanged(DataSampleSequence<T>& prev_dto_collection,
+				 std::vector<DdsSample> cur_samples,
 				 const TagToIndex& tag_to_index)
 {
 	size_t n = cur_samples.size();
-	for (const auto& sample : cur_samples)
+	for (auto sample : std::move(cur_samples))
 	{
 		if (tag_to_index.at(sample.id_tag()) >= prev_dto_collection.size())
 		{
@@ -113,35 +113,54 @@ void fillChanged(DtoDataCollection& prev_dto_collection,
 	}
 }
 
+template<class T>
+void fillChanged(DataSampleSequence<T>& prev_dto_collection,
+				 std::vector<DataExChar> cur_samples,
+				 const TagToIndex& tag_to_index)
+{
+	size_t n = cur_samples.size();
+	for (auto sample : std::move(cur_samples))
+	{
+		if (tag_to_index.at(sample.id_tag()) >= prev_dto_collection.size())
+		{
+			prev_dto_collection.resize(tag_to_index.at(sample.id_tag()) + 1);
+		}
+		prev_dto_collection.time_source[tag_to_index.at(sample.id_tag())] = sample.time_source();
+		prev_dto_collection.id_tag[tag_to_index.at(sample.id_tag())] = sample.id_tag();
+		prev_dto_collection.value[tag_to_index.at(sample.id_tag())] = std::move(sample.value());
+		prev_dto_collection.quality[tag_to_index.at(sample.id_tag())] = sample.quality();
+	}
+}
+
 MediateDataDtoWithVectorsOfStruct
-DdsDataExMapper::toMediateDataDtoWithVectorsOfStruct(const DDSDataEx& cur_data_ex,
+DdsDataExMapper::toMediateDataDtoWithVectorsOfStruct(DDSDataEx cur_data_ex,
 													 MediateDataDtoWithVectorsOfStruct prev_dto,
 													 const AdditionalTopicInfo& info)
 {
 	prev_dto.time_service = cur_data_ex.time_service();
 	fillChanged(prev_dto.data_int,
-				cur_data_ex.data_int(),
+				std::move(cur_data_ex.data_int()),
 				info.tag_to_index.at(DataCollectiionType::DATA_INT));
 	fillChanged(prev_dto.data_float,
-				cur_data_ex.data_float(),
+				std::move(cur_data_ex.data_float()),
 				info.tag_to_index.at(DataCollectiionType::DATA_FLOAT));
 	fillChanged(prev_dto.data_double,
-				cur_data_ex.data_double(),
+				std::move(cur_data_ex.data_double()),
 				info.tag_to_index.at(DataCollectiionType::DATA_DOUBLE));
 	fillChanged(prev_dto.data_char,
-				cur_data_ex.data_char(),
-				info.tag_to_index.at(DataCollectiionType::DATA_DOUBLE));
+				std::move(cur_data_ex.data_char()),
+				info.tag_to_index.at(DataCollectiionType::DATA_CHAR));
 
 	return prev_dto;
 }
 
-template<class DtoDataSample, class DdsSample>
-void fillChanged(std::vector<DtoDataSample>& prev_dto_collection,
-				 const std::vector<DdsSample>& cur_samples,
+template<class T, class DdsSample>
+void fillChanged(std::vector<DataSample<T>>& prev_dto_collection,
+				 std::vector<DdsSample> cur_samples,
 				 const TagToIndex& tag_to_index)
 {
 	size_t n = cur_samples.size();
-	for (const auto& sample : cur_samples)
+	for (auto sample : std::move(cur_samples))
 	{
 		if (tag_to_index.at(sample.id_tag()) >= prev_dto_collection.size())
 		{
@@ -150,6 +169,25 @@ void fillChanged(std::vector<DtoDataSample>& prev_dto_collection,
 		prev_dto_collection[tag_to_index.at(sample.id_tag())].time_source = sample.time_source();
 		prev_dto_collection[tag_to_index.at(sample.id_tag())].id_tag = sample.id_tag();
 		prev_dto_collection[tag_to_index.at(sample.id_tag())].value = sample.value();
+		prev_dto_collection[tag_to_index.at(sample.id_tag())].quality = sample.quality();
+	}
+}
+
+template<class DdsSample>
+void fillChanged(std::vector<DataSample<std::vector<char>>>& prev_dto_collection,
+				 std::vector<DdsSample> cur_samples,
+				 const TagToIndex& tag_to_index)
+{
+	size_t n = cur_samples.size();
+	for (auto sample : std::move(cur_samples))
+	{
+		if (tag_to_index.at(sample.id_tag()) >= prev_dto_collection.size())
+		{
+			prev_dto_collection.resize(tag_to_index.at(sample.id_tag()) + 1);
+		}
+		prev_dto_collection[tag_to_index.at(sample.id_tag())].time_source = sample.time_source();
+		prev_dto_collection[tag_to_index.at(sample.id_tag())].id_tag = sample.id_tag();
+		prev_dto_collection[tag_to_index.at(sample.id_tag())].value = std::move(sample.value());
 		prev_dto_collection[tag_to_index.at(sample.id_tag())].quality = sample.quality();
 	}
 }
@@ -172,38 +210,38 @@ MediateAlarmDto DdsAlarmExMapper::toMediateAlarmDto(MediateAlarmDto prev_dto,
 													const AdditionalTopicInfo& info)
 {
 	prev_dto.time_service = cur_data_ex.time_service();
-	fillChanged(
-		prev_dto, cur_data_ex.alarms(), info.tag_to_index.at(DataCollectiionType::ALARM_UINT32));
+	/*fillChanged(
+		prev_dto, cur_data_ex.alarms(), info.tag_to_index.at(DataCollectiionType::ALARM_UINT32));*/
 	return prev_dto;
 }
 
-std::string MediateDtoMapper::toString(MediateDataDto dto)
+std::string MediateDtoMapper::toString(const MediateDataDto& dto)
 {
 	nlohmann::json json;
 	json["tsrv"] = dto.time_service;
 
-	json["di"]["tsrc"] = std::move(dto.data_int.time_source);
-	json["di"]["tag"] = std::move(dto.data_int.id_tag);
-	json["di"]["val"] = std::move(dto.data_int.value);
-	json["di"]["qlt"] = convertCharVectorToString(std::move(dto.data_int.quality));
+	json["di"]["tsrc"] = dto.data_int.time_source;
+	json["di"]["tag"] = dto.data_int.id_tag;
+	json["di"]["val"] = dto.data_int.value;
+	json["di"]["qlt"] = convertCharVectorToString(dto.data_int.quality);
 
-	json["df"]["tsrc"] = std::move(dto.data_float.time_source);
-	json["df"]["tag"] = std::move(dto.data_float.id_tag);
-	json["df"]["val"] = std::move(dto.data_float.value);
-	json["df"]["qlt"] = convertCharVectorToString(std::move(dto.data_float.quality));
+	json["df"]["tsrc"] = dto.data_float.time_source;
+	json["df"]["tag"] = dto.data_float.id_tag;
+	json["df"]["val"] = dto.data_float.value;
+	json["df"]["qlt"] = convertCharVectorToString(dto.data_float.quality);
 
 	json["dd"]["tsrc"] = dto.data_double.time_source;
-	json["dd"]["tag"] = std::move(dto.data_double.id_tag);
-	json["dd"]["val"] = std::move(dto.data_double.value);
-	json["dd"]["qlt"] = convertCharVectorToString(std::move(dto.data_double.quality));
+	json["dd"]["tag"] = dto.data_double.id_tag;
+	json["dd"]["val"] = dto.data_double.value;
+	json["dd"]["qlt"] = convertCharVectorToString(dto.data_double.quality);
 
-	json["dc"]["tsrc"] = std::move(dto.data_char.time_source);
-	json["dc"]["tag"] = std::move(dto.data_char.id_tag);
+	json["dc"]["tsrc"] = dto.data_char.time_source;
+	json["dc"]["tag"] = dto.data_char.id_tag;
 	for (auto c : dto.data_char.value)
 	{
-		json["dc"]["val"].push_back(convertCharVectorToString(std::move(c)));
+		json["dc"]["val"].push_back(convertCharVectorToString(c));
 	}
-	json["dc"]["qlt"] = convertCharVectorToString(std::move(dto.data_char.quality));
+	json["dc"]["qlt"] = convertCharVectorToString(dto.data_char.quality);
 
 	return json.dump();
 }
@@ -245,7 +283,8 @@ std::string MediateDtoMapper::toStringWithCharVectors(const MediateDataDto& dto)
 }
 
 template<class T>
-void pushBackContainerWithChars(std::back_insert_iterator<T> result_it, std::vector<char> chars)
+void pushBackContainerWithChars(std::back_insert_iterator<T> result_it,
+								const std::vector<char>& chars)
 {
 	auto convert_char_to_string = [](char c) { return std::string(1, c); };
 	std::transform(chars.begin(), chars.end(), result_it, convert_char_to_string);

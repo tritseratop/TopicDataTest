@@ -1,5 +1,6 @@
 #include "DdsTestUtility.h"
 #include "TimeConverter/TimeConverter.hpp"
+#include "Utilities/WsTestUtility.h"
 
 template<class T>
 std::vector<T> getDefaultVector(size_t size, T offset)
@@ -310,19 +311,63 @@ GlobalTestConditions parseJsonToGlobalTestConditions(const nlohmann::json& json)
 	return conditions;
 }
 
-void insertTimeToJson(oatpp::String str)
+std::vector<ServiceConfigForTest<SubscriberConfig>>
+createDdsServiceConfigs(const GlobalTestConditions& conditions)
 {
-	std::string time = std::to_string(TimeConverter::GetTime_LLmcs());
-	auto first = str->find_first_of(':') + 1;
-	auto last = str->find_first_of(',');
-	str->erase(first, last - first);
-	str->insert(str->find_first_of(':') + 1, time);
+	// изменяемые настройки
+	Transport transport = Transport::TCP;
+	std::string ip = conditions.ip;
+	std::string log_file = "logs.txt";
+
+	ServiceConfigForTest<SubscriberConfig> default_service_config({"Participant_sub",
+																   transport,
+																   ip,
+																   4042,
+																   {"127.0.0.1"},
+																   {},
+																   10000,
+																   10000,
+																   10000,
+																   10000,
+																   10000,
+																   10000,
+																   10000,
+																   10000,
+																   10000,
+																   10000,
+																   10000,
+																   10000});
+
+	SubscriberConfig ddsdata_config = {0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 0, 1000};
+	SubscriberConfig ddsdataex_config = {
+		0, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, 0, 1000};
+
+	std::vector<ServiceConfigForTest<SubscriberConfig>> configs;
+
+	for (const auto& c : conditions.conditions)
+	{
+		ddsdata_config.samples = conditions.samples_number;
+		ddsdata_config.sleep = c.publication_interval;
+		ddsdata_config.vector_size = c.all_vectors_sizes;
+		ddsdata_config.info = getAdditionalTopicInfo(c.all_vectors_sizes);
+		ddsdata_config.isCache = true;
+		default_service_config.configs = {ddsdata_config};
+		configs.push_back(default_service_config);
+
+		ddsdataex_config.samples = conditions.samples_number;
+		ddsdataex_config.sleep = c.publication_interval;
+		ddsdataex_config.vector_size = c.all_vectors_sizes;
+		ddsdataex_config.info = getAdditionalTopicInfo(c.all_vectors_sizes);
+		ddsdataex_config.isCache = true;
+		default_service_config.configs = {ddsdataex_config};
+		configs.push_back(default_service_config);
+	}
+
+	return configs;
 }
 
-void replaceTimeToJson(oatpp::String str)
+std::string formMappingTestName(std::string description, const OneTestConditions& cond)
 {
-	std::string time = std::to_string(TimeConverter::GetTime_LLmcs());
-	auto first = str->find_first_of(':') + 1;
-	auto last = str->find_first_of(',');
-	str->replace(first, last - first, time);
+	return "\n" + description + " v = " + std::to_string(cond.all_vectors_sizes)
+		   + " cv = " + std::to_string(cond.char_vector_sizes);
 }

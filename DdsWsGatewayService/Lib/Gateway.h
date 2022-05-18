@@ -1,8 +1,10 @@
 #ifndef GATEWAY_H_
 #define GATEWAY_H_
 
-#include "../../Utilities/WsCommonClasses.h"
-#include "Lib/DataObserver/DataCacher.h"
+#include "Lib/DdsService/DdsSubscriber.h"
+#include "Lib/Notifier/DataCacher.h"
+#include "Lib/WsService/WsServer.h"
+#include "Utilities/WsCommonClasses.h"
 
 #include <deque>
 #include <unordered_map>
@@ -10,7 +12,7 @@
 class Gateway
 {
 public:
-	Gateway(std::vector<IServer*> servers);
+	Gateway(WebsockServer& ws_server, SubscriberService& dds_service);
 
 	bool sendDdsData();
 
@@ -22,7 +24,8 @@ private:
 	MediateDtoMapper ws_mapper_;
 
 	DataCacher cacher_;
-	std::vector<IServer*> servers_;
+	WebsockServer& ws_server_;
+	SubscriberService& dds_service_;
 };
 
 #endif //!GATEWAY_H_

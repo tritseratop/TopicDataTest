@@ -10,17 +10,21 @@
 #include "oatpp/network/Server.hpp"
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
 
-class WebsockServer : public IServer
+class WebsockServer
 {
 public:
 	WebsockServer(const Configure& config);
 	void run();
-	void stop() override;
-	bool isConnected() const override;
-	virtual bool sendData(WsDataDto::Wrapper data) override;
-	virtual bool sendData(oatpp::String data) override;
-	bool sendClose() override;
+	void stop();
+	bool isConnected() const;
+	bool sendData(WsDataDto::Wrapper data);
+	bool sendData(oatpp::String data);
+	bool sendClose();
 	//virtual bool sendAlarm(MediateAlarmDto data) override;
+
+	void cache(int64_t disp);
+	std::deque<int64_t> getCache();
+
 private:
 	std::shared_ptr<oatpp::parser::json::mapping::ObjectMapper>
 	createMapper(bool useBeautifier = false);
@@ -30,6 +34,8 @@ private:
 	bool stop_ = false;
 	AppComponent components;
 	std::shared_ptr<oatpp::network::Server> server_p;
+
+	std::deque<int64_t> cache_;
 };
 
 #endif //!WS_SERVER_H_

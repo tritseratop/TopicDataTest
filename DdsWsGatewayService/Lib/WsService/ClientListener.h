@@ -8,6 +8,7 @@
 #include "oatpp/network/ConnectionProvider.hpp"
 
 class WsSocketListener;
+class WebsockServer;
 
 // слушает события подключенных соединений
 class ClientListener : public oatpp::websocket::AsyncWebSocket::Listener
@@ -23,9 +24,10 @@ private:
 	oatpp::async::Lock write_lock_;
 
 private:
-	OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, async_executor_);
+	OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, async_executor_, "executor");
 	OATPP_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>,
-					server_connection_provider_);
+					server_connection_provider_,
+					"serverConnectionProvider");
 
 public:
 	ClientListener(const std::shared_ptr<AsyncWebSocket>& socket,
@@ -47,7 +49,7 @@ public:
 								 v_uint8 opcode,
 								 p_char8 data,
 								 oatpp::v_io_size size) override;
-	void sendMessageAsync(const oatpp::String& message);
+	void sendMessageAsync(const oatpp::String& message, WebsockServer* server = nullptr);
 	void sendCloseAsync();
 	void invalidateSocket();
 };

@@ -1,6 +1,6 @@
 #include "ClientListener.h"
-#include "Utilities/DdsTestUtility.h"
 #include "Utilities/TimeConverter/TimeConverter.hpp"
+#include "Utilities/WsTestUtility.h"
 #include "WsSocketListener.h"
 
 v_int64 ClientListener::getClientId()
@@ -47,7 +47,7 @@ ClientListener::readMessage(const std::shared_ptr<AsyncWebSocket>& socket,
 	return nullptr;
 }
 
-void ClientListener::sendMessageAsync(const oatpp::String& message)
+void ClientListener::sendMessageAsync(const oatpp::String& message, WebsockServer* server)
 {
 	class SendMessageCoroutine : public oatpp::async::Coroutine<SendMessageCoroutine>
 	{
@@ -67,7 +67,7 @@ void ClientListener::sendMessageAsync(const oatpp::String& message)
 
 		Action act() override
 		{
-			replaceTimeToJson(message);
+			//replaceTimeToJson(message);
 			return oatpp::async::synchronize(m_lock, websocket->sendOneFrameTextAsync(message))
 				.next(finish());
 		}
@@ -75,6 +75,10 @@ void ClientListener::sendMessageAsync(const oatpp::String& message)
 
 	if (socket_)
 	{
+		if (server != nullptr)
+		{
+			server->cache(getTimeFromJsonString(message));
+		}
 		async_executor_->execute<SendMessageCoroutine>(&write_lock_, socket_, message);
 	}
 }

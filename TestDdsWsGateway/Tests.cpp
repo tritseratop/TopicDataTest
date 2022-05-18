@@ -1,10 +1,12 @@
-#include "../DdsWsGatewayService/Lib/DataObserver/DataObserver.h"
 #include "../DdsWsGatewayService/Lib/DdsService/DdsSubscriber.h"
+#include "../DdsWsGatewayService/Lib/Notifier/Notifier.h"
 #include "../DdsWsGatewayService/Lib/WsService/WsServer.h"
 #include "../DdsWsGatewayService/Utilities/DdsTestUtility.h"
 #include "../DdsWsGatewayService/Utilities/PackageAnalyser.h"
 #include "../DdsWsGatewayService/Utilities/WsTestUtility.h"
 #include "../DdsWsGatewayService/Utilities/nlohmann/json.hpp"
+
+#include "../WsClient/WSClient.hpp"
 
 #include "oatpp/parser/json/Beautifier.hpp"
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
@@ -193,41 +195,41 @@ TEST(JsonParsing, WriteSizes)
 	}
 }
 
-//TEST(oatppDtoToStringSerialization, Mapping)
-//{
-//	std::ifstream ifile("dto_to_str.json");
-//	nlohmann::json json;
-//	ifile >> json;
-//	auto result = parseJsonToGlobalTestConditions(json);
-//
-//	auto serializeConfig = oatpp::parser::json::mapping::Serializer::Config::createShared();
-//	auto deserializeConfig = oatpp::parser::json::mapping::Deserializer::Config::createShared();
-//
-//	auto json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared(
-//		serializeConfig, deserializeConfig);
-//
-//	PackageAnalyser* analyser = PackageAnalyser::getInstance("dto_to_str_res.txt");
-//
-//	for (auto cond : result.conditions)
-//	{
-//		std::string test_name = "vectors" + std::to_string(cond.all_vectors_sizes) + " char vectors"
-//								+ std::to_string(cond.char_vector_sizes);
-//		analyser->addDataToAnalyse(test_name);
-//		WsDataDto::Wrapper ws_data =
-//			getWsDataUnion(cond.all_vectors_sizes, cond.char_vector_sizes).ws_dto;
-//		for (auto i = 0; i < cond.samples_number; ++i)
-//		{
-//			auto start = TimeConverter::GetTime_LLmcs();
-//			json_object_mapper->writeToString(ws_data);
-//			auto finish = TimeConverter::GetTime_LLmcs();
-//			analyser->pushDataTimestamp(test_name, finish - start);
-//		}
-//	}
-//
-//	analyser->writeResults();
-//
-//	delete analyser;
-//}
+TEST(JsonParsing, GettingTime)
+{
+	WsDataUnion ws_data = getWsDataUnion(10, 10);
+	ws_data.ws_dto->tsrv = 1'000'000'000'000'000;
+
+	auto json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
+	oatpp::String data = json_object_mapper->writeToString(ws_data.ws_dto);
+	int64_t time = 2'222'222'222'222'222;
+	replaceTimeToJson(data, time);
+
+	EXPECT_EQ(time, getTimeFromJsonString(data));
+
+	ws_data.ws_dto->tsrv = TimeConverter::GetTime_LLmcs();
+	data = json_object_mapper->writeToString(ws_data.ws_dto);
+	time = TimeConverter::GetTime_LLmcs();
+	replaceTimeToJson(data, time);
+
+	EXPECT_EQ(time, getTimeFromJsonString(data));
+
+	ws_data = getWsDataUnion(5, 1);
+	ws_data.ws_dto->tsrv = TimeConverter::GetTime_LLmcs();
+	data = json_object_mapper->writeToString(ws_data.ws_dto);
+	time = TimeConverter::GetTime_LLmcs();
+	replaceTimeToJson(data, time);
+
+	EXPECT_EQ(time, getTimeFromJsonString(data));
+
+	ws_data = getWsDataUnion(10, 1);
+	ws_data.ws_dto->tsrv = TimeConverter::GetTime_LLmcs();
+	data = json_object_mapper->writeToString(ws_data.ws_dto);
+	time = TimeConverter::GetTime_LLmcs();
+	replaceTimeToJson(data, time);
+
+	EXPECT_EQ(time, getTimeFromJsonString(data));
+}
 
 TEST(setTimeToJsonTest, replace)
 {
@@ -251,9 +253,76 @@ TEST(setTimeToJsonTest, insert)
 	EXPECT_EQ(result.getValue(""), expected.getValue(""));
 }
 
+void runServerSending(WebsockServer* server, int64_t initial_disp, int64_t sleep, size_t str_size)
+{
+	while (!server->isConnected())
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	}
+	auto packet = TestPacket({initial_disp, std::string(str_size, 'a')});
+	for (int i = 0; i < 100; ++i)
+	{
+		packet.disp = initial_disp + i;
+		auto packet_json = nlohmann::json(packet).dump();
+		auto oatpp_packet_json = oatpp::String(packet_json);
+		server->sendData(oatpp_packet_json);
+		std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
+	}
+	server->sendClose();
+	server->stop();
+}
+
+TEST(WsConnectionTest, DataTransmition)
+{
+	oatpp::base::Environment::init();
+	{
+		int64_t initisl_disp = 1'000'000'000'000'000;
+
+		Configure ws_conf;
+		ws_conf.WS_HOST = "127.0.0.1";
+		WebsockServer server(ws_conf);
+		std::thread sending([&server]() { server.run(); });
+		std::thread server_thread(
+			[initisl_disp, &server]() { runServerSending(&server, initisl_disp, 0, 1); });
+
+		Configure configure;
+		configure.WS_HOST = "127.0.0.1";
+		WSClient wsclient(configure);
+		wsclient.run();
+
+		server_thread.join();
+		sending.join();
+
+		auto server_cache = server.getCache();
+		EXPECT_EQ(100, server_cache.size());
+		for (int i = 0; i < 100; ++i)
+		{
+			auto server_disp = server_cache.front();
+
+			EXPECT_EQ(initisl_disp + i, server_disp);
+			server_cache.pop_front();
+		}
+
+		auto cache = wsclient.getCache();
+		EXPECT_EQ(100, cache.size());
+
+		if (cache.size() < 100)
+			return;
+		for (int i = 0; i < 100; ++i)
+		{
+			auto disp = cache.front();
+
+			EXPECT_EQ(initisl_disp + i, disp);
+			cache.pop_front();
+		}
+	}
+	oatpp::base::Environment::destroy();
+}
+
 int main(int argc, char* argv[])
 {
 	::testing::InitGoogleTest(&argc, argv);
 	RUN_ALL_TESTS();
+
 	system("pause");
 }

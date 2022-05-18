@@ -1,4 +1,5 @@
 #include "WSListener.hpp"
+#include "Utilities/WsTestUtility.h"
 #include "WSClient.hpp"
 
 #include "oatpp/parser/json/Beautifier.hpp"
@@ -47,28 +48,31 @@ WSListener::readMessage(const std::shared_ptr<AsyncWebSocket>& socket,
 						p_char8 data,
 						oatpp::v_io_size size)
 {
+	static int i = 1;
 	if (first_package == false)
 	{
 		analyser = PackageAnalyser::getInstance();
+		analyser->clear();
 		first_package = true;
 	}
 	if (size == 0)
 	{ // message transfer finished
 		auto timestamp = TimeConverter::GetTime_LLmcs();
 		oatpp::String wholeMessage = m_messageBuffer.toString();
+		client->cache(getTimeFromJsonString(wholeMessage));
 		if (prev_size != 0 && prev_size != wholeMessage->size())
 		{
+			i = 1;
 			std::cout << "recieved" << std::endl;
 			analyser->writeResults();
 			analyser->clear();
-			analyser->resetStart();
 		}
 		prev_size = wholeMessage->size();
-		std::string time_s = wholeMessage->substr(8, 16);
-		int64_t time = std::stoll(time_s);
+		int64_t time = getTimeFromJsonString(wholeMessage);
 		/*auto data_dto = json_object_mapper->readFromString<WsDataDto::Wrapper>(wholeMessage);
 		analyser->pushPackageTimestamp(
 			{data_dto->tsrv, timestamp, timestamp - data_dto->tsrv, wholeMessage->size()});*/
+		//std::cout << i++ << ". Delivery time: " << timestamp - time << std::endl;
 		analyser->pushPackageTimestamp({time, timestamp, timestamp - time, wholeMessage->size()});
 		analyser->pushDataTimestamp("COMPARE: " + std::to_string(prev_size), timestamp - time);
 

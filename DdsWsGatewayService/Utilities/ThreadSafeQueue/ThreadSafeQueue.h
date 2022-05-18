@@ -7,7 +7,7 @@
 
 #include "../DdsCommonClasses.h"
 
-template <typename T>
+template<typename T>
 class ThreadSafeDeque
 {
 private:
@@ -87,6 +87,7 @@ public:
 
 	std::deque<T> getDequeCopy() const
 	{
+		std::shared_lock<std::shared_mutex> r_lock(mutex_);
 		return queue_;
 	}
 };

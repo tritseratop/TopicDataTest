@@ -26,12 +26,12 @@ std::shared_ptr<ClientListener> WsSocketListener::getClientById(v_int64 id)
 	return nullptr;
 }
 
-void WsSocketListener::sendMessageToAllAsync(const oatpp::String& message)
+void WsSocketListener::sendMessageToAllAsync(const oatpp::String& message, WebsockServer* server)
 {
 	std::lock_guard<std::mutex> m(m_write_message_);
 	for (auto& pair : clients_)
 	{
-		pair.second->sendMessageAsync(message);
+		pair.second->sendMessageAsync(message, server);
 	}
 }
 
