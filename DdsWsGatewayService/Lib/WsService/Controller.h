@@ -16,7 +16,7 @@ private:
 private:
 	OATPP_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>,
 					websocketConnectionHandler,
-					"websocket");
+					"server_websocket");
 
 public:
 	Controller(OATPP_COMPONENT(std::shared_ptr<ObjectMapper>, objectMapper))
@@ -44,7 +44,7 @@ public:
 		}
 	};
 
-	ENDPOINT_ASYNC("GET", "ws", WS){ENDPOINT_ASYNC_INIT(WS) Action act() override{
+	ENDPOINT_ASYNC("GET", "ws/test", WS){ENDPOINT_ASYNC_INIT(WS) Action act() override{
 		auto response = oatpp::websocket::Handshaker::serversideHandshake(
 			request->getHeaders(), controller->websocketConnectionHandler);
 	return _return(response);

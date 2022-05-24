@@ -260,7 +260,7 @@ void runServerSending(WebsockServer* server, int64_t initial_disp, int64_t sleep
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 	auto packet = TestPacket({initial_disp, std::string(str_size, 'a')});
-	for (int i = 0; i < 100; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		packet.disp = initial_disp + i;
 		auto packet_json = nlohmann::json(packet).dump();
@@ -268,6 +268,7 @@ void runServerSending(WebsockServer* server, int64_t initial_disp, int64_t sleep
 		server->sendData(oatpp_packet_json);
 		std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
 	}
+	std::this_thread::sleep_for(std::chrono::seconds(100));
 	server->sendClose();
 	server->stop();
 }
@@ -279,22 +280,27 @@ TEST(WsConnectionTest, DataTransmition)
 		int64_t initisl_disp = 1'000'000'000'000'000;
 
 		Configure ws_conf;
+		DataCacher cacher(6);
 		ws_conf.WS_HOST = "127.0.0.1";
-		WebsockServer server(ws_conf);
-		std::thread sending([&server]() { server.run(); });
-		std::thread server_thread(
-			[initisl_disp, &server]() { runServerSending(&server, initisl_disp, 0, 1); });
+		WebsockServer server(ws_conf, cacher);
+		std::thread server_thread([&server]() { server.run(); });
+		//std::thread sending_server_thread([&server]() { server.runTestPacketSending(); });
 
 		Configure configure;
 		configure.WS_HOST = "127.0.0.1";
 		WSClient wsclient(configure);
-		wsclient.run();
+		std::thread client_thread([&wsclient]() { wsclient.run(); });
 
+		server.runTestPacketSending();
+		client_thread.join();
+		//sending_server_thread.join();
+		server.stop();
 		server_thread.join();
-		sending.join();
 
 		auto server_cache = server.getCache();
 		EXPECT_EQ(100, server_cache.size());
+		if (server_cache.size() < 100)
+			return;
 		for (int i = 0; i < 100; ++i)
 		{
 			auto server_disp = server_cache.front();
@@ -323,6 +329,5 @@ int main(int argc, char* argv[])
 {
 	::testing::InitGoogleTest(&argc, argv);
 	RUN_ALL_TESTS();
-
 	system("pause");
 }

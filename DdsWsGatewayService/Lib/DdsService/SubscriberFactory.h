@@ -29,10 +29,10 @@ class ConcreteSubscriber : public AbstractDdsSubscriber
 public:
 	ConcreteSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
 					   const SubscriberConfig& config,
-					   DataCacher* observer)
+					   DataCacher* cacher_)
 		: participant_(participant)
 		, config_(config)
-		, cacher_(observer)
+		, cacher_(cacher_)
 		, subscriber_(nullptr)
 		, reader_(nullptr)
 		, topic_(nullptr)

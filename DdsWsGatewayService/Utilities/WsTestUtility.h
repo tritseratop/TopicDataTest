@@ -16,7 +16,7 @@ struct WsDataUnion
 struct TestPacket
 {
 	int64_t disp = 0;
-	std::string str;
+	std::string str = "";
 
 	friend void to_json(nlohmann::json& json, const TestPacket& packet);
 

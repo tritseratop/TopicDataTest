@@ -4,6 +4,7 @@
 #include "Lib/WsService/AppComponent.h"
 #include "Lib/WsService/Controller.h"
 
+#include "Utilities/ThreadSafeQueue/ThreadSafeQueue.h"
 #include "Utilities/WsCommonClasses.h"
 #include "Utilities/WsDto.h"
 
@@ -13,10 +14,14 @@
 class WebsockServer
 {
 public:
-	WebsockServer(const Configure& config);
+	WebsockServer(const Configure& config, DataCacher& cacher);
 	void run();
+	void runTestPacketSending();
+	void runDataSending();
 	void stop();
 	bool isConnected() const;
+	DataCacher& getDataCacher();
+
 	bool sendData(WsDataDto::Wrapper data);
 	bool sendData(oatpp::String data);
 	bool sendClose();
@@ -26,16 +31,14 @@ public:
 	std::deque<int64_t> getCache();
 
 private:
-	std::shared_ptr<oatpp::parser::json::mapping::ObjectMapper>
-	createMapper(bool useBeautifier = false);
-
-	std::shared_ptr<oatpp::parser::json::mapping::ObjectMapper> json_object_mapper;
+private:
+	AppComponent components_;
+	std::shared_ptr<oatpp::network::Server> server_;
 	const Configure config_;
 	bool stop_ = false;
-	AppComponent components;
-	std::shared_ptr<oatpp::network::Server> server_p;
 
-	std::deque<int64_t> cache_;
+	DataCacher& cacher_;
+	ThreadSafeDeque<int64_t> cache_;
 };
 
 #endif //!WS_SERVER_H_

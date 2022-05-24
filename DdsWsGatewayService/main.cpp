@@ -20,8 +20,8 @@ int main(int argc, char* argv[])
 		oatpp::base::Environment::init();
 		{
 			Configure ws_conf;
-			WebsockServer server(ws_conf);
 			DataCacher cacher(5);
+			WebsockServer server(ws_conf, cacher);
 
 			SubscriberService* mysub = new SubscriberService({}, cacher);
 
@@ -81,7 +81,8 @@ int main(int argc, char* argv[])
 		{
 			Configure ws_conf;
 			ws_conf.WS_HOST = conditions.ip;
-			WebsockServer server(ws_conf);
+			DataCacher cacher(5);
+			WebsockServer server(ws_conf, cacher);
 
 			std::thread sending([&server]() { server.run(); });
 
@@ -105,7 +106,7 @@ int main(int argc, char* argv[])
 		{
 			std::cout << formMappingTestName("Test with", cond) << std::endl;
 
-			{
+			/*{
 				std::string test_name = formMappingTestName("DTO TO WS", cond);
 
 				analyser->addDataToAnalyse(test_name);
@@ -154,10 +155,11 @@ int main(int argc, char* argv[])
 				}
 				analyser->writeResults();
 				analyser->clear();
-			}
+			}*/
 
 			{
 				std::string test_name = formMappingTestName("DTO TO STR (CHARS AS STR)", cond);
+				std::string test_name1 = formMappingTestName("STR TO OATPP STR", cond);
 				analyser->addDataToAnalyse(test_name);
 				MediateDataDto dto = getMediateDataDto(cond.all_vectors_sizes,
 													   cond.char_vector_sizes);
@@ -168,6 +170,11 @@ int main(int argc, char* argv[])
 					auto tmp = mapper.toString(dto);
 					auto finish = TimeConverter::GetTime_LLmcs();
 					analyser->pushDataTimestamp(test_name, finish - start);
+
+					auto start1 = TimeConverter::GetTime_LLmcs();
+					auto tmp1 = oatpp::String(tmp);
+					auto finish1 = TimeConverter::GetTime_LLmcs();
+					analyser->pushDataTimestamp(test_name1, finish1 - start1);
 				}
 				analyser->writeResults();
 				analyser->clear();
@@ -175,6 +182,8 @@ int main(int argc, char* argv[])
 
 			{
 				std::string test_name = formMappingTestName("DTO TO STR (CHARS AS VEC)", cond);
+				std::string test_name1 = formMappingTestName("STR TO OATPP STR (CHARS AS VEC)",
+															 cond);
 				analyser->addDataToAnalyse(test_name);
 				MediateDataDto dto = getMediateDataDto(cond.all_vectors_sizes,
 													   cond.char_vector_sizes);
@@ -185,12 +194,53 @@ int main(int argc, char* argv[])
 					auto tmp = mapper.toStringWithCharVectors(dto);
 					auto finish = TimeConverter::GetTime_LLmcs();
 					analyser->pushDataTimestamp(test_name, finish - start);
+
+					auto start1 = TimeConverter::GetTime_LLmcs();
+					auto tmp1 = oatpp::String(tmp);
+					auto finish1 = TimeConverter::GetTime_LLmcs();
+					analyser->pushDataTimestamp(test_name1, finish1 - start1);
 				}
 				analyser->writeResults();
 				analyser->clear();
 			}
 
 			{
+				std::string test_name = formMappingTestName("DTO TO OATPP STR (CHARS AS STR)",
+															cond);
+				analyser->addDataToAnalyse(test_name);
+				MediateDataDto dto = getMediateDataDto(cond.all_vectors_sizes,
+													   cond.char_vector_sizes);
+				MediateDtoMapper mapper;
+				for (auto i = 0; i < conditions.samples_number; ++i)
+				{
+					auto start = TimeConverter::GetTime_LLmcs();
+					auto tmp = oatpp::String(mapper.toString(dto));
+					auto finish = TimeConverter::GetTime_LLmcs();
+					analyser->pushDataTimestamp(test_name, finish - start);
+				}
+				analyser->writeResults();
+				analyser->clear();
+			}
+
+			{
+				std::string test_name = formMappingTestName("DTO TO OATPP STR (CHARS AS VEC)",
+															cond);
+				analyser->addDataToAnalyse(test_name);
+				MediateDataDto dto = getMediateDataDto(cond.all_vectors_sizes,
+													   cond.char_vector_sizes);
+				MediateDtoMapper mapper;
+				for (auto i = 0; i < conditions.samples_number; ++i)
+				{
+					auto start = TimeConverter::GetTime_LLmcs();
+					auto tmp = oatpp::String(mapper.toStringWithCharVectors(dto));
+					auto finish = TimeConverter::GetTime_LLmcs();
+					analyser->pushDataTimestamp(test_name, finish - start);
+				}
+				analyser->writeResults();
+				analyser->clear();
+			}
+
+			/*{
 				std::string test_name = formMappingTestName("DDSDATA TO DTO", cond);
 				analyser->addDataToAnalyse(test_name);
 				auto data = getDdsData(cond.all_vectors_sizes, cond.char_vector_sizes);
@@ -222,7 +272,7 @@ int main(int argc, char* argv[])
 				}
 				analyser->writeResults();
 				analyser->clear();
-			}
+			}*/
 		}
 
 		delete analyser;

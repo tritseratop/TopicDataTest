@@ -1,6 +1,9 @@
 #include "Lib/WsService/WsSocketListener.h"
+#include "Lib/WsService/WsServer.h"
 
-WsSocketListener::WsSocketListener() { }
+WsSocketListener::WsSocketListener(WebsockServer* server)
+	: server_(server)
+{ }
 
 void WsSocketListener::addClient(const std::shared_ptr<ClientListener>& client)
 {
@@ -26,12 +29,21 @@ std::shared_ptr<ClientListener> WsSocketListener::getClientById(v_int64 id)
 	return nullptr;
 }
 
-void WsSocketListener::sendMessageToAllAsync(const oatpp::String& message, WebsockServer* server)
+void WsSocketListener::runTestMessageSending(int64_t sleep, int64_t initial_disp, size_t times)
 {
 	std::lock_guard<std::mutex> m(m_write_message_);
 	for (auto& pair : clients_)
 	{
-		pair.second->sendMessageAsync(message, server);
+		pair.second->runTestMessageSendingAsync(server_, sleep, initial_disp, times);
+	}
+}
+
+void WsSocketListener::runDataSending(int64_t sleep)
+{
+	std::lock_guard<std::mutex> m(m_write_message_);
+	for (auto& pair : clients_)
+	{
+		pair.second->runDataSendingAsync(server_, sleep);
 	}
 }
 
@@ -51,7 +63,7 @@ void WsSocketListener::onAfterCreate_NonBlocking(
 	const std::shared_ptr<const ParameterMap>& params)
 {
 	//TODO initialize
-	auto client = std::make_shared<ClientListener>(socket, this, SOCKETS);
+	auto client = std::make_shared<ClientListener>(socket, this, server_->getDataCacher(), SOCKETS);
 	++SOCKETS;
 	socket->setListener(client);
 	addClient(client);

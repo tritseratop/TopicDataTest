@@ -6,6 +6,8 @@
 #include <map>
 #include <queue>
 
+class WebsockServer;
+
 class WsSocketListener : public oatpp::websocket::AsyncConnectionHandler::SocketInstanceListener
 {
 private:
@@ -14,17 +16,20 @@ private:
 	std::map<v_int64, std::shared_ptr<ClientListener>> clients_;
 	std::mutex m_write_message_;
 	std::mutex m_change_clients_;
+	WebsockServer* server_;
 
 public:
 	static std::atomic<v_int32> SOCKETS; // for id generation
 public:
-	WsSocketListener();
+	WsSocketListener(WebsockServer* server);
 	void addClient(const std::shared_ptr<ClientListener>& socket);
 
 	void removeClientById(v_int64 id);
 	std::shared_ptr<ClientListener> getClientById(v_int64 id);
 
-	void sendMessageToAllAsync(const oatpp::String& message, WebsockServer* server = nullptr);
+	void runTestMessageSending(int64_t sleep, int64_t initial_disp, size_t times);
+	void runDataSending(int64_t sleep);
+
 	void sendClose();
 
 	void onAfterCreate_NonBlocking(const std::shared_ptr<ClientListener::AsyncWebSocket>& socket,
