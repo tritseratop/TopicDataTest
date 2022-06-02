@@ -282,12 +282,14 @@ TEST(WsConnectionTest, RunWithoutCoroutine)
 			server_connection_provider, connection_handler);
 		std::thread server_thread([&server]() { server->run(); });
 
+		size_t packet_number = 100;
 		std::vector<TestPacket> test_packets;
-		test_packets.reserve(10000);
+		test_packets.reserve(packet_number);
+		std::string message(10000, 'a');
 
-		for (int64_t i = 9999; i >= 0; --i)
+		for (int64_t i = packet_number - 1; i >= 0; --i)
 		{
-			test_packets.push_back(TestPacket{init_disp + i, ""});
+			test_packets.push_back(TestPacket{init_disp + i, message});
 		}
 
 		ThreadSafeDeque<int64_t> server_cache;
@@ -299,6 +301,7 @@ TEST(WsConnectionTest, RunWithoutCoroutine)
 			const BeforeMessageSend before_msg_send =
 				[&server_cache](const oatpp::String& message) {
 					auto result = getTimeFromJsonString(message);
+					std::this_thread::sleep_for(std::chrono::milliseconds(100));
 					server_cache.push_back(result);
 				};
 
@@ -325,10 +328,10 @@ TEST(WsConnectionTest, RunWithoutCoroutine)
 		executor->stop();
 		executor->join();
 
-		EXPECT_EQ(10000, server_cache.size());
-		if (server_cache.size() < 10000)
+		EXPECT_EQ(packet_number, server_cache.size());
+		if (server_cache.size() < packet_number)
 			return;
-		for (int i = 0; i < 10000; ++i)
+		for (int i = 0; i < packet_number; ++i)
 		{
 			auto server_disp = server_cache.front();
 
@@ -337,11 +340,11 @@ TEST(WsConnectionTest, RunWithoutCoroutine)
 		}
 
 		auto cache = wsclient.getCache();
-		EXPECT_EQ(10000, cache.size());
+		EXPECT_EQ(packet_number, cache.size());
 
-		if (cache.size() < 10000)
+		if (cache.size() < packet_number)
 			return;
-		for (int i = 0; i < 10000; ++i)
+		for (int i = 0; i < packet_number; ++i)
 		{
 			auto disp = cache.front();
 

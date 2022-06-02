@@ -20,7 +20,8 @@
 class SubscriberService
 {
 public:
-	SubscriberService(const ServiceConfigForTest<SubscriberConfig>& config, DataCacher& cacher);
+	SubscriberService(const ServiceConfigForTest<SubscriberConfig>& config,
+					  std::shared_ptr<DataCacher> cacher);
 	virtual ~SubscriberService();
 
 	bool initSubscribers();
@@ -56,7 +57,7 @@ private:
 	SubscriberFactory factory_;
 	std::vector<AbstractDdsSubscriber*> subscribers_;
 
-	DataCacher& cacher_;
+	std::shared_ptr<DataCacher> cacher_;
 	ConfigSubscriber* config_subscriber_;
 
 	PackageAnalyser* analyser_;

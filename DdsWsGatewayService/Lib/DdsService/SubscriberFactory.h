@@ -29,7 +29,7 @@ class ConcreteSubscriber : public AbstractDdsSubscriber
 public:
 	ConcreteSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
 					   const SubscriberConfig& config,
-					   Cacher* cacher)
+					   std::shared_ptr<Cacher> cacher)
 		: participant_(participant)
 		, subscriber_(nullptr)
 		, reader_(nullptr)
@@ -149,7 +149,7 @@ private:
 
 	SubscriberConfig config_;
 
-	Cacher* cacher_;
+	std::shared_ptr<Cacher> cacher_;
 
 	std::atomic<bool> stop_;
 
@@ -285,7 +285,7 @@ public:
 	virtual ~SubscriberFactory() { }
 	AbstractDdsSubscriber* createSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
 											const SubscriberConfig& config,
-											void* cacher) const;
+											std::shared_ptr<void> cacher) const;
 
 protected:
 };

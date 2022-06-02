@@ -13,7 +13,7 @@ using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
 
 SubscriberService::SubscriberService(const ServiceConfigForTest<SubscriberConfig>& config,
-									 DataCacher& cacher)
+									 std::shared_ptr<DataCacher> cacher)
 	: config_(config)
 	, participant_(nullptr)
 	, cacher_(cacher)
@@ -139,7 +139,7 @@ bool SubscriberService::initSubscriber(const SubscriberConfig& config)
 {
 	// TODO: узнать че менять в SUBSCRIBER_QOS_DEFAULT
 	AbstractDdsSubscriber* sub = factory_.createSubscriber(
-		participant_, config, config.isCache ? &cacher_ : nullptr);
+		participant_, config, config.isCache ? cacher_ : nullptr);
 	if (sub == nullptr)
 	{
 		return false;
@@ -204,7 +204,7 @@ std::vector<AbstractDdsSubscriber*> SubscriberService::getSubscribers() const
 
 std::deque<MediateDataDto> SubscriberService::getDataCacheCopy() const
 {
-	return cacher_.getDataCacheCopy();
+	return cacher_->getDataCacheCopy();
 }
 
 // TODO: сделать макрос?
