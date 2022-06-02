@@ -68,7 +68,7 @@ public:
 		{
 			return {};
 		}
-		T tmp = queue_.front();
+		T tmp = std::move(queue_.front());
 		queue_.pop_front();
 		return tmp;
 	}

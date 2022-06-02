@@ -57,9 +57,10 @@ endforeach()
 add_library(DdsWsGatewayLib STATIC ${LIB_SOURCES})
 add_library(DdsWsGatewayUtilities STATIC ${UTILITIES_SOURCES})
 
-add_executable(DdsWsGatewayService ${GATEWAY_SOURCES})
+#(DdsWsGatewayService ${GATEWAY_SOURCES})
 
-set(targets DdsWsGatewayLib DdsWsGatewayUtilities DdsWsGatewayService)
+#set(targets DdsWsGatewayLib DdsWsGatewayUtilities DdsWsGatewayService)
+set(targets DdsWsGatewayLib DdsWsGatewayUtilities)
 
 foreach (target ${targets})
     target_include_directories(${target} 
@@ -75,7 +76,7 @@ foreach (target ${targets})
     )
 endforeach ()
 
-target_link_libraries(DdsWsGatewayService 
-        PUBLIC DdsWsGatewayUtilities
-        PUBLIC DdsWsGatewayLib 
-    )
+#target_link_libraries( DdsWsGatewayService 
+#        PUBLIC DdsWsGatewayUtilities
+#        PUBLIC DdsWsGatewayLib 
+#    )

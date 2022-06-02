@@ -10,10 +10,10 @@
 class ClientAppComponent
 {
 private:
-	const Configure config;
+	const WsConfigure config;
 
 public:
-	ClientAppComponent(const Configure& config_)
+	ClientAppComponent(const WsConfigure& config_)
 		: config(config_)
 	{ }
 
@@ -24,8 +24,8 @@ public:
 						   connectionProvider)
 	("connectionProvider", [this] {
 		return oatpp::network::tcp::client::ConnectionProvider::createShared(
-			{config.WS_HOST.c_str(),
-			 static_cast<v_uint16>(config.WS_PORT),
+			{config.host.c_str(),
+			 static_cast<v_uint16>(config.port),
 			 oatpp::network::Address::IP_4});
 	}());
 };

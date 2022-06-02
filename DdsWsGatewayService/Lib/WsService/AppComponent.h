@@ -13,19 +13,20 @@
 class AppComponent
 {
 private:
-	const Configure config_;
-	WebsockServer* server_;
+	const WsConfigure config_;
+	std::unordered_map<int64_t, std::shared_ptr<AdapterUnit>> adapter_units_;
 
 public:
-	AppComponent(WebsockServer* server, const Configure& config_)
+	AppComponent(const WsConfigure& config_,
+				 std::unordered_map<int64_t, std::shared_ptr<AdapterUnit>> adapter_units)
 		: config_(config_)
-		, server_(server)
+		, adapter_units_(adapter_units)
 	{ }
 
 	// создает асинхронный executor
 	OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor_)
 	("server_executor", [] {
-		return std::make_shared<oatpp::async::Executor>(4, // кол-во потоков data-processing
+		return std::make_shared<oatpp::async::Executor>(1, // кол-во потоков data-processing
 														1, // кол-во потоков ввода/вывода
 														1 // кол-во потоков таймеров
 		);
@@ -36,8 +37,8 @@ public:
 						   connection_provider_)
 	("server_connection_provider", [this] {
 		return oatpp::network::tcp::server::ConnectionProvider::createShared(
-			{config_.WS_HOST.c_str(),
-			 static_cast<v_uint16>(config_.WS_PORT),
+			{config_.host.c_str(),
+			 static_cast<v_uint16>(config_.port),
 			 oatpp::network::Address::IP_4});
 	}());
 
@@ -60,13 +61,13 @@ public:
 
 	// Обязательно нужно создать ОДИН SocketListener, чтобы на каждое новое подключение не создавались новые
 	OATPP_CREATE_COMPONENT(std::shared_ptr<WsSocketListener>, sock_listener_)
-	([this] { return std::make_shared<WsSocketListener>(server_); }());
+	("sock_listener", [this] { return std::make_shared<WsSocketListener>(adapter_units_); }());
 
 	// обработчик подключения по протоколу websocket
 	OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>, wsConnectionHandler)
 	("server_websocket", [] {
 		OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor, "server_executor");
-		OATPP_COMPONENT(std::shared_ptr<WsSocketListener>, sock_listener);
+		OATPP_COMPONENT(std::shared_ptr<WsSocketListener>, sock_listener, "sock_listener");
 		auto connectionHanler = oatpp::websocket::AsyncConnectionHandler::createShared(executor);
 		connectionHanler->setSocketInstanceListener(sock_listener);
 		return connectionHanler;

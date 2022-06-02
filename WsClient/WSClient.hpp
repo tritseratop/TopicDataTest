@@ -7,11 +7,11 @@ class WSClient
 {
 private:
 	std::string login;
-	const Configure config;
+	const WsConfigure config;
 	std::deque<int64_t> cache_;
 
 public:
-	WSClient(const Configure& config_)
+	WSClient(const WsConfigure& config_)
 		: config(config_)
 	{ }
 	void run();

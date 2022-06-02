@@ -15,7 +15,7 @@ private:
 
 private:
 	OATPP_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>,
-					websocketConnectionHandler,
+					websocket_connection_handler_,
 					"server_websocket");
 
 public:
@@ -44,15 +44,25 @@ public:
 		}
 	};
 
-	ENDPOINT_ASYNC("GET", "ws/test", WS){ENDPOINT_ASYNC_INIT(WS) Action act() override{
-		auto response = oatpp::websocket::Handshaker::serversideHandshake(
-			request->getHeaders(), controller->websocketConnectionHandler);
-	return _return(response);
-}
-}
-;
-}
-;
+	ENDPOINT_ASYNC("GET", "ws/test/{adapter-unit-id}", WS)
+	{
+		ENDPOINT_ASYNC_INIT(WS) Action act() override
+		{
+			auto adapter_unit_id = request->getPathVariable("adapter-unit-id");
+
+			auto response = oatpp::websocket::Handshaker::serversideHandshake(
+				request->getHeaders(), controller->websocket_connection_handler_);
+
+			auto params = std::make_shared<oatpp::network::ConnectionHandler::ParameterMap>();
+
+			(*params)["adapter-unit-id"] = adapter_unit_id;
+
+			response->setConnectionUpgradeParameters(params);
+
+			return _return(response);
+		};
+	};
+};
 
 #include OATPP_CODEGEN_END(ApiController)
 

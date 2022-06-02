@@ -1,83 +1,65 @@
 #include "Lib/WsService/WsSocketListener.h"
-#include "Lib/WsService/WsServer.h"
 
-WsSocketListener::WsSocketListener(WebsockServer* server)
-	: server_(server)
+WsSocketListener::WsSocketListener(
+	std::unordered_map<int64_t, std::shared_ptr<AdapterUnit>> adapter_units)
+	: adapter_units_counter_(0)
+	, adapter_units_(std::move(adapter_units))
 { }
 
-void WsSocketListener::addClient(const std::shared_ptr<ClientListener>& client)
+void WsSocketListener::sendCloseToAllAsync()
 {
-	std::lock_guard<std::mutex> guard(m_change_clients_);
-	clients_[client->getClientId()] = client;
-}
-
-void WsSocketListener::removeClientById(v_int64 id)
-{
-	if (clients_.count(id) != 0)
+	std::lock_guard<std::mutex> m(adapter_units_mutex_);
+	for (auto& [id, adapter_unit] : adapter_units_)
 	{
-		std::lock_guard<std::mutex> guard(m_change_clients_);
-		clients_.erase(id);
+		adapter_unit->sendCloseToAllAsync();
 	}
 }
-
-std::shared_ptr<ClientListener> WsSocketListener::getClientById(v_int64 id)
-{
-	if (clients_.count(id) != 0)
-	{
-		return clients_[id];
-	}
-	return nullptr;
-}
-
-void WsSocketListener::runTestMessageSending(int64_t sleep, int64_t initial_disp, size_t times)
-{
-	std::lock_guard<std::mutex> m(m_write_message_);
-	for (auto& pair : clients_)
-	{
-		pair.second->runTestMessageSendingAsync(server_, sleep, initial_disp, times);
-	}
-}
-
-void WsSocketListener::runDataSending(int64_t sleep)
-{
-	std::lock_guard<std::mutex> m(m_write_message_);
-	for (auto& pair : clients_)
-	{
-		pair.second->runDataSendingAsync(server_, sleep);
-	}
-}
-
-void WsSocketListener::sendClose()
-{
-	std::lock_guard<std::mutex> m(m_write_message_);
-	for (auto& pair : clients_)
-	{
-		pair.second->sendCloseAsync();
-	}
-}
-
-std::atomic<v_int32> WsSocketListener::SOCKETS(0);
 
 void WsSocketListener::onAfterCreate_NonBlocking(
 	const std::shared_ptr<ClientListener::AsyncWebSocket>& socket,
 	const std::shared_ptr<const ParameterMap>& params)
 {
-	//TODO initialize
-	auto client = std::make_shared<ClientListener>(socket, this, server_->getDataCacher(), SOCKETS);
-	++SOCKETS;
+	auto adapter_unit_id = params->find("adapter-unit-id")->second;
+	auto adapter_unit = getAdapterUnitPtr(adapter_unit_id);
+
+	auto client = std::make_shared<ClientListener>(socket, getClientId(), adapter_unit);
 	socket->setListener(client);
-	addClient(client);
+
+	if (adapter_unit == nullptr)
+	{
+		client->sendCloseAsync();
+	}
+	else
+	{
+		adapter_unit->addClient(client);
+	}
+}
+
+int64_t WsSocketListener::getClientId()
+{
+	return adapter_units_counter_++;
+}
+
+std::shared_ptr<AdapterUnit> WsSocketListener::getAdapterUnitPtr(oatpp::String adapter_unit_id)
+{
+	int64_t adapter_unit_id_number = atoll(adapter_unit_id->c_str());
+
+	std::lock_guard<std::mutex> guard(adapter_units_mutex_);
+	if (adapter_units_.count(adapter_unit_id_number) != 0)
+	{
+		return adapter_units_.at(adapter_unit_id_number);
+	}
+	return nullptr;
 }
 
 void WsSocketListener::onBeforeDestroy_NonBlocking(
 	const std::shared_ptr<ClientListener::AsyncWebSocket>& socket)
 {
 	auto client = std::static_pointer_cast<ClientListener>(socket->getListener());
-	removeClientById(client->getClientId());
-	client->invalidateSocket();
-}
+	auto client_id = client->getClientId();
+	auto adapter_unit = client->getAdapterUnit();
 
-bool WsSocketListener::isConnected()
-{
-	return clients_.size() > 0;
+	adapter_unit->removeClientById(client_id);
+
+	client->invalidateSocket();
 }

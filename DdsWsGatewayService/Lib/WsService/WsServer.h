@@ -11,19 +11,25 @@
 #include "oatpp/network/Server.hpp"
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
 
-class WebsockServer
+class WsServer
 {
 public:
-	WebsockServer(const Configure& config, DataCacher& cacher);
+	WsServer(const WsConfigure& config, DataCacher& cacher);
 	void run();
-	void runTestPacketSending();
+	void runTestPacketSending(std::vector<TestPacket> packet);
 	void runDataSending();
 	void stop();
-	bool isConnected() const;
+	bool hasConnections() const;
 	DataCacher& getDataCacher();
 
-	bool sendData(WsDataDto::Wrapper data);
-	bool sendData(oatpp::String data);
+	bool sendData(WsDataDto::Wrapper data)
+	{
+		return false;
+	};
+	bool sendData(oatpp::String data)
+	{
+		return false;
+	};
 	bool sendClose();
 	//virtual bool sendAlarm(MediateAlarmDto data) override;
 
@@ -31,10 +37,9 @@ public:
 	std::deque<int64_t> getCache();
 
 private:
-private:
-	AppComponent components_;
+	//AppComponent components_;
 	std::shared_ptr<oatpp::network::Server> server_;
-	const Configure config_;
+	const WsConfigure config_;
 	bool stop_ = false;
 
 	DataCacher& cacher_;

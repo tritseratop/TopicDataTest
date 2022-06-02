@@ -2,6 +2,8 @@
 #define ClientListener_hpp
 
 #include "Lib/Notifier/DataCacher.h"
+#include "Utilities/WsCommonClasses.h"
+#include "Utilities/WsTestUtility.h"
 
 #include "oatpp-websocket/AsyncConnectionHandler.hpp"
 #include "oatpp-websocket/AsyncWebSocket.hpp"
@@ -9,8 +11,7 @@
 #include "oatpp/core/macro/component.hpp"
 #include "oatpp/network/ConnectionProvider.hpp"
 
-class WsSocketListener;
-class WebsockServer;
+class AdapterUnit;
 
 // слушает события подключенных соединений
 class ClientListener : public oatpp::websocket::AsyncWebSocket::Listener
@@ -20,8 +21,10 @@ private:
 
 private:
 	std::shared_ptr<AsyncWebSocket> socket_;
-	WsSocketListener* sock_listener_;
-	v_int64 client_id_;
+	int64_t id_;
+
+	std::shared_ptr<AdapterUnit> adapter_unit_;
+
 	oatpp::data::stream::BufferOutputStream message_buffer_;
 	oatpp::async::Lock write_lock_;
 
@@ -33,14 +36,12 @@ private:
 
 public:
 	ClientListener(const std::shared_ptr<AsyncWebSocket>& socket,
-				   WsSocketListener* sock_listener,
-				   DataCacher& cache_,
-				   v_int64 id)
-		: socket_(socket)
-		, sock_listener_(sock_listener)
-		, client_id_(id)
-	{ }
-	v_int64 getClientId();
+				   int64_t id,
+				   std::shared_ptr<AdapterUnit> adapter_unit);
+
+	int64_t getClientId() const;
+	std::shared_ptr<AdapterUnit> getAdapterUnit();
+
 	CoroutineStarter onPing(const std::shared_ptr<AsyncWebSocket>& socket,
 							const oatpp::String& message) override;
 	CoroutineStarter onPong(const std::shared_ptr<AsyncWebSocket>& socket,
@@ -52,14 +53,14 @@ public:
 								 v_uint8 opcode,
 								 p_char8 data,
 								 oatpp::v_io_size size) override;
-	void runTestMessageSendingAsync(WebsockServer* server,
-									int64_t sleep,
-									int64_t initial_disp,
-									size_t times);
 
-	void runDataSendingAsync(WebsockServer* server, int64_t sleep);
+	void sendMessageAsync(const oatpp::String& message);
 	void sendCloseAsync();
+
 	void invalidateSocket();
+
+	void sendMessageAsync(const oatpp::String& message,
+						  const BeforeMessageSend& before_message_send);
 };
 
 #endif // !ClientListener_hpp

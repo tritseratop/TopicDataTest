@@ -1,4 +1,5 @@
 #include "Utilities/WsTestUtility.h"
+#include "Lib/WsService/WsServer.h"
 #include "Utilities/TimeConverter/TimeConverter.hpp"
 
 void to_json(nlohmann::json& json, const TestPacket& packet)
@@ -85,30 +86,6 @@ WsDataUnion getWsDataUnion(size_t size, size_t char_size)
 	data_union.ws_dto->dc = collect_char;
 
 	return data_union;
-}
-
-void sendingDataDto(WebsockServer* server, const GlobalTestConditions& conditions)
-{
-	while (!server->isConnected())
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	}
-	auto json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
-	for (auto cond : conditions.conditions)
-	{
-		WsDataUnion ws_data = getWsDataUnion(cond.all_vectors_sizes, cond.char_vector_sizes);
-		ws_data.ws_dto->tsrv = TimeConverter::GetTime_LLmcs();
-
-		oatpp::String data = json_object_mapper->writeToString(ws_data.ws_dto);
-
-		for (auto i = 0; i < conditions.samples_number; ++i)
-		{
-			server->sendData(data);
-			std::this_thread::sleep_for(std::chrono::milliseconds(cond.publication_interval));
-		}
-	}
-	server->sendClose();
-	server->stop();
 }
 
 void insertTimeToJson(oatpp::String str)

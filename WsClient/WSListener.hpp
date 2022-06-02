@@ -105,14 +105,14 @@ private:
 
 public:
 	ClientCoroutine(const std::shared_ptr<oatpp::websocket::Connector>& connector)
-		: m_connector(connector)
-		, m_socket(nullptr)
+		: m_socket(nullptr)
+		, m_connector(connector)
 	{ }
 
 	ClientCoroutine(const std::shared_ptr<oatpp::websocket::Connector>& connector,
 					WSClient* client_)
-		: m_connector(connector)
-		, m_socket(nullptr)
+		: m_socket(nullptr)
+		, m_connector(connector)
 		, client(client_)
 	{ }
 	Action act() override;

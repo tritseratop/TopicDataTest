@@ -253,72 +253,99 @@ TEST(setTimeToJsonTest, insert)
 	EXPECT_EQ(result.getValue(""), expected.getValue(""));
 }
 
-void runServerSending(WebsockServer* server, int64_t initial_disp, int64_t sleep, size_t str_size)
-{
-	while (!server->isConnected())
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	}
-	auto packet = TestPacket({initial_disp, std::string(str_size, 'a')});
-	for (int i = 0; i < 1; ++i)
-	{
-		packet.disp = initial_disp + i;
-		auto packet_json = nlohmann::json(packet).dump();
-		auto oatpp_packet_json = oatpp::String(packet_json);
-		server->sendData(oatpp_packet_json);
-		std::this_thread::sleep_for(std::chrono::milliseconds(sleep));
-	}
-	std::this_thread::sleep_for(std::chrono::seconds(100));
-	server->sendClose();
-	server->stop();
-}
-
-TEST(WsConnectionTest, DataTransmition)
+TEST(WsConnectionTest, RunWithoutCoroutine)
 {
 	oatpp::base::Environment::init();
 	{
-		int64_t initisl_disp = 1'000'000'000'000'000;
+		int64_t init_disp = 1'000'000'000'000'000;
 
-		Configure ws_conf;
-		DataCacher cacher(6);
-		ws_conf.WS_HOST = "127.0.0.1";
-		WebsockServer server(ws_conf, cacher);
-		std::thread server_thread([&server]() { server.run(); });
-		//std::thread sending_server_thread([&server]() { server.runTestPacketSending(); });
+		const WsConfigure ws_conf;
 
-		Configure configure;
-		configure.WS_HOST = "127.0.0.1";
-		WSClient wsclient(configure);
+		auto adapter_unit = std::make_shared<AdapterUnit>(0);
+		std::unordered_map<int64_t, std::shared_ptr<AdapterUnit>> adapter_units;
+		adapter_units[adapter_unit->getId()] = adapter_unit;
+
+		AppComponent component(ws_conf, adapter_units);
+
+		OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router);
+
+		auto myController = std::make_shared<Controller>();
+		router->addController(myController);
+		OATPP_COMPONENT(
+			std::shared_ptr<oatpp::network::ConnectionHandler>, connection_handler, "http");
+
+		OATPP_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>,
+						server_connection_provider,
+						"server_connection_provider");
+
+		std::shared_ptr<oatpp::network::Server> server = oatpp::network::Server::createShared(
+			server_connection_provider, connection_handler);
+		std::thread server_thread([&server]() { server->run(); });
+
+		std::vector<TestPacket> test_packets;
+		test_packets.reserve(10000);
+
+		for (int64_t i = 9999; i >= 0; --i)
+		{
+			test_packets.push_back(TestPacket{init_disp + i, ""});
+		}
+
+		ThreadSafeDeque<int64_t> server_cache;
+
+		WSClient wsclient(ws_conf);
 		std::thread client_thread([&wsclient]() { wsclient.run(); });
 
-		server.runTestPacketSending();
+		TestCallback test_callback = [&test_packets, &server_cache](AdapterUnit& adapter) {
+			const BeforeMessageSend before_msg_send =
+				[&server_cache](const oatpp::String& message) {
+					auto result = getTimeFromJsonString(message);
+					server_cache.push_back(result);
+				};
+
+			while (!adapter.hasClients())
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			}
+			while (!test_packets.empty())
+			{
+				auto message = nlohmann::json(test_packets.back()).dump();
+				test_packets.pop_back();
+				adapter.sendTextMessageToAllAsync(oatpp::String(message), before_msg_send);
+			}
+			adapter.sendCloseToAllAsync();
+		};
+
+		adapter_unit->runTestMessageSending(test_callback);
+
 		client_thread.join();
-		//sending_server_thread.join();
-		server.stop();
+		server->stop();
 		server_thread.join();
 
-		auto server_cache = server.getCache();
-		EXPECT_EQ(100, server_cache.size());
-		if (server_cache.size() < 100)
+		OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor, "server_executor");
+		executor->stop();
+		executor->join();
+
+		EXPECT_EQ(10000, server_cache.size());
+		if (server_cache.size() < 10000)
 			return;
-		for (int i = 0; i < 100; ++i)
+		for (int i = 0; i < 10000; ++i)
 		{
 			auto server_disp = server_cache.front();
 
-			EXPECT_EQ(initisl_disp + i, server_disp);
+			EXPECT_EQ(init_disp + i, server_disp);
 			server_cache.pop_front();
 		}
 
 		auto cache = wsclient.getCache();
-		EXPECT_EQ(100, cache.size());
+		EXPECT_EQ(10000, cache.size());
 
-		if (cache.size() < 100)
+		if (cache.size() < 10000)
 			return;
-		for (int i = 0; i < 100; ++i)
+		for (int i = 0; i < 10000; ++i)
 		{
 			auto disp = cache.front();
 
-			EXPECT_EQ(initisl_disp + i, disp);
+			EXPECT_EQ(init_disp + i, disp);
 			cache.pop_front();
 		}
 	}
@@ -327,6 +354,7 @@ TEST(WsConnectionTest, DataTransmition)
 
 int main(int argc, char* argv[])
 {
+	oatpp::base::Environment::destroy();
 	::testing::InitGoogleTest(&argc, argv);
 	RUN_ALL_TESTS();
 	system("pause");

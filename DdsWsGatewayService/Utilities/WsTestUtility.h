@@ -1,10 +1,13 @@
 #ifndef WS_TEST_UTILITY_H_
 #define WS_TEST_UTILITY_H_
 
+#include <functional>
+
 #include "DdsTestUtility.h"
-#include "Lib/WsService/WsServer.h"
 #include "Utilities/nlohmann/json.hpp"
 #include "WsDto.h"
+
+class WsServer;
 
 struct WsDataUnion
 {
@@ -26,8 +29,6 @@ struct TestPacket
 TestPacket createTestPacket(size_t str_size);
 
 WsDataUnion getWsDataUnion(size_t size = 4, size_t char_size = 1);
-
-void sendingDataDto(WebsockServer* server, const GlobalTestConditions& conditions);
 
 void insertTimeToJson(oatpp::String str);
 

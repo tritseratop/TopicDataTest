@@ -1,18 +1,31 @@
 #include "Lib/WsService/ClientListener.h"
-#include "Lib/WsService/WsSocketListener.h"
+#include "Lib/WsService/AdapterUnit.h"
 #include "Utilities/TimeConverter/TimeConverter.hpp"
 #include "Utilities/WsTestUtility.h"
 
-v_int64 ClientListener::getClientId()
+ClientListener::ClientListener(const std::shared_ptr<AsyncWebSocket>& socket,
+							   int64_t id,
+							   std::shared_ptr<AdapterUnit> adapter_unit)
+	: socket_(socket)
+	, id_(id)
+	, adapter_unit_(adapter_unit)
+{ }
+
+int64_t ClientListener::getClientId() const
 {
-	return client_id_;
+	return id_;
+}
+
+std::shared_ptr<AdapterUnit> ClientListener::getAdapterUnit()
+{
+	return adapter_unit_;
 }
 
 oatpp::async::CoroutineStarter ClientListener::onPing(const std::shared_ptr<AsyncWebSocket>& socket,
 													  const oatpp::String& message)
 {
 	OATPP_LOGI(TAG, "onPing");
-	return socket->sendPongAsync(message);
+	return oatpp::async::synchronize(&write_lock_, socket->sendPongAsync(message));
 }
 oatpp::async::CoroutineStarter ClientListener::onPong(const std::shared_ptr<AsyncWebSocket>& socket,
 													  const oatpp::String& message)
@@ -47,121 +60,34 @@ ClientListener::readMessage(const std::shared_ptr<AsyncWebSocket>& socket,
 	return nullptr;
 }
 
-void ClientListener::runTestMessageSendingAsync(WebsockServer* server,
-												int64_t sleep,
-												int64_t initial_disp,
-												size_t times)
+void ClientListener::sendMessageAsync(const oatpp::String& message)
 {
-	class TestPacketSenderCoroutine : public oatpp::async::Coroutine<TestPacketSenderCoroutine>
+	class SendMessageCoroutine : public oatpp::async::Coroutine<SendMessageCoroutine>
 	{
 	private:
-		oatpp::async::Lock* lock_;
-		std::shared_ptr<AsyncWebSocket> websocket_;
-		int64_t sleep_;
-		int64_t initial_disp_;
-		WebsockServer* server_;
-		size_t times_ = 0;
-		size_t counter = 0;
+		oatpp::async::Lock* m_lock;
+		std::shared_ptr<AsyncWebSocket> websocket;
+		oatpp::String message_;
 
 	public:
-		TestPacketSenderCoroutine(oatpp::async::Lock* lock,
-								  const std::shared_ptr<AsyncWebSocket> socket,
-								  int64_t sleep,
-								  int64_t initial_disp,
-								  size_t times,
-								  WebsockServer* server = nullptr)
-			: lock_(lock)
-			, websocket_(socket)
-			, sleep_(sleep)
-			, server_(server)
-			, times_(times)
-			, initial_disp_(initial_disp)
+		SendMessageCoroutine(oatpp::async::Lock* lock,
+							 const std::shared_ptr<AsyncWebSocket> socket,
+							 const oatpp::String& message)
+			: m_lock(lock)
+			, websocket(socket)
+			, message_(message)
 		{ }
 
 		Action act() override
 		{
-			if (counter == times_)
-			{
-				return yieldTo(&TestPacketSenderCoroutine::close);
-			}
-			TestPacket packet{initial_disp_ + counter, ""};
-			counter++;
-			auto packet_json = nlohmann::json(packet).dump();
-			auto oatpp_packet_json = oatpp::String(packet_json);
-			if (server_ != nullptr)
-			{
-				server_->cache(getTimeFromJsonString(packet_json));
-			}
-			return oatpp::async::synchronize(lock_,
-											 websocket_->sendOneFrameTextAsync(oatpp_packet_json))
-				.next(repeat());
-		}
-
-		Action close()
-		{
-			return oatpp::async::synchronize(lock_, websocket_->sendCloseAsync()).next(finish());
+			return oatpp::async::synchronize(m_lock, websocket->sendOneFrameTextAsync(message_))
+				.next(finish());
 		}
 	};
 
 	if (socket_)
 	{
-		async_executor_->execute<TestPacketSenderCoroutine>(
-			&write_lock_, socket_, sleep, initial_disp, times, server);
-	}
-}
-
-void ClientListener::runDataSendingAsync(WebsockServer* server, int64_t sleep)
-{
-	class DataSenderCoroutine : public oatpp::async::Coroutine<DataSenderCoroutine>
-	{
-	private:
-		oatpp::async::Lock* lock_;
-		std::shared_ptr<AsyncWebSocket> socket_;
-		int64_t sleep_;
-		WebsockServer* server_;
-		DataCacher& cacher_;
-		MediateDtoMapper mapper_;
-
-	public:
-		DataSenderCoroutine(oatpp::async::Lock* lock,
-							const std::shared_ptr<AsyncWebSocket> socket,
-							int64_t sleep,
-							WebsockServer* server = nullptr)
-			: lock_(lock)
-			, socket_(socket)
-			, sleep_(sleep * 1000)
-			, server_(server)
-			, cacher_(server_->getDataCacher())
-		{ }
-
-		Action act() override
-		{
-			auto dto = cacher_.popDdsDto();
-			if (dto.has_value())
-			{
-				oatpp::String data(mapper_.toString(dto.value()));
-				return oatpp::async::synchronize(lock_, socket_->sendOneFrameTextAsync(data))
-					.next(waitRepeat(std::chrono::microseconds(sleep_)));
-			}
-			else
-			{
-				return waitRepeat(std::chrono::microseconds(sleep_));
-			}
-		}
-
-		Action prepareNewTextFrame() { }
-
-		Action sendNewTextFrame() { }
-
-		Action close()
-		{
-			return oatpp::async::synchronize(lock_, socket_->sendCloseAsync()).next(finish());
-		}
-	};
-
-	if (socket_)
-	{
-		async_executor_->execute<DataSenderCoroutine>(&write_lock_, socket_, sleep, server);
+		async_executor_->execute<SendMessageCoroutine>(&write_lock_, socket_, message);
 	}
 }
 
@@ -170,18 +96,18 @@ void ClientListener::sendCloseAsync()
 	class SendCloseCoroutine : public oatpp::async::Coroutine<SendCloseCoroutine>
 	{
 	private:
-		oatpp::async::Lock* m_lock;
-		std::shared_ptr<AsyncWebSocket> websocket;
+		oatpp::async::Lock* lock_;
+		std::shared_ptr<AsyncWebSocket> websocket_;
 
 	public:
 		SendCloseCoroutine(oatpp::async::Lock* lock, const std::shared_ptr<AsyncWebSocket> socket)
-			: m_lock(lock)
-			, websocket(socket)
+			: lock_(lock)
+			, websocket_(socket)
 		{ }
 
 		Action act() override
 		{
-			return oatpp::async::synchronize(m_lock, websocket->sendCloseAsync()).next(finish());
+			return oatpp::async::synchronize(lock_, websocket_->sendCloseAsync()).next(finish());
 		}
 	};
 
@@ -195,7 +121,43 @@ void ClientListener::invalidateSocket()
 {
 	if (socket_)
 	{
-		//server_connection_provider_->invalidate(socket_->getConnection());
+		socket_.reset();
 	}
-	socket_.reset();
+}
+
+void ClientListener::sendMessageAsync(const oatpp::String& message,
+									  const BeforeMessageSend& before_message_send)
+{
+	class SendMessageCoroutine : public oatpp::async::Coroutine<SendMessageCoroutine>
+	{
+	private:
+		oatpp::async::Lock* m_lock;
+		std::shared_ptr<AsyncWebSocket> websocket;
+		oatpp::String message_;
+		const BeforeMessageSend before_message_send_;
+
+	public:
+		SendMessageCoroutine(oatpp::async::Lock* lock,
+							 const std::shared_ptr<AsyncWebSocket> socket,
+							 const oatpp::String& message,
+							 const BeforeMessageSend& before_message_send)
+			: m_lock(lock)
+			, websocket(socket)
+			, message_(message)
+			, before_message_send_(before_message_send)
+		{ }
+
+		Action act() override
+		{
+			before_message_send_(message_);
+			return oatpp::async::synchronize(m_lock, websocket->sendOneFrameTextAsync(message_))
+				.next(finish());
+		}
+	};
+
+	if (socket_)
+	{
+		async_executor_->execute<SendMessageCoroutine>(
+			&write_lock_, socket_, message, before_message_send);
+	}
 }

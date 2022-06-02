@@ -89,7 +89,7 @@ std::shared_ptr<oatpp::websocket::AsyncWebSocket> ClientCoroutine::SOCKET(nullpt
 
 oatpp::async::Action ClientCoroutine::act()
 {
-	return m_connector->connectAsync("ws/test").callbackTo(&ClientCoroutine::onConnected);
+	return m_connector->connectAsync("ws/test/0").callbackTo(&ClientCoroutine::onConnected);
 }
 
 oatpp::async::Action ClientCoroutine::onConnected(
