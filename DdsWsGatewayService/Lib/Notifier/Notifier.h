@@ -11,7 +11,7 @@
 class Notifier
 {
 public:
-	Notifier(WebsockServer& ws_server, DataCacher& cacher);
+	Notifier(WsServer& ws_server, DataCacher& cacher);
 
 	bool sendDdsData();
 	bool sendDdsAlarm();
@@ -22,13 +22,13 @@ public:
 	bool is_data_cache_empty();
 
 private:
+	WsServer& server_;
+	DataCacher& cacher_;
+
 	bool stop_sending_data_;
 	bool stop_sending_alarm_;
 
 	MediateDtoMapper mapper_;
-
-	DataCacher& cacher_;
-	WebsockServer& server_;
 };
 
 #endif //!DATA_OBSERVER_H_

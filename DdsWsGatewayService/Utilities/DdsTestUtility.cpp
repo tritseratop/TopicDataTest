@@ -43,7 +43,7 @@ AdditionalTopicInfo getAdditionalTopicInfo(size_t size)
 	for (auto& [data_type, tag_to_index] : info.tag_to_index)
 	{
 		info.tags.at(data_type).reserve(size);
-		for (size_t i = 0; i < size; i++)
+		for (uint32_t i = 0; i < size; i++)
 		{
 			tag_to_index[1000000 + i] = i;
 			info.tags.at(data_type).push_back(1000000 + i);
@@ -304,7 +304,7 @@ GlobalTestConditions parseJsonToGlobalTestConditions(const nlohmann::json& json)
 		OneTestConditions condition{
 			c["all_vectors_sizes"].get<size_t>(),
 			c["char_vector_sizes"].get<size_t>(),
-			c["publication_interval"].get<uint64_t>(),
+			c["publication_interval"].get<int64_t>(),
 		};
 		conditions.conditions.push_back(condition);
 	}

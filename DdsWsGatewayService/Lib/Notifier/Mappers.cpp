@@ -99,7 +99,6 @@ void fillChanged(DataSampleSequence<T>& prev_dto_collection,
 				 std::vector<DdsSample> cur_samples,
 				 const TagToIndex& tag_to_index)
 {
-	size_t n = cur_samples.size();
 	for (auto sample : std::move(cur_samples))
 	{
 		if (tag_to_index.at(sample.id_tag()) >= prev_dto_collection.size())
@@ -159,7 +158,6 @@ void fillChanged(std::vector<DataSample<T>>& prev_dto_collection,
 				 std::vector<DdsSample> cur_samples,
 				 const TagToIndex& tag_to_index)
 {
-	size_t n = cur_samples.size();
 	for (auto sample : std::move(cur_samples))
 	{
 		if (tag_to_index.at(sample.id_tag()) >= prev_dto_collection.size())

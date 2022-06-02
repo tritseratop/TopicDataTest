@@ -1,6 +1,6 @@
 #include "DdsCommonClasses.h"
 
-TopicType string2TopicType(std::string type_name)
+TopicType StringToTopicType(std::string type_name)
 {
 	if (type_name == "DDSData")
 	{
@@ -24,7 +24,7 @@ TopicType string2TopicType(std::string type_name)
 	}
 }
 
-std::string TopicType2string(TopicType type)
+std::string TopicTypeToString(TopicType type)
 {
 	switch (type)
 	{

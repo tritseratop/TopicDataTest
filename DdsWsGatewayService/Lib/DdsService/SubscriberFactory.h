@@ -23,20 +23,20 @@ public:
 	virtual void setConfig(const SubscriberConfig& config) = 0;
 };
 
-template<class T, class TPubSubType>
+template<class T, class TPubSubType, class Cacher>
 class ConcreteSubscriber : public AbstractDdsSubscriber
 {
 public:
 	ConcreteSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
 					   const SubscriberConfig& config,
-					   DataCacher* cacher_)
+					   Cacher* cacher)
 		: participant_(participant)
-		, config_(config)
-		, cacher_(cacher_)
 		, subscriber_(nullptr)
 		, reader_(nullptr)
 		, topic_(nullptr)
 		, support_type_(new TPubSubType())
+		, config_(config)
+		, cacher_(cacher)
 		, stop_(false)
 		, listener_(this)
 	{ }
@@ -132,7 +132,7 @@ private:
 	{
 		if (cacher_ != nullptr)
 		{
-			cacher_->cache(std::move(data_), config_.info);
+			cacher_->cache(std::move(data_));
 		}
 	}
 
@@ -149,7 +149,7 @@ private:
 
 	SubscriberConfig config_;
 
-	DataCacher* cacher_;
+	Cacher* cacher_;
 
 	std::atomic<bool> stop_;
 
@@ -157,10 +157,10 @@ private:
 	{
 	public:
 		SubscriberListener(ConcreteSubscriber* subscriber)
-			: matched_(0)
+			: sub_(subscriber)
 			, samples_(0)
+			, matched_(0)
 			, first_(false)
-			, sub_(subscriber)
 		{ }
 
 		~SubscriberListener() override { }
@@ -285,7 +285,7 @@ public:
 	virtual ~SubscriberFactory() { }
 	AbstractDdsSubscriber* createSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
 											const SubscriberConfig& config,
-											DataCacher* observer) const;
+											void* cacher) const;
 
 protected:
 };

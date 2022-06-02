@@ -8,35 +8,54 @@
 #include <deque>
 #include <unordered_map>
 
+//template<class DdsTopic>
+//class Cacher
+//{
+//
+//};
+
 class DataCacher
 {
 public:
-	DataCacher(size_t depth);
+	DataCacher(size_t depth, AdditionalTopicInfo mapping_info);
 
-	void cache(DDSData data, const AdditionalTopicInfo& info);
-
-	void cache(const DDSDataEx& data, const AdditionalTopicInfo& info);
+	void cache(DDSData data);
+	void cache(const DDSDataEx& data);
 
 	std::optional<MediateDataDto> popDdsDto();
 	std::deque<MediateDataDto> getDataCacheCopy() const;
 
-	void cache(DDSAlarm data, const AdditionalTopicInfo& info);
+private:
+	size_t depth_;
+	ThreadSafeDeque<MediateDataDto> data_cache_;
 
-	void cache(const DDSAlarmEx& data, const AdditionalTopicInfo& info);
+	DdsDataExMapper ddsdata_ex_mapper_;
+	DdsDataMapper ddsdata_mapper_;
+
+	const AdditionalTopicInfo mapping_info_;
+
+	PackageAnalyser* analyser_;
+};
+
+class AlarmCacher
+{
+public:
+	AlarmCacher(size_t depth, AdditionalTopicInfo mapping_info_);
+
+	void cache(DDSAlarm data);
+	void cache(const DDSAlarmEx& data);
 
 	//std::optional<WsDataDto::Wrapper> popDdsAlarm();
 	std::deque<MediateAlarmDto> getAlarmCacheCopy() const;
 
 private:
 	size_t depth_;
-
-	ThreadSafeDeque<MediateDataDto> data_cache_;
 	ThreadSafeDeque<MediateAlarmDto> alarm_cache_;
 
-	DdsDataExMapper ddsdata_ex_mapper_;
-	DdsDataMapper ddsdata_mapper_;
+	DdsAlarmMapper dds_alarm_mapper_;
+	DdsAlarmExMapper dds_alarm_ex_mapper_;
 
-	PackageAnalyser* analyser_;
+	const AdditionalTopicInfo mapping_info_;
 };
 
 #endif //!DATA_CACHER_H_

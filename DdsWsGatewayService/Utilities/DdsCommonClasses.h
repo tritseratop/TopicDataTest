@@ -31,9 +31,9 @@ enum DataCollectiionType
 	ALARM_UINT32
 };
 
-TopicType string2TopicType(std::string type_name);
+TopicType StringToTopicType(std::string type_name);
 
-std::string TopicType2string(TopicType type);
+std::string TopicTypeToString(TopicType type);
 
 struct AdditionalPackageInfo
 {
@@ -119,14 +119,14 @@ struct PublisherConfig
 struct SubscriberConfig
 {
 	int16_t subscriber_id = 0;
-	uint16_t vector_size = 0;
+	size_t vector_size = 0;
 	std::string topic_name = "";
 	std::string topic_type_name = "";
 	TopicType topic_type = TopicType::UNKNOWN;
 
 	// listener settings
-	uint32_t samples = 10;
-	uint32_t sleep = 1000;
+	size_t samples = 10;
+	int64_t sleep = 1000;
 
 	AdditionalTopicInfo info;
 

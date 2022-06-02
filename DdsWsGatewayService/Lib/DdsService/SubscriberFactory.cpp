@@ -14,30 +14,32 @@ bool operator==(const SubscriberConfig& lhs, const SubscriberConfig& rhs)
 }
 
 template<>
-void ConcreteSubscriber<DDSData, DDSDataPubSubType>::setDataSize()
+void ConcreteSubscriber<DDSData, DDSDataPubSubType, DataCacher>::setDataSize()
 { }
 
 template<>
-void ConcreteSubscriber<DDSData, DDSDataPubSubType>::runDataSending()
+void ConcreteSubscriber<DDSData, DDSDataPubSubType, DataCacher>::runDataSending()
 { }
 
 AbstractDdsSubscriber*
 SubscriberFactory::createSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
 									const SubscriberConfig& config,
-									DataCacher* observer) const
+									void* cacher) const
 {
 	switch (config.topic_type)
 	{
 	case TopicType::DDS_DATA:
-		return new ConcreteSubscriber<DDSData, DDSDataPubSubType>(participant, config, observer);
+		return new ConcreteSubscriber<DDSData, DDSDataPubSubType, DataCacher>(
+			participant, config, static_cast<DataCacher*>(cacher));
 	case TopicType::DDS_DATA_EX:
-		return new ConcreteSubscriber<DDSDataEx, DDSDataExPubSubType>(
-			participant, config, observer);
+		return new ConcreteSubscriber<DDSDataEx, DDSDataExPubSubType, DataCacher>(
+			participant, config, static_cast<DataCacher*>(cacher));
 	case TopicType::DDS_ALARM:
-		return new ConcreteSubscriber<DDSAlarm, DDSAlarmPubSubType>(participant, config, observer);
+		return new ConcreteSubscriber<DDSAlarm, DDSAlarmPubSubType, AlarmCacher>(
+			participant, config, static_cast<AlarmCacher*>(cacher));
 	case TopicType::DDS_EX_ALARM:
-		return new ConcreteSubscriber<DDSAlarmEx, DDSAlarmExPubSubType>(
-			participant, config, observer);
+		return new ConcreteSubscriber<DDSAlarmEx, DDSAlarmExPubSubType, AlarmCacher>(
+			participant, config, static_cast<AlarmCacher*>(cacher));
 	default:
 		std::cout << "Topic type " << config.topic_type_name << " is not found" << std::endl;
 		return nullptr;

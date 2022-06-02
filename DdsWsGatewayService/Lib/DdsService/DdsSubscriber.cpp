@@ -15,8 +15,8 @@ using eprosima::fastrtps::types::ReturnCode_t;
 SubscriberService::SubscriberService(const ServiceConfigForTest<SubscriberConfig>& config,
 									 DataCacher& cacher)
 	: config_(config)
-	, cacher_(cacher)
 	, participant_(nullptr)
+	, cacher_(cacher)
 	, config_subscriber_(nullptr)
 {
 	setVectorSizesInDataTopic();

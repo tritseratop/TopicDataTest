@@ -40,7 +40,7 @@ struct OneTestConditions
 {
 	size_t all_vectors_sizes = 0;
 	size_t char_vector_sizes = 0;
-	uint64_t publication_interval = 100;
+	int64_t publication_interval = 100;
 
 	bool operator==(const OneTestConditions& rhs) const;
 };

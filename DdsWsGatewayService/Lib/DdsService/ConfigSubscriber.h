@@ -37,9 +37,9 @@ private:
 			eprosima::fastdds::dds::DataReader* reader,
 			const eprosima::fastdds::dds::SubscriptionMatchedStatus& info) override;
 
-		int matched_;
-		uint32_t samples_; // TODO atomic??
 		ConfigSubscriber* subscriber_;
+		uint32_t samples_; // TODO atomic??
+		int matched_;
 	} listener_;
 };
 
