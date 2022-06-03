@@ -14,7 +14,6 @@ private:
 
 public:
 	Group(int64_t id);
-	Group(const Group&) = default;
 
 	void addClient(const std::shared_ptr<ClientListener>& client);
 	void removeClientById(int64_t id);

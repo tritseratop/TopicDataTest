@@ -5,6 +5,7 @@
 
 #include "../../DdsWsGatewayService/Utilities/WsDto.h"
 #include "../../DdsWsGatewayService/Utilities/nlohmann/json.hpp"
+#include "../DdsWsGatewayService/Lib/WsService/Server.h"
 #include "DdsTestUtility.h"
 
 class Server;
@@ -36,5 +37,7 @@ void replaceTimeToJson(oatpp::String str);
 void replaceTimeToJson(oatpp::String str, int64_t time);
 
 int64_t getTimeFromJsonString(oatpp::String str);
+
+void runWsConnection(TestCallback& test_callback, OnMessageRead& on_message_read);
 
 #endif //!WS_TEST_UTILITY_H_

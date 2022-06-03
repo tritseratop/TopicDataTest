@@ -1,8 +1,6 @@
 #include "Lib/WsService/Server.h"
 
-Server::Server(const WsConfigure& config, DataCacher& cacher)
-	: config_(config)
-	, cacher_(cacher)
+Server::Server()
 {
 	OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router);
 
@@ -38,10 +36,3 @@ bool Server::sendClose()
 	sock_listener->sendCloseToAllAsync();
 	return true;
 }
-
-//bool Server::sendAlarm(MediateAlarmDto data) {
-//	OATPP_COMPONENT(std::shared_ptr<SocketListener>, sock_listener);
-//	//TODO маппинг
-//	sock_listener->sendMessageToAllAsync(oatpp::String("I'm here"));
-//	return true;
-//}

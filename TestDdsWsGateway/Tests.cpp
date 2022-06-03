@@ -1,13 +1,10 @@
 #include "../DdsWsGatewayService/Lib/Common/Notifier.h"
 #include "../DdsWsGatewayService/Lib/DdsService/DdsSubscriber.h"
-#include "../DdsWsGatewayService/Lib/WsService/Server.h"
 #include "../DdsWsGatewayService/Utilities/PackageAnalyser.h"
 #include "../DdsWsGatewayService/Utilities/nlohmann/json.hpp"
 
 #include "Utilities/DdsTestUtility.h"
 #include "Utilities/WsTestUtility.h"
-
-#include "../WsClient/WSClient.hpp"
 
 #include "oatpp/parser/json/Beautifier.hpp"
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
@@ -256,108 +253,67 @@ TEST(setTimeToJsonTest, insert)
 
 TEST(WsConnectionTest, RunWithoutCoroutine)
 {
-	oatpp::base::Environment::init();
+	int64_t init_disp = 1'000'000'000'000'000;
+
+	size_t packet_number = 100;
+	std::vector<TestPacket> test_packets;
+	test_packets.reserve(packet_number);
+	std::string message(10000, 'a');
+
+	for (int64_t i = packet_number - 1; i >= 0; --i)
 	{
-		int64_t init_disp = 1'000'000'000'000'000;
-
-		const WsConfigure ws_conf;
-
-		auto group = std::make_shared<Group>(0);
-		std::unordered_map<int64_t, std::shared_ptr<Group>> groups;
-		groups[group->getId()] = group;
-
-		AppComponent component(ws_conf, groups);
-
-		OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router);
-
-		auto myController = std::make_shared<Controller>();
-		router->addController(myController);
-		OATPP_COMPONENT(
-			std::shared_ptr<oatpp::network::ConnectionHandler>, connection_handler, "http");
-
-		OATPP_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>,
-						server_connection_provider,
-						"server_connection_provider");
-
-		std::shared_ptr<oatpp::network::Server> server = oatpp::network::Server::createShared(
-			server_connection_provider, connection_handler);
-		std::thread server_thread([&server]() { server->run(); });
-
-		size_t packet_number = 100;
-		std::vector<TestPacket> test_packets;
-		test_packets.reserve(packet_number);
-		std::string message(10000, 'a');
-
-		for (int64_t i = packet_number - 1; i >= 0; --i)
-		{
-			test_packets.push_back(TestPacket{init_disp + i, message});
-		}
-
-		ThreadSafeDeque<int64_t> client_cache;
-		const OnMessageRead on_message_read = [&client_cache](const oatpp::String& message) {
-			client_cache.push_back(getTimeFromJsonString(message));
-		};
-
-		WSClient wsclient(ws_conf);
-		std::thread client_thread(
-			[&wsclient, &on_message_read]() { wsclient.run(on_message_read); });
-
-		ThreadSafeDeque<int64_t> server_cache;
-
-		TestCallback test_callback = [&test_packets, &server_cache](Group& adapter) {
-			const BeforeMessageSend before_msg_send =
-				[&server_cache](const oatpp::String& message) {
-					auto result = getTimeFromJsonString(message);
-					//std::this_thread::sleep_for(std::chrono::milliseconds(100));
-					server_cache.push_back(result);
-				};
-
-			while (!adapter.hasClients())
-			{
-				std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			}
-			while (!test_packets.empty())
-			{
-				auto message = nlohmann::json(test_packets.back()).dump();
-				test_packets.pop_back();
-				adapter.sendTextMessageToAllAsync(oatpp::String(message), before_msg_send);
-			}
-			adapter.sendCloseToAllAsync();
-		};
-
-		group->runTestMessageSending(test_callback);
-
-		client_thread.join();
-		server->stop();
-		server_thread.join();
-
-		OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor, "server_executor");
-		executor->stop();
-		executor->join();
-
-		EXPECT_EQ(packet_number, server_cache.size());
-		if (server_cache.size() < packet_number)
-			return;
-		for (int i = 0; i < packet_number; ++i)
-		{
-			auto server_disp = server_cache.front();
-
-			EXPECT_EQ(init_disp + i, server_disp);
-			server_cache.pop_front();
-		}
-
-		EXPECT_EQ(packet_number, client_cache.size());
-		if (client_cache.size() < packet_number)
-			return;
-		for (int i = 0; i < packet_number; ++i)
-		{
-			auto disp = client_cache.front();
-
-			EXPECT_EQ(init_disp + i, disp);
-			client_cache.pop_front();
-		}
+		test_packets.push_back(TestPacket{init_disp + i, message});
 	}
-	oatpp::base::Environment::destroy();
+
+	ThreadSafeDeque<int64_t> client_cache;
+	OnMessageRead on_message_read = [&client_cache](const oatpp::String& message) {
+		client_cache.push_back(getTimeFromJsonString(message));
+	};
+
+	ThreadSafeDeque<int64_t> server_cache;
+
+	BeforeMessageSend before_msg_send = [&server_cache](const oatpp::String& message) {
+		auto result = getTimeFromJsonString(message);
+		//std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		server_cache.push_back(result);
+	};
+	TestCallback test_callback = [&test_packets, &before_msg_send](Group& adapter) {
+		while (!adapter.hasClients())
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		}
+		while (!test_packets.empty())
+		{
+			auto message = nlohmann::json(test_packets.back()).dump();
+			test_packets.pop_back();
+			adapter.sendTextMessageToAllAsync(oatpp::String(message), before_msg_send);
+		}
+		adapter.sendCloseToAllAsync();
+	};
+
+	runWsConnection(test_callback, on_message_read);
+
+	EXPECT_EQ(packet_number, server_cache.size());
+	if (server_cache.size() < packet_number)
+		return;
+	for (int i = 0; i < packet_number; ++i)
+	{
+		auto server_disp = server_cache.front();
+
+		EXPECT_EQ(init_disp + i, server_disp);
+		server_cache.pop_front();
+	}
+
+	EXPECT_EQ(packet_number, client_cache.size());
+	if (client_cache.size() < packet_number)
+		return;
+	for (int i = 0; i < packet_number; ++i)
+	{
+		auto disp = client_cache.front();
+
+		EXPECT_EQ(init_disp + i, disp);
+		client_cache.pop_front();
+	}
 }
 
 int main(int argc, char* argv[])

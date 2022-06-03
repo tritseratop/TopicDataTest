@@ -14,9 +14,11 @@
 class Server
 {
 public:
-	Server(const WsConfigure& config, DataCacher& cacher);
+	Server();
 	void run();
 	void stop();
+
+	bool sendClose();
 
 	bool sendData(WsDataDto::Wrapper data)
 	{
@@ -27,15 +29,8 @@ public:
 		return false;
 	};
 
-	bool sendClose();
-
 private:
-	//AppComponent components_;
 	std::shared_ptr<oatpp::network::Server> server_;
-	const WsConfigure config_;
-	bool stop_ = false;
-
-	DataCacher& cacher_;
 };
 
 #endif //!WS_SERVER_H_

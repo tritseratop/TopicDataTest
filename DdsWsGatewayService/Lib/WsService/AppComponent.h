@@ -61,7 +61,7 @@ public:
 
 	// Обязательно нужно создать ОДИН SocketListener, чтобы на каждое новое подключение не создавались новые
 	OATPP_CREATE_COMPONENT(std::shared_ptr<SocketListener>, sock_listener_)
-	("sock_listener", [this] { return std::make_shared<SocketListener>(groups_); }());
+	("sock_listener", [this] { return std::make_shared<SocketListener>(std::move(groups_)); }());
 
 	// обработчик подключения по протоколу websocket
 	OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>,

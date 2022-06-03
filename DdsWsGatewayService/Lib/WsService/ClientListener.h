@@ -29,9 +29,6 @@ private:
 
 private:
 	OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, async_executor_, "server_executor");
-	OATPP_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>,
-					server_connection_provider_,
-					"server_connection_provider");
 
 public:
 	ClientListener(const std::shared_ptr<AsyncWebSocket>& socket,
