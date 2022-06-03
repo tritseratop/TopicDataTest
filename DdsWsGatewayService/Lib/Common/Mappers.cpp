@@ -1,4 +1,4 @@
-#include "Lib/Notifier/Mappers.h"
+#include "Lib/Common/Mappers.h"
 
 MediateDataDto DdsDataMapper::toMediateDataDto(DDSData data, const AdditionalTopicInfo& info)
 {

@@ -1,8 +1,8 @@
 #ifndef DATA_OBSERVER_H_
 #define DATA_OBSERVER_H_
 
-#include "Lib/Notifier/DataCacher.h"
-#include "Lib/WsService/WsServer.h"
+#include "Lib/Common/DataCacher.h"
+#include "Lib/WsService/Server.h"
 #include "Utilities/WsCommonClasses.h"
 
 #include <deque>
@@ -11,7 +11,7 @@
 class Notifier
 {
 public:
-	Notifier(WsServer& ws_server, DataCacher& cacher);
+	Notifier(Server& ws_server, DataCacher& cacher);
 
 	bool sendDdsData();
 	bool sendDdsAlarm();
@@ -22,7 +22,7 @@ public:
 	bool is_data_cache_empty();
 
 private:
-	WsServer& server_;
+	Server& server_;
 	DataCacher& cacher_;
 
 	bool stop_sending_data_;

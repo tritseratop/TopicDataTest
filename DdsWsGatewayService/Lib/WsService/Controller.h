@@ -48,14 +48,14 @@ public:
 	{
 		ENDPOINT_ASYNC_INIT(WS) Action act() override
 		{
-			auto adapter_unit_id = request->getPathVariable("adapter-unit-id");
+			auto group_id = request->getPathVariable("adapter-unit-id");
 
 			auto response = oatpp::websocket::Handshaker::serversideHandshake(
 				request->getHeaders(), controller->websocket_connection_handler_);
 
 			auto params = std::make_shared<oatpp::network::ConnectionHandler::ParameterMap>();
 
-			(*params)["adapter-unit-id"] = adapter_unit_id;
+			(*params)["adapter-unit-id"] = group_id;
 
 			response->setConnectionUpgradeParameters(params);
 

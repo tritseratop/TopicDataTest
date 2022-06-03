@@ -1,10 +1,10 @@
 #ifndef TEST_UTILITY_H_
 #define TEST_UTILITY_H_
 
-#include "DdsCommonClasses.h"
-#include "MediateDto.h"
-#include "TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "nlohmann/json.hpp"
+#include "../../DdsWsGatewayService/Utilities/DdsCommonClasses.h"
+#include "../../DdsWsGatewayService/Utilities/MediateDto.h"
+#include "../../DdsWsGatewayService/Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "../../DdsWsGatewayService/Utilities/nlohmann/json.hpp"
 
 #include "oatpp/core/Types.hpp"
 

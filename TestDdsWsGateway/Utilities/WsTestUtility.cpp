@@ -1,5 +1,5 @@
-#include "Utilities/WsTestUtility.h"
-#include "Lib/WsService/WsServer.h"
+#include "WsTestUtility.h"
+#include "Lib/WsService/Server.h"
 #include "Utilities/TimeConverter/TimeConverter.hpp"
 
 void to_json(nlohmann::json& json, const TestPacket& packet)

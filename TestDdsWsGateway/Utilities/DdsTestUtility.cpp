@@ -1,6 +1,6 @@
 #include "DdsTestUtility.h"
-#include "TimeConverter/TimeConverter.hpp"
-#include "Utilities/WsTestUtility.h"
+#include "../../DdsWsGatewayService/Utilities/TimeConverter/TimeConverter.hpp"
+#include "WsTestUtility.h"
 
 template<class T>
 std::vector<T> getDefaultVector(size_t size, T offset)

@@ -5,7 +5,7 @@
 
 #include <unordered_map>
 
-class AdapterUnit
+class Group
 {
 private:
 	const int64_t id_;
@@ -13,8 +13,8 @@ private:
 	mutable std::mutex clients_mutex_;
 
 public:
-	AdapterUnit(int64_t id);
-	AdapterUnit(const AdapterUnit&) = default;
+	Group(int64_t id);
+	Group(const Group&) = default;
 
 	void addClient(const std::shared_ptr<ClientListener>& client);
 	void removeClientById(int64_t id);

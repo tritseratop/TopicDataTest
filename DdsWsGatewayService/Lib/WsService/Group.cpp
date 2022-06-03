@@ -1,22 +1,22 @@
-#include "Lib/WsService/AdapterUnit.h"
+#include "Lib/WsService/Group.h"
 
-AdapterUnit::AdapterUnit(int64_t id)
+Group::Group(int64_t id)
 	: id_(id)
 { }
 
-void AdapterUnit::addClient(const std::shared_ptr<ClientListener>& client)
+void Group::addClient(const std::shared_ptr<ClientListener>& client)
 {
 	std::lock_guard<std::mutex> guard(clients_mutex_);
 	clients_[client->getClientId()] = client;
 }
 
-void AdapterUnit::removeClientById(int64_t id)
+void Group::removeClientById(int64_t id)
 {
 	std::lock_guard<std::mutex> guard(clients_mutex_);
 	clients_.erase(id);
 }
 
-void AdapterUnit::sendTextMessageToAllAsync(const oatpp::String& message)
+void Group::sendTextMessageToAllAsync(const oatpp::String& message)
 {
 	std::lock_guard<std::mutex> m(clients_mutex_);
 	for (auto& [id, client] : clients_)
@@ -25,7 +25,7 @@ void AdapterUnit::sendTextMessageToAllAsync(const oatpp::String& message)
 	}
 }
 
-void AdapterUnit::sendCloseToAllAsync()
+void Group::sendCloseToAllAsync()
 {
 	std::lock_guard<std::mutex> m(clients_mutex_);
 	for (auto& [id, client] : clients_)
@@ -34,13 +34,13 @@ void AdapterUnit::sendCloseToAllAsync()
 	}
 }
 
-void AdapterUnit::runTestMessageSending(TestCallback& test_callback)
+void Group::runTestMessageSending(TestCallback& test_callback)
 {
 	test_callback(*this);
 }
 
-void AdapterUnit::sendTextMessageToAllAsync(const oatpp::String& message,
-											const BeforeMessageSend& before_msg_send)
+void Group::sendTextMessageToAllAsync(const oatpp::String& message,
+									  const BeforeMessageSend& before_msg_send)
 {
 	std::lock_guard<std::mutex> m(clients_mutex_);
 	for (auto& [id, client] : clients_)
@@ -49,13 +49,13 @@ void AdapterUnit::sendTextMessageToAllAsync(const oatpp::String& message,
 	}
 }
 
-bool AdapterUnit::hasClients() const
+bool Group::hasClients() const
 {
 	std::lock_guard<std::mutex> m(clients_mutex_);
 	return clients_.size() > 0;
 }
 
-int64_t AdapterUnit::getId() const
+int64_t Group::getId() const
 {
 	return id_;
 }

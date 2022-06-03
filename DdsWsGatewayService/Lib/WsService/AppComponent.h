@@ -1,7 +1,7 @@
 #ifndef APP_COMPONENT_HPP
 #define APP_COMPONENT_HPP
 
-#include "Lib/WsService/WsSocketListener.h"
+#include "Lib/WsService/SocketListener.h"
 #include "Utilities/WsCommonClasses.h"
 
 #include "oatpp/core/macro/component.hpp"
@@ -14,13 +14,13 @@ class AppComponent
 {
 private:
 	const WsConfigure config_;
-	std::unordered_map<int64_t, std::shared_ptr<AdapterUnit>> adapter_units_;
+	std::unordered_map<int64_t, std::shared_ptr<Group>> groups_;
 
 public:
 	AppComponent(const WsConfigure& config_,
-				 std::unordered_map<int64_t, std::shared_ptr<AdapterUnit>> adapter_units)
+				 std::unordered_map<int64_t, std::shared_ptr<Group>> groups)
 		: config_(config_)
-		, adapter_units_(adapter_units)
+		, groups_(groups)
 	{ }
 
 	// создает асинхронный executor
@@ -43,12 +43,12 @@ public:
 	}());
 
 	// создает роутер
-	OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, httpRouter)
+	OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, http_router_)
 	([] { return oatpp::web::server::HttpRouter::createShared(); }());
 
 	// создает компонент, который обрабатывает (перенаправляет?) запросы с помощью роутера
 	OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>,
-						   serverConnectionHandler)
+						   server_connection_handler_)
 	("http", [] {
 		OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router);
 		OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor, "server_executor");
@@ -60,14 +60,15 @@ public:
 	([] { return oatpp::parser::json::mapping::ObjectMapper::createShared(); }());
 
 	// Обязательно нужно создать ОДИН SocketListener, чтобы на каждое новое подключение не создавались новые
-	OATPP_CREATE_COMPONENT(std::shared_ptr<WsSocketListener>, sock_listener_)
-	("sock_listener", [this] { return std::make_shared<WsSocketListener>(adapter_units_); }());
+	OATPP_CREATE_COMPONENT(std::shared_ptr<SocketListener>, sock_listener_)
+	("sock_listener", [this] { return std::make_shared<SocketListener>(groups_); }());
 
 	// обработчик подключения по протоколу websocket
-	OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>, wsConnectionHandler)
+	OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>,
+						   ws_connection_handler)
 	("server_websocket", [] {
 		OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor, "server_executor");
-		OATPP_COMPONENT(std::shared_ptr<WsSocketListener>, sock_listener, "sock_listener");
+		OATPP_COMPONENT(std::shared_ptr<SocketListener>, sock_listener, "sock_listener");
 		auto connectionHanler = oatpp::websocket::AsyncConnectionHandler::createShared(executor);
 		connectionHanler->setSocketInstanceListener(sock_listener);
 		return connectionHanler;

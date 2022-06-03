@@ -11,16 +11,12 @@
 #include "oatpp/network/Server.hpp"
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
 
-class WsServer
+class Server
 {
 public:
-	WsServer(const WsConfigure& config, DataCacher& cacher);
+	Server(const WsConfigure& config, DataCacher& cacher);
 	void run();
-	void runTestPacketSending(std::vector<TestPacket> packet);
-	void runDataSending();
 	void stop();
-	bool hasConnections() const;
-	DataCacher& getDataCacher();
 
 	bool sendData(WsDataDto::Wrapper data)
 	{
@@ -30,11 +26,8 @@ public:
 	{
 		return false;
 	};
-	bool sendClose();
-	//virtual bool sendAlarm(MediateAlarmDto data) override;
 
-	void cache(int64_t disp);
-	std::deque<int64_t> getCache();
+	bool sendClose();
 
 private:
 	//AppComponent components_;
@@ -43,7 +36,6 @@ private:
 	bool stop_ = false;
 
 	DataCacher& cacher_;
-	ThreadSafeDeque<int64_t> cache_;
 };
 
 #endif //!WS_SERVER_H_

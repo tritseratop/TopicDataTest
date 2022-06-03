@@ -1,5 +1,5 @@
+#include "Lib/Common/Notifier.h"
 #include "Lib/DdsService/DdsSubscriber.h"
-#include "Lib/Notifier/Notifier.h"
 #include "Utilities/DdsTestUtility.h"
 #include "Utilities/WsTestUtility.h"
 

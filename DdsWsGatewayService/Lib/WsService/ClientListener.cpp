@@ -1,14 +1,13 @@
 #include "Lib/WsService/ClientListener.h"
-#include "Lib/WsService/AdapterUnit.h"
+#include "Lib/WsService/Group.h"
 #include "Utilities/TimeConverter/TimeConverter.hpp"
-#include "Utilities/WsTestUtility.h"
 
 ClientListener::ClientListener(const std::shared_ptr<AsyncWebSocket>& socket,
 							   int64_t id,
-							   std::shared_ptr<AdapterUnit> adapter_unit)
+							   std::shared_ptr<Group> group)
 	: socket_(socket)
 	, id_(id)
-	, adapter_unit_(adapter_unit)
+	, group_(group)
 { }
 
 int64_t ClientListener::getClientId() const
@@ -16,9 +15,9 @@ int64_t ClientListener::getClientId() const
 	return id_;
 }
 
-std::shared_ptr<AdapterUnit> ClientListener::getAdapterUnit()
+std::shared_ptr<Group> ClientListener::getGroup()
 {
-	return adapter_unit_;
+	return group_;
 }
 
 oatpp::async::CoroutineStarter ClientListener::onPing(const std::shared_ptr<AsyncWebSocket>& socket,

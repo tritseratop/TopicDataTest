@@ -1,10 +1,11 @@
+#include "../DdsWsGatewayService/Lib/Common/Notifier.h"
 #include "../DdsWsGatewayService/Lib/DdsService/DdsSubscriber.h"
-#include "../DdsWsGatewayService/Lib/Notifier/Notifier.h"
-#include "../DdsWsGatewayService/Lib/WsService/WsServer.h"
-#include "../DdsWsGatewayService/Utilities/DdsTestUtility.h"
+#include "../DdsWsGatewayService/Lib/WsService/Server.h"
 #include "../DdsWsGatewayService/Utilities/PackageAnalyser.h"
-#include "../DdsWsGatewayService/Utilities/WsTestUtility.h"
 #include "../DdsWsGatewayService/Utilities/nlohmann/json.hpp"
+
+#include "Utilities/DdsTestUtility.h"
+#include "Utilities/WsTestUtility.h"
 
 #include "../WsClient/WSClient.hpp"
 
@@ -261,11 +262,11 @@ TEST(WsConnectionTest, RunWithoutCoroutine)
 
 		const WsConfigure ws_conf;
 
-		auto adapter_unit = std::make_shared<AdapterUnit>(0);
-		std::unordered_map<int64_t, std::shared_ptr<AdapterUnit>> adapter_units;
-		adapter_units[adapter_unit->getId()] = adapter_unit;
+		auto group = std::make_shared<Group>(0);
+		std::unordered_map<int64_t, std::shared_ptr<Group>> groups;
+		groups[group->getId()] = group;
 
-		AppComponent component(ws_conf, adapter_units);
+		AppComponent component(ws_conf, groups);
 
 		OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router);
 
@@ -292,16 +293,22 @@ TEST(WsConnectionTest, RunWithoutCoroutine)
 			test_packets.push_back(TestPacket{init_disp + i, message});
 		}
 
-		ThreadSafeDeque<int64_t> server_cache;
+		ThreadSafeDeque<int64_t> client_cache;
+		const OnMessageRead on_message_read = [&client_cache](const oatpp::String& message) {
+			client_cache.push_back(getTimeFromJsonString(message));
+		};
 
 		WSClient wsclient(ws_conf);
-		std::thread client_thread([&wsclient]() { wsclient.run(); });
+		std::thread client_thread(
+			[&wsclient, &on_message_read]() { wsclient.run(on_message_read); });
 
-		TestCallback test_callback = [&test_packets, &server_cache](AdapterUnit& adapter) {
+		ThreadSafeDeque<int64_t> server_cache;
+
+		TestCallback test_callback = [&test_packets, &server_cache](Group& adapter) {
 			const BeforeMessageSend before_msg_send =
 				[&server_cache](const oatpp::String& message) {
 					auto result = getTimeFromJsonString(message);
-					std::this_thread::sleep_for(std::chrono::milliseconds(100));
+					//std::this_thread::sleep_for(std::chrono::milliseconds(100));
 					server_cache.push_back(result);
 				};
 
@@ -318,7 +325,7 @@ TEST(WsConnectionTest, RunWithoutCoroutine)
 			adapter.sendCloseToAllAsync();
 		};
 
-		adapter_unit->runTestMessageSending(test_callback);
+		group->runTestMessageSending(test_callback);
 
 		client_thread.join();
 		server->stop();
@@ -339,17 +346,15 @@ TEST(WsConnectionTest, RunWithoutCoroutine)
 			server_cache.pop_front();
 		}
 
-		auto cache = wsclient.getCache();
-		EXPECT_EQ(packet_number, cache.size());
-
-		if (cache.size() < packet_number)
+		EXPECT_EQ(packet_number, client_cache.size());
+		if (client_cache.size() < packet_number)
 			return;
 		for (int i = 0; i < packet_number; ++i)
 		{
-			auto disp = cache.front();
+			auto disp = client_cache.front();
 
 			EXPECT_EQ(init_disp + i, disp);
-			cache.pop_front();
+			client_cache.pop_front();
 		}
 	}
 	oatpp::base::Environment::destroy();

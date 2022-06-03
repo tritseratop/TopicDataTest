@@ -2,7 +2,7 @@
 
 #include "Notifier.h"
 
-Notifier::Notifier(WsServer& ws_server, DataCacher& cacher)
+Notifier::Notifier(Server& ws_server, DataCacher& cacher)
 	: server_(ws_server)
 	, cacher_(cacher)
 	, stop_sending_data_(false)

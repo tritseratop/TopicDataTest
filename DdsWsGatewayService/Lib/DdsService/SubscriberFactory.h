@@ -1,7 +1,7 @@
 #ifndef SUBSCRIBER_FACTORY_H_
 #define SUBSCRIBER_FACTORY_H_
 
-#include "Lib/Notifier/Notifier.h"
+#include "Lib/Common/Notifier.h"
 #include "Utilities/DdsCommonClasses.h"
 #include "Utilities/PackageAnalyser.h"
 #include "Utilities/ThreadSafeQueue/ThreadSafeQueue.h"

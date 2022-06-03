@@ -5,10 +5,12 @@
 #include <functional>
 
 class ClientListener;
-class AdapterUnit;
+class Group;
 
-using TestCallback = std::function<void(AdapterUnit&)>;
+using TestCallback = std::function<void(Group&)>;
 using BeforeMessageSend = std::function<void(const oatpp::String& message)>;
+
+using OnMessageRead = std::function<void(const oatpp::String& message)>;
 
 struct ConnectionConfigure
 {

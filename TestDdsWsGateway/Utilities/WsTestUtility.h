@@ -3,11 +3,11 @@
 
 #include <functional>
 
+#include "../../DdsWsGatewayService/Utilities/WsDto.h"
+#include "../../DdsWsGatewayService/Utilities/nlohmann/json.hpp"
 #include "DdsTestUtility.h"
-#include "Utilities/nlohmann/json.hpp"
-#include "WsDto.h"
 
-class WsServer;
+class Server;
 
 struct WsDataUnion
 {

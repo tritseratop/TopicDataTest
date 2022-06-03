@@ -18,7 +18,7 @@ endif()
 
 set(LIB_SOURCE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/Lib
-    ${CMAKE_CURRENT_SOURCE_DIR}/Lib/Notifier
+    ${CMAKE_CURRENT_SOURCE_DIR}/Lib/Common
     ${CMAKE_CURRENT_SOURCE_DIR}/Lib/DdsService
     ${CMAKE_CURRENT_SOURCE_DIR}/Lib/WsService
 )
