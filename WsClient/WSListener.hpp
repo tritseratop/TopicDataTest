@@ -34,6 +34,7 @@ private:
 	bool first_package;
 	WsDataDto::Wrapper dto;
 	size_t prev_size;
+	OnMessageRead on_message_read_;
 
 public:
 	/*WSListener(std::mutex& writeMutex)
@@ -46,18 +47,12 @@ public:
         : client(client_) 
         , m_writeMutex(writeMutex)
     {}*/
-	WSListener()
-		: client(nullptr)
-		, first_package(false)
-		, prev_size(0)
-	{
-		json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
-	}
 
-	WSListener(WSClient* client_)
+	WSListener(WSClient* client_, const OnMessageRead& on_message_read)
 		: client(client_)
 		, first_package(false)
 		, prev_size(0)
+		, on_message_read_(on_message_read)
 	{
 		json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
 	}
@@ -65,28 +60,16 @@ public:
 	void setLogin(std::string login_);
 	std::string getLogin();
 
-	/**
-     * Called on "ping" frame.
-     */
 	CoroutineStarter onPing(const std::shared_ptr<AsyncWebSocket>& socket,
 							const oatpp::String& message) override;
 
-	/**
-     * Called on "pong" frame
-     */
 	CoroutineStarter onPong(const std::shared_ptr<AsyncWebSocket>& socket,
 							const oatpp::String& message) override;
 
-	/**
-     * Called on "close" frame
-     */
 	CoroutineStarter onClose(const std::shared_ptr<AsyncWebSocket>& socket,
 							 v_uint16 code,
 							 const oatpp::String& message) override;
 
-	/**
-     * Called on each message frame. After the last message will be called once-again with size == 0 to designate end of the message.
-     */
 	CoroutineStarter readMessage(const std::shared_ptr<AsyncWebSocket>& socket,
 								 v_uint8 opcode,
 								 p_char8 data,
@@ -102,18 +85,16 @@ private:
 	std::shared_ptr<oatpp::websocket::AsyncWebSocket> m_socket;
 	std::shared_ptr<oatpp::websocket::Connector> m_connector;
 	WSClient* client;
+	OnMessageRead on_message_read_;
 
 public:
-	ClientCoroutine(const std::shared_ptr<oatpp::websocket::Connector>& connector)
-		: m_socket(nullptr)
-		, m_connector(connector)
-	{ }
-
 	ClientCoroutine(const std::shared_ptr<oatpp::websocket::Connector>& connector,
-					WSClient* client_)
+					WSClient* client_,
+					const OnMessageRead& on_message_read)
 		: m_socket(nullptr)
 		, m_connector(connector)
 		, client(client_)
+		, on_message_read_(on_message_read)
 	{ }
 	Action act() override;
 	Action

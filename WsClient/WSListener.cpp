@@ -1,5 +1,4 @@
 #include "WSListener.hpp"
-#include "Utilities/WsTestUtility.h"
 #include "WSClient.hpp"
 
 #include "oatpp/parser/json/Beautifier.hpp"
@@ -57,24 +56,7 @@ WSListener::readMessage(const std::shared_ptr<AsyncWebSocket>& socket,
 	}
 	if (size == 0)
 	{ // message transfer finished
-		auto timestamp = TimeConverter::GetTime_LLmcs();
-		oatpp::String wholeMessage = m_messageBuffer.toString();
-		client->cache(getTimeFromJsonString(wholeMessage));
-		if (prev_size != 0 && prev_size != wholeMessage->size())
-		{
-			i = 1;
-			std::cout << "recieved" << std::endl;
-			analyser->writeResults();
-			analyser->clear();
-		}
-		prev_size = wholeMessage->size();
-		int64_t time = getTimeFromJsonString(wholeMessage);
-		/*auto data_dto = json_object_mapper->readFromString<WsDataDto::Wrapper>(wholeMessage);
-		analyser->pushPackageTimestamp(
-			{data_dto->tsrv, timestamp, timestamp - data_dto->tsrv, wholeMessage->size()});*/
-		//std::cout << i++ << ". Delivery time: " << timestamp - time << std::endl;
-		analyser->pushPackageTimestamp({time, timestamp, timestamp - time, wholeMessage->size()});
-		analyser->pushDataTimestamp("COMPARE: " + std::to_string(prev_size), timestamp - time);
+		on_message_read_(m_messageBuffer.toString());
 
 		m_messageBuffer.setCurrentPosition(0);
 	}
@@ -97,7 +79,7 @@ oatpp::async::Action ClientCoroutine::onConnected(
 {
 	m_socket = oatpp::websocket::AsyncWebSocket::createShared(connection, true);
 	//m_socket->setListener(std::make_shared<WSListener>());
-	m_socket->setListener(std::make_shared<WSListener>(client));
+	m_socket->setListener(std::make_shared<WSListener>(client, on_message_read_));
 	std::cout << "Connected" << std::endl;
 	SOCKET = m_socket;
 	return m_socket->listenAsync().next(yieldTo(&ClientCoroutine::onFinishListen));

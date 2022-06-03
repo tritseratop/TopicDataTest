@@ -1,6 +1,7 @@
 #ifndef WSClient_hpp
 #define WSClient_hpp
 
+#include "../DdsWsGatewayService/Utilities/WsCommonClasses.h"
 #include "WSListener.hpp"
 
 class WSClient
@@ -14,7 +15,7 @@ public:
 	WSClient(const WsConfigure& config_)
 		: config(config_)
 	{ }
-	void run();
+	void run(const OnMessageRead& on_message_read);
 	void stop();
 	void setLogin(std::string login_);
 

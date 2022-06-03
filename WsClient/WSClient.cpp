@@ -11,7 +11,7 @@
 #include <iostream>
 #include <thread>
 
-void WSClient::run()
+void WSClient::run(const OnMessageRead& on_message_read)
 {
 	//oatpp::base::Environment::init();
 	{
@@ -25,7 +25,7 @@ void WSClient::run()
 		auto connector = oatpp::websocket::Connector::createShared(connectionProvider);
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-		client_executor->execute<ClientCoroutine>(connector, this);
+		client_executor->execute<ClientCoroutine>(connector, this, on_message_read);
 		/*oatpp::websocket::Config config;
         config.maskOutgoingMessages = true;
         config.readBufferSize = 64;
