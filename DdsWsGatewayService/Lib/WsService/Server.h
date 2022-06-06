@@ -16,6 +16,8 @@ class Server
 public:
 	Server();
 	void run();
+
+	void stopAfterAllTaskFinished();
 	void stop();
 
 	bool sendClose();

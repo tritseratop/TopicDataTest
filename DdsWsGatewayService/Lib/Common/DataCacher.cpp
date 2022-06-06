@@ -51,6 +51,19 @@ void DataCacher::cache(const DDSDataEx& data)
 	}
 }
 
+std::optional<std::string> DataCacher::popAsString()
+{
+	auto tmp = data_cache_.pop_front();
+	if (tmp.has_value())
+	{
+		return std::optional<std::string>(dto_mapper_.toString(tmp.value()));
+	}
+	else
+	{
+		std::optional<std::string>();
+	}
+}
+
 std::optional<MediateDataDto> DataCacher::popDdsDto()
 {
 	return data_cache_.pop_front();

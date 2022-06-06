@@ -10,7 +10,7 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 # Unit Tests
 # Add test cpp file
-file(GLOB TEST_SOURCES "*.cpp" "Utilities/*.h" "Utilities/*.cpp")
+file(GLOB TEST_SOURCES "*.cpp" "Helpers/*.cpp")
 
 add_executable (RunUnitTests ${TEST_SOURCES})
 set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc" "-static-libstdc++")

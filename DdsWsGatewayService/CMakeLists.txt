@@ -27,6 +27,7 @@ set(UTILITIES_SOURCE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/Utilities
     ${CMAKE_CURRENT_SOURCE_DIR}/Utilities/ConfigTopic
     ${CMAKE_CURRENT_SOURCE_DIR}/Utilities/nlohmann
+    ${CMAKE_CURRENT_SOURCE_DIR}/Utilities/Test
     ${CMAKE_CURRENT_SOURCE_DIR}/Utilities/ThreadSafeQueue
     ${CMAKE_CURRENT_SOURCE_DIR}/Utilities/TimeConverter
     ${CMAKE_CURRENT_SOURCE_DIR}/Utilities/TypeTopicsDDS
@@ -57,10 +58,10 @@ endforeach()
 add_library(DdsWsGatewayLib STATIC ${LIB_SOURCES})
 add_library(DdsWsGatewayUtilities STATIC ${UTILITIES_SOURCES})
 
-#(DdsWsGatewayService ${GATEWAY_SOURCES})
+add_executable(DdsWsGatewayService ${GATEWAY_SOURCES})
 
-#set(targets DdsWsGatewayLib DdsWsGatewayUtilities DdsWsGatewayService)
-set(targets DdsWsGatewayLib DdsWsGatewayUtilities)
+set(targets DdsWsGatewayLib DdsWsGatewayUtilities DdsWsGatewayService)
+#set(targets DdsWsGatewayLib DdsWsGatewayUtilities)
 
 foreach (target ${targets})
     target_include_directories(${target} 
@@ -76,7 +77,7 @@ foreach (target ${targets})
     )
 endforeach ()
 
-#target_link_libraries( DdsWsGatewayService 
-#        PUBLIC DdsWsGatewayUtilities
-#        PUBLIC DdsWsGatewayLib 
-#    )
+target_link_libraries( DdsWsGatewayService 
+        PUBLIC DdsWsGatewayUtilities
+        PUBLIC DdsWsGatewayLib 
+    )

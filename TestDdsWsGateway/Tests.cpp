@@ -3,8 +3,9 @@
 #include "../DdsWsGatewayService/Utilities/PackageAnalyser.h"
 #include "../DdsWsGatewayService/Utilities/nlohmann/json.hpp"
 
-#include "Utilities/DdsTestUtility.h"
-#include "Utilities/WsTestUtility.h"
+#include "../DdsWsGatewayService/Utilities/Test/DdsTestUtility.h"
+#include "../DdsWsGatewayService/Utilities/Test/WsTestUtility.h"
+#include "Helpers/Utilities.h"
 
 #include "oatpp/parser/json/Beautifier.hpp"
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
@@ -271,7 +272,6 @@ TEST(WsConnectionTest, RunWithoutCoroutine)
 	};
 
 	ThreadSafeDeque<int64_t> server_cache;
-
 	BeforeMessageSend before_msg_send = [&server_cache](const oatpp::String& message) {
 		auto result = getTimeFromJsonString(message);
 		//std::this_thread::sleep_for(std::chrono::milliseconds(100));

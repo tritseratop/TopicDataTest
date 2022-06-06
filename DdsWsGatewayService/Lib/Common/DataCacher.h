@@ -8,13 +8,13 @@
 #include <deque>
 #include <unordered_map>
 
-//template<class DdsTopic>
-//class Cacher
-//{
-//
-//};
+class Cacher
+{
+public:
+	virtual std::optional<std::string> popAsString() = 0;
+};
 
-class DataCacher
+class DataCacher : public Cacher
 {
 public:
 	DataCacher(size_t depth, AdditionalTopicInfo mapping_info);
@@ -22,13 +22,16 @@ public:
 	void cache(DDSData data);
 	void cache(const DDSDataEx& data);
 
+	std::optional<std::string> popAsString() override;
 	std::optional<MediateDataDto> popDdsDto();
+
 	std::deque<MediateDataDto> getDataCacheCopy() const;
 
 private:
 	size_t depth_;
 	ThreadSafeDeque<MediateDataDto> data_cache_;
 
+	MediateDtoMapper dto_mapper_;
 	DdsDataExMapper ddsdata_ex_mapper_;
 	DdsDataMapper ddsdata_mapper_;
 
@@ -37,7 +40,7 @@ private:
 	PackageAnalyser* analyser_;
 };
 
-class AlarmCacher
+class AlarmCacher : public Cacher
 {
 public:
 	AlarmCacher(size_t depth, AdditionalTopicInfo mapping_info_);
@@ -45,6 +48,7 @@ public:
 	void cache(DDSAlarm data);
 	void cache(const DDSAlarmEx& data);
 
+	std::optional<std::string> popAsString() override;
 	//std::optional<WsDataDto::Wrapper> popDdsAlarm();
 	std::deque<MediateAlarmDto> getAlarmCacheCopy() const;
 

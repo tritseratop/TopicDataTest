@@ -1,5 +1,5 @@
 #include "DdsTestUtility.h"
-#include "../../DdsWsGatewayService/Utilities/TimeConverter/TimeConverter.hpp"
+#include "Utilities/TimeConverter/TimeConverter.hpp"
 #include "WsTestUtility.h"
 
 template<class T>

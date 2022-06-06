@@ -23,18 +23,19 @@ find_package(oatpp-websocket REQUIRED)
 message(STATUS "Configuring HelloWorld example...")
 
 file(GLOB WS_CLIENT "*.cpp" "*.h" "*.hpp")
+file(GLOB WS_CLIENT_LIB "WSClient.cpp" "WSListener.cpp")
 
 # Add source to this project's executable.
-#add_executable (WsClient  ${WS_CLIENT})
-add_library (WsClientLib  ${WS_CLIENT})
+add_executable (WsClient  ${WS_CLIENT})
+add_library (WsClientLib  ${WS_CLIENT_LIB})
 
-#target_link_libraries(WsClient 
-#        PUBLIC oatpp::oatpp
-#        PUBLIC oatpp::oatpp-test
-#        PUBLIC oatpp::oatpp-websocket
-#        PUBLIC DdsWsGatewayUtilities
-#        PUBLIC DdsWsGatewayLib
-#)
+target_link_libraries(WsClient 
+        PUBLIC oatpp::oatpp
+        PUBLIC oatpp::oatpp-test
+        PUBLIC oatpp::oatpp-websocket
+        PUBLIC DdsWsGatewayUtilities
+        PUBLIC DdsWsGatewayLib
+)
 target_link_libraries(WsClientLib 
         PUBLIC oatpp::oatpp
         PUBLIC oatpp::oatpp-test

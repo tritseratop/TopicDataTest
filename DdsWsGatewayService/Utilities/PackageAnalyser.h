@@ -43,6 +43,7 @@ public:
 	void addDataToAnalyse(std::string name);
 	void pushDataTimestamp(std::string name, int64_t distance);
 	void pushPackageTimestamp(PackageTimestamp timestamp);
+	size_t returnLastPackageSize();
 	void writeResults() const;
 	void clear();
 

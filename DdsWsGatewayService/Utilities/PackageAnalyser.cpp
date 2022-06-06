@@ -37,6 +37,17 @@ void PackageAnalyser::pushPackageTimestamp(PackageTimestamp timestamp)
 {
 	packages_.push_back(timestamp);
 }
+size_t PackageAnalyser::returnLastPackageSize()
+{
+	if (packages_.back().has_value())
+	{
+		return packages_.back().value().size;
+	}
+	else
+	{
+		return 0;
+	}
+}
 
 void PackageAnalyser::writeResults() const
 {

@@ -8,7 +8,7 @@ class ClientListener;
 class Group;
 
 using TestCallback = std::function<void(Group&)>;
-using BeforeMessageSend = std::function<void(const oatpp::String& message)>;
+using BeforeMessageSend = std::function<void(oatpp::String& message)>;
 
 using OnMessageRead = std::function<void(const oatpp::String& message)>;
 

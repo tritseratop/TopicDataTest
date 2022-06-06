@@ -66,16 +66,3 @@ std::deque<int64_t> WSClient::getCache()
 {
 	return cache_;
 }
-
-//void main()
-//{
-//	Configure configure;
-//#ifdef _DEBUG
-//	configure.WS_HOST = "127.0.0.1";
-//#else
-//	configure.WS_HOST = "192.168.0.186";
-//#endif
-//	WSClient wsclient(configure);
-//	wsclient.run();
-//	system("pause");
-//}
