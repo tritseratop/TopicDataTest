@@ -12,7 +12,8 @@ void runWsConnection(TestCallback& test_callback)
 #ifdef _DEBUG
 		ws_conf.host = "127.0.0.1";
 #else
-		ws_conf.host = "192.168.0.186";
+		ws_conf.host = "192.168.0.185";
+		//ws_conf.host = "127.0.0.1";
 #endif
 		auto group = std::make_shared<Group>(0);
 		std::unordered_map<int64_t, std::shared_ptr<Group>> groups;
@@ -34,13 +35,17 @@ void runWsConnection(TestCallback& test_callback)
 
 int main(int argc, char* argv[])
 {
+	size_t str_size = 1000;
+	if (argc > 1)
+	{
+		str_size = strtol(argv[1], NULL, 10);
+	}
 	int64_t init_disp = 1'000'000'000'000'000;
 
-	size_t packet_number = 100;
-
-	size_t number = 10000;
+	size_t number = 1800;
 
 	std::vector<size_t> string_sizes{1000,
+									 1600,
 									 5000,
 									 10'000,
 									 50'000,
@@ -65,6 +70,7 @@ int main(int argc, char* argv[])
 		TestPacket test_packet{1'000'000'000'000'000, "a"};
 		for (auto& string_size : string_sizes)
 		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 			test_packet.str = std::string(string_size, 'a');
 			for (int i = 0; i < number; ++i)
 			{

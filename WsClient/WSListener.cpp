@@ -47,22 +47,15 @@ WSListener::readMessage(const std::shared_ptr<AsyncWebSocket>& socket,
 						p_char8 data,
 						oatpp::v_io_size size)
 {
-	static int i = 1;
-	if (first_package == false)
-	{
-		analyser = PackageAnalyser::getInstance();
-		analyser->clear();
-		first_package = true;
-	}
 	if (size == 0)
 	{ // message transfer finished
-		on_message_read_(m_messageBuffer.toString());
+		on_message_read_(message_buffer_.toString());
 
-		m_messageBuffer.setCurrentPosition(0);
+		message_buffer_.setCurrentPosition(0);
 	}
 	else if (size > 0)
 	{ // message frame received
-		m_messageBuffer.writeSimple(data, size);
+		message_buffer_.writeSimple(data, size);
 	}
 	return nullptr;
 }
@@ -88,7 +81,7 @@ oatpp::async::Action ClientCoroutine::onConnected(
 oatpp::async::Action ClientCoroutine::onFinishListen()
 {
 	PackageAnalyser* analyser = PackageAnalyser::getInstance();
-	analyser->writeResults();
+	analyser->writeResultsAndClear("");
 	client->stop();
 	return finish();
 }

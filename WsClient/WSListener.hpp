@@ -25,7 +25,7 @@ private:
 	/**
      * Buffer for messages. Needed for multi-frame messages.
      */
-	oatpp::data::stream::BufferOutputStream m_messageBuffer;
+	oatpp::data::stream::BufferOutputStream message_buffer_;
 	std::string login;
 	WSClient* client;
 	std::shared_ptr<oatpp::parser::json::mapping::ObjectMapper> json_object_mapper;

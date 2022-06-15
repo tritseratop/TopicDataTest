@@ -28,6 +28,7 @@ class PackageAnalyser
 protected:
 	static PackageAnalyser* analyser_;
 	static std::mutex gen_instance_;
+	mutable std::mutex package_;
 
 	explicit PackageAnalyser(const std::string& fname = "logger.txt");
 
@@ -39,12 +40,16 @@ public:
 	PackageAnalyser(const PackageAnalyser&) = delete;
 	void operator=(const PackageAnalyser&) = delete;
 
-	void setInitialInfo(std::string info);
 	void addDataToAnalyse(std::string name);
 	void pushDataTimestamp(std::string name, int64_t distance);
 	void pushPackageTimestamp(PackageTimestamp timestamp);
 	size_t returnLastPackageSize();
-	void writeResults() const;
+	void setInitialInfo(std::string info);
+
+	void writeResultsAndClear(std::string info);
+
+private:
+	void writeResults();
 	void clear();
 
 private:

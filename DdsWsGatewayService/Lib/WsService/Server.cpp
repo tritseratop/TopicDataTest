@@ -22,8 +22,8 @@ void Server::run()
 
 void Server::stopAfterAllTaskFinished()
 {
-	// Остановка Executor после завершения работы сервера
 	OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor, "server_executor");
+	// Остановка Executor после завершения всех задач
 	executor->waitTasksFinished();
 	executor->stop();
 	executor->join();
@@ -33,12 +33,12 @@ void Server::stopAfterAllTaskFinished()
 
 void Server::stop()
 {
-	server_->stop();
-
-	// Остановка Executor после завершения работы сервера
 	OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor, "server_executor");
+	// Остановка Executor до завершения работы сервера
 	executor->stop();
 	executor->join();
+
+	server_->stop();
 }
 
 bool Server::sendClose()

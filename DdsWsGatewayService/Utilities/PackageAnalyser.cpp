@@ -39,6 +39,7 @@ void PackageAnalyser::pushPackageTimestamp(PackageTimestamp timestamp)
 }
 size_t PackageAnalyser::returnLastPackageSize()
 {
+	std::lock_guard<std::mutex> guard(package_);
 	if (packages_.back().has_value())
 	{
 		return packages_.back().value().size;
@@ -49,8 +50,10 @@ size_t PackageAnalyser::returnLastPackageSize()
 	}
 }
 
-void PackageAnalyser::writeResults() const
+void PackageAnalyser::writeResultsAndClear(std::string message)
 {
+	std::lock_guard<std::mutex> guard(package_);
+	setInitialInfo(std::move(message));
 	TransitionInfo info;
 	if (!init_info.empty())
 	{
@@ -101,6 +104,9 @@ void PackageAnalyser::writeResults() const
 			file << d.first + ":\t" << sum / d.second.size() << std::endl;
 		}
 	}
+	packages_.clear();
+	data_to_analyse.clear();
+	init_info.clear();
 }
 
 void PackageAnalyser::clear()

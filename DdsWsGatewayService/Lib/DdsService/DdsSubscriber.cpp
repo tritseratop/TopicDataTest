@@ -177,8 +177,7 @@ void SubscriberService::runSubscribers()
 		}
 	}
 	stop_ws_server_ = true;
-	analyser_->writeResults();
-	analyser_->clear();
+	analyser_->writeResultsAndClear("");
 }
 
 void SubscriberService::changeSubscribersConfig(
