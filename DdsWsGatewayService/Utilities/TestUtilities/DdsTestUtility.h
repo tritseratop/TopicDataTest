@@ -3,38 +3,44 @@
 
 #include "Utilities/DdsCommonClasses.h"
 #include "Utilities/MediateDto.h"
+#include "Utilities/TestUtilities/CommonTestUtilities.h"
 #include "Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "Utilities/nlohmann/json.hpp"
 
 #include "oatpp/core/Types.hpp"
 
-template<class T>
-std::vector<T> getDefaultVector(size_t size = 0, T offset = 0);
-
-std::vector<char> getDefaultVector(size_t size = 0, char offset = 0);
-
-template<class T>
-std::vector<T> getFilledVector(size_t size, T filler);
-
 AdditionalTopicInfo getAdditionalTopicInfo(size_t size = 4);
 
-std::pair<DDSData, MediateDataDto> getEqualDdsData(size_t size, size_t char_size = 1);
-
-MediateDataDto getMediateDataDto(size_t size, size_t char_size = 1);
-
-DDSData getDdsData(size_t size = 4, size_t char_size = 100);
-
-DDSDataEx getDdsDataEx(size_t size = 4, size_t char_size = 100);
-
-struct DataExUnion
+struct DdsDataUnion
 {
-	DDSData data_;
-	DDSDataEx data_ex;
-	MediateDataDto dto_to_change;
+	DDSData data;
 	MediateDataDto dto;
+	AdditionalTopicInfo tags_info;
 };
 
-DataExUnion getEqualDdsDataEx(size_t size_ex = 2, size_t size_data = 4);
+DdsDataUnion getEqualDdsData(size_t size, size_t char_size = 1);
+DdsDataUnion getEqualDdsData(const VectorsForData& vectors, const AdditionalTopicInfo& tag_info);
+
+MediateDataDto getMediateDataDto(size_t size, size_t char_size = 1);
+MediateDataDto getMediateDataDto(const VectorsForData& vectors,
+								 const AdditionalTopicInfo& tag_info);
+
+DDSData getDdsData(size_t size, size_t char_size = 1);
+DDSData getDdsData(const VectorsForData& vectors);
+
+DDSDataEx getDdsDataEx(size_t size, size_t char_size = 1);
+DDSDataEx getDdsDataEx(const VectorsForData& vectors, const AdditionalTopicInfo& tag_info);
+
+struct DdsDataExUnion
+{
+	DDSData data;
+	DDSDataEx data_ex;
+	MediateDataDto dto_to_change;
+	MediateDataDto result_dto;
+	AdditionalTopicInfo tags_info;
+};
+
+DdsDataExUnion getEqualDdsDataEx(size_t data_ex_size, size_t data_size, size_t char_size = 1);
 
 struct OneTestConditions
 {

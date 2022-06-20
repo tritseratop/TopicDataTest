@@ -20,23 +20,16 @@ TestPacket createTestPacket(size_t str_size)
 
 WsDataUnion getWsDataUnion(size_t size, size_t char_size)
 {
+	auto vectors = VectorsForData(size, char_size);
+	auto tag_info = getAdditionalTopicInfo(size);
+
 	WsDataUnion data_union;
-	auto buf = getEqualDdsData(size, char_size);
-	data_union.dds_data = buf.first;
-	data_union.data_dto = buf.second;
+	data_union.data_dto = getMediateDataDto(vectors, tag_info);
 
 	auto collect_int = WsDataCollectionInt::createShared();
 	auto collect_float = WsDataCollectionFloat::createShared();
 	auto collect_double = WsDataCollectionDouble::createShared();
 	auto collect_char = WsDataCollectionChar::createShared();
-
-	AdditionalTopicInfo info = getAdditionalTopicInfo(size);
-	std::string quality(size, 'a');
-
-	collect_int->qlt = quality.c_str();
-	collect_float->qlt = quality.c_str();
-	collect_double->qlt = quality.c_str();
-	collect_char->qlt = quality.c_str();
 
 	collect_int->tsrc = {};
 	collect_int->tag = {};
@@ -53,33 +46,43 @@ WsDataUnion getWsDataUnion(size_t size, size_t char_size)
 	collect_char->tsrc = {};
 	collect_char->tag = {};
 	collect_char->val = {};
-	std::string char_val(char_size, 'a');
+
+	collect_int->qlt = oatpp::String(vectors.int_qualities.data(), vectors.int_qualities.size());
+	collect_float->qlt = oatpp::String(vectors.float_qualities.data(),
+									   vectors.float_qualities.size());
+	collect_double->qlt = oatpp::String(vectors.double_qualities.data(),
+										vectors.double_qualities.size());
+	collect_char->qlt = oatpp::String(vectors.char_qualities.data(), vectors.char_qualities.size());
 
 	for (int i = 0; i < size; ++i)
 	{
-		collect_int->tsrc->push_back(oatpp::Int64(101));
-		collect_int->tag->push_back(oatpp::UInt32(info.tags.at(DataCollectiionType::DATA_INT)[i]));
-		collect_int->val->push_back(oatpp::Int32(1));
+		collect_int->tsrc->push_back(oatpp::Int64(vectors.time_values[i]));
+		collect_int->tag->push_back(
+			oatpp::UInt32(tag_info.tags.at(DataCollectiionType::DATA_INT)[i]));
+		collect_int->val->push_back(oatpp::Int32(vectors.int_values[i]));
 
-		collect_float->tsrc->push_back(oatpp::Int64(101));
+		collect_float->tsrc->push_back(oatpp::Int64(vectors.time_values[i]));
 		collect_float->tag->push_back(
-			oatpp::UInt32(info.tags.at(DataCollectiionType::DATA_FLOAT)[i]));
-		collect_float->val->push_back(oatpp::Float32(1));
+			oatpp::UInt32(tag_info.tags.at(DataCollectiionType::DATA_FLOAT)[i]));
+		collect_float->val->push_back(oatpp::Float32(vectors.float_values[i]));
 
-		collect_double->tsrc->push_back(oatpp::Int64(101));
+		collect_double->tsrc->push_back(oatpp::Int64(vectors.time_values[i]));
 		collect_double->tag->push_back(
-			oatpp::UInt32(info.tags.at(DataCollectiionType::DATA_DOUBLE)[i]));
-		collect_double->val->push_back(oatpp::Float64(1));
+			oatpp::UInt32(tag_info.tags.at(DataCollectiionType::DATA_DOUBLE)[i]));
+		collect_double->val->push_back(oatpp::Float64(vectors.double_values[i]));
 
-		collect_char->tsrc->push_back(oatpp::Int64(101));
+		collect_char->tsrc->push_back(oatpp::Int64(vectors.time_values[i]));
 		collect_char->tag->push_back(
-			oatpp::UInt32(info.tags.at(DataCollectiionType::DATA_CHAR)[i]));
-		collect_char->val->push_back(oatpp::String(char_val.c_str()));
+			oatpp::UInt32(tag_info.tags.at(DataCollectiionType::DATA_CHAR)[i]));
+
+		oatpp::String str(vectors.char_value.size());
+		std::copy(vectors.char_value.begin(), vectors.char_value.end(), str->begin());
+		collect_char->val->push_back(str);
 	}
 
 	data_union.ws_dto = WsDataDto::createShared();
 
-	data_union.ws_dto->tsrv = 100;
+	data_union.ws_dto->tsrv = vectors.time_service;
 	data_union.ws_dto->di = collect_int;
 	data_union.ws_dto->df = collect_float;
 	data_union.ws_dto->dd = collect_double;

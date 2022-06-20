@@ -3,8 +3,8 @@
 #include "../DdsWsGatewayService/Utilities/PackageAnalyser.h"
 #include "../DdsWsGatewayService/Utilities/nlohmann/json.hpp"
 
-#include "../DdsWsGatewayService/Utilities/Test/DdsTestUtility.h"
-#include "../DdsWsGatewayService/Utilities/Test/WsTestUtility.h"
+#include "../DdsWsGatewayService/Utilities/TestUtilities/DdsTestUtility.h"
+#include "../DdsWsGatewayService/Utilities/TestUtilities/WsTestUtility.h"
 #include "Helpers/Utilities.h"
 
 #include "oatpp/parser/json/Beautifier.hpp"
@@ -45,42 +45,66 @@ TEST(HelloTest, BasicAssertions)
 	EXPECT_EQ(7 * 6, 42);
 }
 
-TEST(DtoTest, DdsDataConversation)
+TEST(DdsToDtoMapping, DdsDataMapping)
 {
-	auto dds_data = getEqualDdsData(4);
-	DdsDataMapper ddsdata_mapper;
+	{
+		auto dds_data = getEqualDdsData(4, 1);
+
+		DdsDataMapper ddsdata_mapper;
+		MediateDataDto d = ddsdata_mapper.toMediateDataDto(dds_data.data, dds_data.tags_info);
+		EXPECT_EQ(dds_data.dto, d);
+	}
+	{
+		auto dds_data = getEqualDdsData(5, 8);
+
+		DdsDataMapper ddsdata_mapper;
+		MediateDataDto d = ddsdata_mapper.toMediateDataDto(dds_data.data, dds_data.tags_info);
+		EXPECT_EQ(dds_data.dto, d);
+	}
+	{
+		auto dds_data = getEqualDdsData(0, 8);
+
+		DdsDataMapper ddsdata_mapper;
+		MediateDataDto d = ddsdata_mapper.toMediateDataDto(dds_data.data, dds_data.tags_info);
+		EXPECT_EQ(dds_data.dto, d);
+	}
+}
+
+TEST(DdsToDtoMapping, DdsDataExMapping)
+{
+	auto vectors = VectorsForData(4, 1);
+
 	DdsDataExMapper ddsdataex_mapper;
-
-	AdditionalTopicInfo info = getAdditionalTopicInfo(4);
-
-	MediateDataDto d = ddsdata_mapper.toMediateDataDto(std::move(dds_data.first), info);
-	EXPECT_EQ(dds_data.second, d);
-
-	DataExUnion data_ex_union = getEqualDdsDataEx(3, 5);
-	MediateDataDto d2 = ddsdataex_mapper.toMediateDataDto(
-		data_ex_union.data_ex, info, data_ex_union.dto_to_change);
-	EXPECT_EQ(d2, data_ex_union.dto);
-
-	DataExUnion data_ex_union1 = getEqualDdsDataEx(3, 0);
-	MediateDataDto d3 = ddsdataex_mapper.toMediateDataDto(
-		data_ex_union1.data_ex, info, data_ex_union1.dto_to_change);
-	EXPECT_EQ(d3, data_ex_union1.dto);
-
-	info = getAdditionalTopicInfo(500);
-	DataExUnion data_ex_union2 = getEqualDdsDataEx(500, 1000);
-	MediateDataDto d4 = ddsdataex_mapper.toMediateDataDto(
-		data_ex_union2.data_ex, info, data_ex_union2.dto_to_change);
-	EXPECT_EQ(d4, data_ex_union2.dto);
-
-	DataExUnion data_ex_union3 = getEqualDdsDataEx(0, 0);
-	MediateDataDto d5 = ddsdataex_mapper.toMediateDataDto(
-		data_ex_union3.data_ex, info, data_ex_union3.dto_to_change);
-	EXPECT_EQ(d5, data_ex_union3.dto);
-
-	DataExUnion data_ex_union4 = getEqualDdsDataEx(0, 3);
-	MediateDataDto d6 = ddsdataex_mapper.toMediateDataDto(
-		data_ex_union4.data_ex, info, data_ex_union4.dto_to_change);
-	EXPECT_EQ(d6, data_ex_union4.dto);
+	{
+		DdsDataExUnion data_ex_union = getEqualDdsDataEx(3, 5);
+		MediateDataDto dto = ddsdataex_mapper.toMediateDataDto(
+			data_ex_union.data_ex, data_ex_union.tags_info, data_ex_union.dto_to_change);
+		EXPECT_EQ(dto, data_ex_union.result_dto);
+	}
+	{
+		DdsDataExUnion data_ex_union = getEqualDdsDataEx(3, 0);
+		MediateDataDto dto = ddsdataex_mapper.toMediateDataDto(
+			data_ex_union.data_ex, data_ex_union.tags_info, data_ex_union.dto_to_change);
+		EXPECT_EQ(dto, data_ex_union.result_dto);
+	}
+	{
+		DdsDataExUnion data_ex_union = getEqualDdsDataEx(500, 1000);
+		MediateDataDto dto = ddsdataex_mapper.toMediateDataDto(
+			data_ex_union.data_ex, data_ex_union.tags_info, data_ex_union.dto_to_change);
+		EXPECT_EQ(dto, data_ex_union.result_dto);
+	}
+	{
+		DdsDataExUnion data_ex_union = getEqualDdsDataEx(0, 0);
+		MediateDataDto dto = ddsdataex_mapper.toMediateDataDto(
+			data_ex_union.data_ex, data_ex_union.tags_info, data_ex_union.dto_to_change);
+		EXPECT_EQ(dto, data_ex_union.result_dto);
+	}
+	{
+		DdsDataExUnion data_ex_union = getEqualDdsDataEx(0, 3);
+		MediateDataDto dto = ddsdataex_mapper.toMediateDataDto(
+			data_ex_union.data_ex, data_ex_union.tags_info, data_ex_union.dto_to_change);
+		EXPECT_EQ(dto, data_ex_union.result_dto);
+	}
 }
 
 TEST(DtoTest, WsDataConversation)
@@ -94,12 +118,21 @@ TEST(DtoTest, WsDataConversation)
 	auto json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared(
 		serializeConfig, deserializeConfig);
 
-	auto data = getWsDataUnion(20, 1);
-	auto dto = mapper.toWsDataDto(data.data_dto);
-	EXPECT_EQ(json_object_mapper->writeToString(data.ws_dto),
-			  json_object_mapper->writeToString(dto));
+	{
+		auto data = getWsDataUnion(100, 20);
+		auto dto = mapper.toWsDataDto(data.data_dto);
+		auto res1 = json_object_mapper->writeToString(data.ws_dto);
+		auto res2 = json_object_mapper->writeToString(dto);
+		EXPECT_EQ(res1, res2);
+	}
 
-	auto data1 = getWsDataUnion(0);
+	auto data = getWsDataUnion(20, 0);
+	auto dto = mapper.toWsDataDto(data.data_dto);
+	auto res1 = json_object_mapper->writeToString(data.ws_dto);
+	auto res2 = json_object_mapper->writeToString(dto);
+	EXPECT_EQ(res1, res2);
+
+	auto data1 = getWsDataUnion(0, 20);
 	auto dto1 = mapper.toWsDataDto(data1.data_dto);
 	EXPECT_EQ(json_object_mapper->writeToString(data1.ws_dto),
 			  json_object_mapper->writeToString(dto1));

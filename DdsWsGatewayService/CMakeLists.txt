@@ -27,7 +27,7 @@ set(UTILITIES_SOURCE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/Utilities
     ${CMAKE_CURRENT_SOURCE_DIR}/Utilities/ConfigTopic
     ${CMAKE_CURRENT_SOURCE_DIR}/Utilities/nlohmann
-    ${CMAKE_CURRENT_SOURCE_DIR}/Utilities/Test
+    ${CMAKE_CURRENT_SOURCE_DIR}/Utilities/TestUtilities
     ${CMAKE_CURRENT_SOURCE_DIR}/Utilities/ThreadSafeQueue
     ${CMAKE_CURRENT_SOURCE_DIR}/Utilities/TimeConverter
     ${CMAKE_CURRENT_SOURCE_DIR}/Utilities/TypeTopicsDDS

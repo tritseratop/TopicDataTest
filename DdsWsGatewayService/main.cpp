@@ -1,6 +1,6 @@
 #include "Lib/Common/Notifier.h"
 #include "Lib/DdsService/DdsSubscriber.h"
-#include "Utilities/Test/WsTestUtility.h"
+#include "Utilities/TestUtilities/WsTestUtility.h"
 
 void runWsConnection(TestCallback& test_callback)
 {

@@ -60,13 +60,8 @@ std::optional<std::string> DataCacher::popAsString()
 	}
 	else
 	{
-		std::optional<std::string>();
+		return std::optional<std::string>();
 	}
-}
-
-std::optional<MediateDataDto> DataCacher::popDdsDto()
-{
-	return data_cache_.pop_front();
 }
 
 AlarmCacher::AlarmCacher(size_t depth, AdditionalTopicInfo mapping_info)

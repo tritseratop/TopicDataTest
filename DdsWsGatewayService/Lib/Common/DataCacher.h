@@ -23,7 +23,6 @@ public:
 	void cache(const DDSDataEx& data);
 
 	std::optional<std::string> popAsString() override;
-	std::optional<MediateDataDto> popDdsDto();
 
 	std::deque<MediateDataDto> getDataCacheCopy() const;
 
@@ -49,7 +48,7 @@ public:
 	void cache(const DDSAlarmEx& data);
 
 	std::optional<std::string> popAsString() override;
-	//std::optional<WsDataDto::Wrapper> popDdsAlarm();
+
 	std::deque<MediateAlarmDto> getAlarmCacheCopy() const;
 
 private:

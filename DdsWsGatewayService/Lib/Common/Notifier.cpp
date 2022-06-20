@@ -11,13 +11,6 @@ Notifier::Notifier(Server& ws_server, DataCacher& cacher)
 
 bool Notifier::sendDdsData()
 {
-	auto data = cacher_.popDdsDto();
-	if (data.has_value())
-	{
-		auto ws_dto = mapper_.toWsDataDto(data.value());
-		server_.sendData(ws_dto);
-		return true;
-	}
 	return false;
 }
 

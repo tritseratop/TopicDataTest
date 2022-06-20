@@ -5,6 +5,7 @@
 
 #include "DdsTestUtility.h"
 #include "Lib/WsService/Server.h"
+#include "Utilities/TestUtilities/CommonTestUtilities.h"
 #include "Utilities/WsDto.h"
 #include "Utilities/nlohmann/json.hpp"
 
