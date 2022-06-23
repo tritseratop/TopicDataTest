@@ -26,18 +26,31 @@ endif()
 
 message(STATUS "Configuring HelloWorld example...")
 
-file(GLOB DDS_PUBLISHER_CPP 
+file(GLOB DDS_PUBLISHER_EXE 
         "PublisherFactory.h" 
         "PublisherFactory.cpp" 
         "*.cpp" 
 )
 
+file(GLOB DDS_PUBLISHER_LIB 
+        "PublisherFactory.h" 
+        "PublisherFactory.cpp" 
+        "DdsPublisher.cpp" 
+        "DdsPublisher.h" 
+)
+
 # Add source to this project's executable.
-add_executable (PublisherProject  ${DDS_PUBLISHER_CPP})
+add_executable (PublisherProject  ${DDS_PUBLISHER_EXE})
 target_link_libraries(PublisherProject 
     fastrtps 
     fastcdr
     DdsWsGatewayUtilities
 )
 
+add_library (PublisherProjectLib  ${DDS_PUBLISHER_LIB})
+target_link_libraries(PublisherProjectLib 
+    fastrtps 
+    fastcdr
+    DdsWsGatewayUtilities
+)
 # TODO: Add tests and install targets if needed.

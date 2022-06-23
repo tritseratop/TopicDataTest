@@ -1,4 +1,4 @@
-#include "../DdsWsGatewayService/Utilities/DdsTestUtility.h"
+#include "../DdsWsGatewayService/Utilities/TestUtilities/DdsTestUtility.h"
 #include "../DdsWsGatewayService/Utilities/nlohmann/json.hpp"
 #include "DdsPublisher.h"
 

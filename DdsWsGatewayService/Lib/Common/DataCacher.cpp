@@ -73,6 +73,20 @@ void AlarmCacher::cache(DDSAlarm data) { }
 
 void AlarmCacher::cache(const DDSAlarmEx& data) { }
 
+std::optional<std::string> AlarmCacher::popAsString()
+{
+	auto tmp = alarm_cache_.pop_front();
+	if (tmp.has_value())
+	{
+		//return std::optional<std::string>(dds_alarm_mapper_.toString(tmp.value()));
+		return std::optional<std::string>("");
+	}
+	else
+	{
+		return std::optional<std::string>();
+	}
+}
+
 std::deque<MediateDataDto> DataCacher::getDataCacheCopy() const
 {
 	return data_cache_.getDequeCopy();

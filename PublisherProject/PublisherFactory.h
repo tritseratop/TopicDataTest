@@ -1,29 +1,33 @@
 #ifndef PUBLISHER_FACTORY_H_
 #define PUBLISHER_FACTORY_H_
 
-#include "../DdsWsGatewayService/Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "../DdsWsGatewayService/Utilities/TimeConverter/TimeConverter.hpp"
 #include "../DdsWsGatewayService/Utilities/DdsCommonClasses.h"
+#include "../DdsWsGatewayService/Utilities/TimeConverter/TimeConverter.hpp"
+#include "../DdsWsGatewayService/Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
-#include <fastdds/dds/topic/TypeSupport.hpp>
-#include <fastdds/dds/publisher/Publisher.hpp>
 #include <fastdds/dds/publisher/DataWriter.hpp>
 #include <fastdds/dds/publisher/DataWriterListener.hpp>
+#include <fastdds/dds/publisher/Publisher.hpp>
+#include <fastdds/dds/topic/TypeSupport.hpp>
 
 #include <fastrtps/transport/TCPv4TransportDescriptor.h>
 
-#include <thread>
 #include <mutex>
+#include <thread>
 
 using eprosima::fastrtps::types::ReturnCode_t;
 
 class AbstractDdsPublisher
 {
 public:
-	virtual ~AbstractDdsPublisher() {};
+	virtual ~AbstractDdsPublisher(){};
 	virtual bool init() = 0;
 	virtual void run() = 0;
+
+	virtual void testRun(BeforeTopicSend&) = 0;
+	virtual void testRun(BeforeTopicSendData&) = 0;
+
 	virtual void setData() = 0;
 	virtual void setData(void* data) = 0;
 	virtual TopicType getTopicType() = 0;
@@ -31,14 +35,12 @@ public:
 protected:
 };
 
-template <class T, class TPubSubType>
+template<class T, class TPubSubType>
 class ConcretePublisher : public AbstractDdsPublisher
 {
 public:
-	ConcretePublisher(
-		eprosima::fastdds::dds::DomainParticipant* participant,
-		const PublisherConfig& config
-	)
+	ConcretePublisher(eprosima::fastdds::dds::DomainParticipant* participant,
+					  const PublisherConfig& config)
 		: participant_(participant)
 		, config_(config)
 		, publisher_(nullptr)
@@ -48,8 +50,7 @@ public:
 		, listener_(this)
 		, topic_type_(config.topic_type)
 		, stop_(false)
-	{
-	}
+	{ }
 
 	~ConcretePublisher() override
 	{
@@ -85,7 +86,8 @@ public:
 	{
 		type_.register_type(participant_);
 
-		topic_ = participant_->create_topic(config_.topic_name, config_.topic_type_name, TOPIC_QOS_DEFAULT);
+		topic_ = participant_->create_topic(
+			config_.topic_name, config_.topic_type_name, TOPIC_QOS_DEFAULT);
 		if (topic_ == nullptr)
 		{
 			return false;
@@ -99,13 +101,13 @@ public:
 		}
 
 		eprosima::fastdds::dds::DataWriterQos wqos;
-		/*wqos.history().kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
+		wqos.history().kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
 		wqos.history().depth = 30;
 		wqos.resource_limits().max_samples = 50;
 		wqos.resource_limits().allocated_samples = 20;
 		wqos.reliability().kind = eprosima::fastdds::dds::RELIABLE_RELIABILITY_QOS;
 		wqos.durability().kind = eprosima::fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
-		wqos.deadline().period.nanosec = config_.sleep * 1000;*/
+		wqos.deadline().period.nanosec = config_.sleep * 1000;
 
 		if (config_.isSync)
 		{
@@ -127,6 +129,32 @@ public:
 		while (!stop_ && samples_sent < config_.samples)
 		{
 			if (publish(writer_, &listener_, samples_sent))
+			{
+				samples_sent++;
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(config_.sleep));
+		}
+	}
+
+	void testRun(BeforeTopicSend& before_topic_send) override
+	{
+		uint32_t samples_sent = 0;
+		while (!stop_ && samples_sent < config_.samples)
+		{
+			if (testPublish(before_topic_send, &listener_))
+			{
+				samples_sent++;
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(config_.sleep));
+		}
+	}
+
+	void testRun(BeforeTopicSendData& before_topic_send) override
+	{
+		uint32_t samples_sent = 0;
+		while (!stop_ && samples_sent < config_.samples)
+		{
+			if (testPublish(before_topic_send, writer_, &listener_))
 			{
 				samples_sent++;
 			}
@@ -156,17 +184,13 @@ private:
 	class DDSDataListener : public eprosima::fastdds::dds::DataWriterListener
 	{
 	public:
-
 		DDSDataListener(ConcretePublisher* publisher)
 			: matched_(0)
 			, first_connected_(false)
 			, pub_(publisher)
-		{
-		}
+		{ }
 
-		~DDSDataListener() override
-		{
-		}
+		~DDSDataListener() override { }
 
 		void on_publication_matched(
 			eprosima::fastdds::dds::DataWriter* writer,
@@ -190,7 +214,9 @@ private:
 			else
 			{
 				std::cout << info.current_count_change
-					<< " is not a valid value for PublicationMatchedStatus current count change" << std::endl;
+						  << " is not a valid value for PublicationMatchedStatus current count "
+							 "change"
+						  << std::endl;
 			}
 		}
 
@@ -200,7 +226,9 @@ private:
 
 	} listener_;
 
-	bool publish(eprosima::fastdds::dds::DataWriter* writer, const DDSDataListener* listener, uint32_t samples_sent)
+	bool publish(eprosima::fastdds::dds::DataWriter* writer,
+				 const DDSDataListener* listener,
+				 uint32_t samples_sent)
 	{
 		//std::lock_guard<std::mutex> guard(std::mutex());
 		if (listener > 0 && listener->first_connected_)
@@ -214,17 +242,43 @@ private:
 		}
 		return false;
 	}
+
+	bool testPublish(BeforeTopicSend& before_topic_send, const DDSDataListener* listener)
+	{
+		//std::lock_guard<std::mutex> guard(std::mutex());
+		if (listener > 0 && listener->first_connected_)
+		{
+			return before_topic_send(writer_);
+		}
+		return false;
+	}
+
+	bool testPublish(BeforeTopicSendData& before_topic_send,
+					 eprosima::fastdds::dds::DataWriter* writer,
+					 const DDSDataListener* listener)
+	{
+		//std::lock_guard<std::mutex> guard(std::mutex());
+		if (listener > 0 && listener->first_connected_)
+		{
+			before_topic_send(&data_);
+			if (!writer->write(&data_))
+			{
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
 };
 
 class PublisherFactory
 {
 public:
-	virtual ~PublisherFactory() {}
-	AbstractDdsPublisher* createPublisher(
-		eprosima::fastdds::dds::DomainParticipant* participant,
-		const PublisherConfig& config) const;
-protected:
+	virtual ~PublisherFactory() { }
+	AbstractDdsPublisher* createPublisher(eprosima::fastdds::dds::DomainParticipant* participant,
+										  const PublisherConfig& config) const;
 
+protected:
 };
 
 #endif //!PUBLISHER_FACTORY_H_

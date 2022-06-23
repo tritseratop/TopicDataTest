@@ -13,11 +13,13 @@ using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
 
 SubscriberService::SubscriberService(const ServiceConfigForTest<SubscriberConfig>& config,
-									 std::shared_ptr<DataCacher> cacher)
+									 std::shared_ptr<DataCacher> cacher,
+									 OnTopicReceived on_topic_received)
 	: config_(config)
 	, participant_(nullptr)
 	, cacher_(cacher)
 	, config_subscriber_(nullptr)
+	, on_topic_received_(std::move(on_topic_received))
 {
 	setVectorSizesInDataTopic();
 }
@@ -139,7 +141,10 @@ bool SubscriberService::initSubscriber(const SubscriberConfig& config)
 {
 	// TODO: узнать че менять в SUBSCRIBER_QOS_DEFAULT
 	AbstractDdsSubscriber* sub = factory_.createSubscriber(
-		participant_, config, config.isCache ? cacher_ : nullptr);
+		participant_,
+		config,
+		config.isCache ? cacher_ : nullptr,
+		std::make_shared<OnTopicReceived>(on_topic_received_));
 	if (sub == nullptr)
 	{
 		return false;
@@ -163,7 +168,7 @@ void SubscriberService::runSubscribers()
 {
 	stop_ws_server_ = false;
 	std::vector<std::thread> threads;
-	analyser_ = PackageAnalyser::getInstance();
+	//analyser_ = PackageAnalyser::getInstance();
 	for (auto& sub : subscribers_)
 	{
 		threads.push_back(std::thread([&]() { sub->run(); }));
@@ -177,7 +182,15 @@ void SubscriberService::runSubscribers()
 		}
 	}
 	stop_ws_server_ = true;
-	analyser_->writeResultsAndClear("");
+	//analyser_->writeResultsAndClear("");
+}
+
+void SubscriberService::stopSubscribers()
+{
+	for (auto& sub : subscribers_)
+	{
+		sub->stop();
+	}
 }
 
 void SubscriberService::changeSubscribersConfig(

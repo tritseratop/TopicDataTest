@@ -20,6 +20,7 @@ public:
 	virtual ~AbstractDdsSubscriber(){};
 	virtual bool init() = 0;
 	virtual void run() = 0;
+	virtual void stop() = 0;
 	virtual void setConfig(const SubscriberConfig& config) = 0;
 };
 
@@ -29,7 +30,8 @@ class ConcreteSubscriber : public AbstractDdsSubscriber
 public:
 	ConcreteSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
 					   const SubscriberConfig& config,
-					   std::shared_ptr<Cacher> cacher)
+					   std::shared_ptr<Cacher> cacher,
+					   std::shared_ptr<OnTopicReceived> on_topic_received)
 		: participant_(participant)
 		, subscriber_(nullptr)
 		, reader_(nullptr)
@@ -39,6 +41,7 @@ public:
 		, cacher_(cacher)
 		, stop_(false)
 		, listener_(this)
+		, on_topic_received_(on_topic_received)
 	{ }
 
 	~ConcreteSubscriber() override
@@ -97,13 +100,13 @@ public:
 
 		eprosima::fastdds::dds::DataReaderQos rqos;
 
-		/*rqos.history().kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
+		rqos.history().kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
 		rqos.history().depth = 30;
 		rqos.resource_limits().max_samples = 50;
 		rqos.resource_limits().allocated_samples = 20;
 		rqos.reliability().kind = eprosima::fastdds::dds::RELIABLE_RELIABILITY_QOS;
 		rqos.durability().kind = eprosima::fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
-		rqos.deadline().period.nanosec = config_.sleep * 1000;*/
+		rqos.deadline().period.nanosec = config_.sleep * 1000;
 
 		reader_ = subscriber_->create_datareader(topic_, rqos, &listener_);
 		if (reader_ == nullptr)
@@ -122,6 +125,11 @@ public:
 		}
 	}
 
+	void stop() override
+	{
+		stop_ = true;
+	}
+
 	void setConfig(const SubscriberConfig& config) override
 	{
 		config_ = config;
@@ -136,9 +144,10 @@ private:
 		}
 	}
 
-	void runDataSending();
-
-	void setDataSize(){};
+	void setTestCallback(OnTopicReceived on_topic_received)
+	{
+		*on_topic_received_ = on_topic_received;
+	}
 
 private:
 	eprosima::fastdds::dds::DomainParticipant* participant_;
@@ -153,6 +162,8 @@ private:
 
 	std::atomic<bool> stop_;
 
+	std::shared_ptr<OnTopicReceived> on_topic_received_;
+
 	class SubscriberListener : public eprosima::fastdds::dds::DataReaderListener
 	{
 	public:
@@ -165,24 +176,47 @@ private:
 
 		~SubscriberListener() override { }
 
+		//void on_data_available(eprosima::fastdds::dds::DataReader* reader) override
+		//{
+		//	eprosima::fastdds::dds::SampleInfo info;
+		//	auto res = reader->take_next_sample(&data_sample_, &info);
+		//	if (res == ReturnCode_t::RETCODE_OK)
+		//	{
+		//		auto timestamp = TimeConverter::GetTime_LLmcs();
+		//		if (!first_)
+		//		{
+		//			analyser_ = PackageAnalyser::getInstance();
+		//			analyser_->setInitialInfo(sub_->config_.topic_type_name + " "
+		//									  + std::to_string(sub_->config_.vector_size));
+		//			first_ = true;
+		//		}
+		//		analyser_->pushPackageTimestamp({data_sample_.time_service(),
+		//										 timestamp,
+		//										 timestamp - data_sample_.time_service(),
+		//										 T::getCdrSerializedSize(data_sample_)});
+		//		if (info.valid_data)
+		//		{
+		//			samples_++;
+		//			//TODO по другому надо как то проверять
+		//			{
+		//				if (samples_ >= sub_->config_.samples)
+		//				{
+		//					sub_->stop_ = true;
+		//				}
+		//				sub_->cacheData(data_sample_);
+		//			}
+		//			std::cout << samples_ << ". Sub #" << sub_->config_.subscriber_id << " get data"
+		//					  << std::endl;
+		//		}
+		//	}
+		//}
+
 		void on_data_available(eprosima::fastdds::dds::DataReader* reader) override
 		{
 			eprosima::fastdds::dds::SampleInfo info;
 			auto res = reader->take_next_sample(&data_sample_, &info);
 			if (res == ReturnCode_t::RETCODE_OK)
 			{
-				auto timestamp = TimeConverter::GetTime_LLmcs();
-				if (!first_)
-				{
-					analyser_ = PackageAnalyser::getInstance();
-					analyser_->setInitialInfo(sub_->config_.topic_type_name + " "
-											  + std::to_string(sub_->config_.vector_size));
-					first_ = true;
-				}
-				analyser_->pushPackageTimestamp({data_sample_.time_service(),
-												 timestamp,
-												 timestamp - data_sample_.time_service(),
-												 T::getCdrSerializedSize(data_sample_)});
 				if (info.valid_data)
 				{
 					samples_++;
@@ -192,10 +226,11 @@ private:
 						{
 							sub_->stop_ = true;
 						}
+						auto data_ptr = std::make_shared<T>(data_sample_);
+						sub_->on_topic_received_->operator()(
+							std::static_pointer_cast<void>(data_ptr));
 						sub_->cacheData(data_sample_);
 					}
-					std::cout << samples_ << ". Sub #" << sub_->config_.subscriber_id << " get data"
-							  << std::endl;
 				}
 			}
 		}
@@ -262,8 +297,6 @@ private:
 					}
 					sub_->cacheData(data_sample_);
 				}
-				std::cout << samples_ << ". Sub #" << sub_->config_.subscriber_id << " get data"
-						  << std::endl;
 			}
 		}
 
@@ -283,9 +316,11 @@ class SubscriberFactory
 {
 public:
 	virtual ~SubscriberFactory() { }
-	AbstractDdsSubscriber* createSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
-											const SubscriberConfig& config,
-											std::shared_ptr<void> cacher) const;
+	AbstractDdsSubscriber*
+	createSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
+					 const SubscriberConfig& config,
+					 std::shared_ptr<void> cacher,
+					 std::shared_ptr<OnTopicReceived> on_topic_received) const;
 
 protected:
 };

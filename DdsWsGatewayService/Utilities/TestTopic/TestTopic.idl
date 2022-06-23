@@ -1,0 +1,5 @@
+struct ConfigTopic
+{
+	long long dispatch_time;
+	string str;
+};

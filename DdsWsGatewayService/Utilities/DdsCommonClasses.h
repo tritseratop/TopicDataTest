@@ -1,10 +1,19 @@
 #ifndef DDS_COMMON_CLASSES_H_
 #define DDS_COMMON_CLASSES_H_
 
+#include <fastdds/dds/publisher/DataWriter.hpp>
+
 #include <algorithm>
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+using BeforeTopicSend = std::function<bool(eprosima::fastdds::dds::DataWriter*)>;
+
+using BeforeTopicSendData = std::function<void(void*)>;
+
+using OnTopicReceived = std::function<void(std::shared_ptr<void>)>;
 
 enum Transport
 {
@@ -100,7 +109,7 @@ struct ServiceConfigForTest
 
 struct PublisherConfig
 {
-	int16_t subscriber_id = 0;
+	int16_t pub_id = 0;
 	uint16_t vector_size = 0;
 	uint16_t char_vector_size = 0;
 	std::string topic_name = "";
@@ -134,5 +143,8 @@ struct SubscriberConfig
 
 	friend bool operator==(const SubscriberConfig& lhs, const SubscriberConfig& rhs);
 };
+
+struct ParticipantConfig
+{ };
 
 #endif //!DDS_COMMON_CLASSES_H_

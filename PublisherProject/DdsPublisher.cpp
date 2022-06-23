@@ -227,6 +227,32 @@ void PublisherService::runPublishers()
 	}
 }
 
+void PublisherService::testRunPublishers(BeforeTopicSend& before_topic_send)
+{
+	std::vector<std::thread> threads;
+	for (auto& pub : publishers_)
+	{
+		threads.push_back(std::thread([&]() { pub->testRun(before_topic_send); }));
+	}
+	for (auto& t : threads)
+	{
+		t.join();
+	}
+}
+
+void PublisherService::testRunPublishers(BeforeTopicSendData& before_topic_send)
+{
+	std::vector<std::thread> threads;
+	for (auto& pub : publishers_)
+	{
+		threads.push_back(std::thread([&]() { pub->testRun(before_topic_send); }));
+	}
+	for (auto& t : threads)
+	{
+		t.join();
+	}
+}
+
 void PublisherService::changeSubsConfig(const ServiceConfigForTest<PublisherConfig>& config)
 {
 	if (config_ == config)
