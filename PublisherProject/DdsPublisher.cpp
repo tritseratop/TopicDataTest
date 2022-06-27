@@ -240,12 +240,13 @@ void PublisherService::testRunPublishers(BeforeTopicSend& before_topic_send)
 	}
 }
 
-void PublisherService::testRunPublishers(BeforeTopicSendData& before_topic_send)
+void PublisherService::testRunPublishers(std::vector<BeforeTopicSendData>& before_topic_send)
 {
 	std::vector<std::thread> threads;
-	for (auto& pub : publishers_)
+	for (size_t i = 0; i < publishers_.size(); ++i)
 	{
-		threads.push_back(std::thread([&]() { pub->testRun(before_topic_send); }));
+		threads.push_back(std::thread(
+			[this, i, &before_topic_send]() { publishers_[i]->testRun(before_topic_send[i]); }));
 	}
 	for (auto& t : threads)
 	{

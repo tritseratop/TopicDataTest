@@ -28,7 +28,7 @@ public:
 	bool initPublishers();
 	void runPublishers();
 	void testRunPublishers(BeforeTopicSend&);
-	void testRunPublishers(BeforeTopicSendData&);
+	void testRunPublishers(std::vector<BeforeTopicSendData>&);
 	void changeSubsConfig(const ServiceConfigForTest<PublisherConfig>& config);
 	void setData();
 	void setDdsData(DDSData* data);

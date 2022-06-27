@@ -1,7 +1,8 @@
 #ifndef ADAPTER_UNIT_H_
 #define ADAPTER_UNIT_H_
 
-#include <Lib/WsService/ClientListener.h>
+#include "Lib/Common/DataCacher.h"
+#include "Lib/WsService/ClientListener.h"
 
 #include <unordered_map>
 
@@ -11,12 +12,15 @@ private:
 	const int64_t id_;
 	std::unordered_map<int64_t, std::shared_ptr<ClientListener>> clients_;
 	mutable std::mutex clients_mutex_;
+	std::shared_ptr<Cacher> cacher_;
 
 public:
-	Group(int64_t id);
+	Group(int64_t id, std::shared_ptr<Cacher> cacher = nullptr);
 
 	void addClient(const std::shared_ptr<ClientListener>& client);
 	void removeClientById(int64_t id);
+
+	void sendCacherDataToAllAsync();
 
 	void sendTextMessageToAllAsync(const oatpp::String& message);
 	void sendCloseToAllAsync();

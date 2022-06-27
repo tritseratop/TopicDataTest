@@ -64,22 +64,22 @@ void ClientListener::sendMessageAsync(const oatpp::String& message)
 	class SendMessageCoroutine : public oatpp::async::Coroutine<SendMessageCoroutine>
 	{
 	private:
-		oatpp::async::Lock* m_lock;
-		std::shared_ptr<AsyncWebSocket> websocket;
+		oatpp::async::Lock* lock_;
+		std::shared_ptr<AsyncWebSocket> websocket_;
 		oatpp::String message_;
 
 	public:
 		SendMessageCoroutine(oatpp::async::Lock* lock,
 							 const std::shared_ptr<AsyncWebSocket> socket,
 							 const oatpp::String& message)
-			: m_lock(lock)
-			, websocket(socket)
+			: lock_(lock)
+			, websocket_(socket)
 			, message_(message)
 		{ }
 
 		Action act() override
 		{
-			return oatpp::async::synchronize(m_lock, websocket->sendOneFrameTextAsync(message_))
+			return oatpp::async::synchronize(lock_, websocket_->sendOneFrameTextAsync(message_))
 				.next(finish());
 		}
 	};
@@ -130,8 +130,8 @@ void ClientListener::sendMessageAsync(const oatpp::String& message,
 	class SendMessageCoroutine : public oatpp::async::Coroutine<SendMessageCoroutine>
 	{
 	private:
-		oatpp::async::Lock* m_lock;
-		std::shared_ptr<AsyncWebSocket> websocket;
+		oatpp::async::Lock* lock_;
+		std::shared_ptr<AsyncWebSocket> websocket_;
 		oatpp::String message_;
 		const BeforeMessageSend before_message_send_;
 
@@ -140,8 +140,8 @@ void ClientListener::sendMessageAsync(const oatpp::String& message,
 							 const std::shared_ptr<AsyncWebSocket> socket,
 							 const oatpp::String& message,
 							 const BeforeMessageSend& before_message_send)
-			: m_lock(lock)
-			, websocket(socket)
+			: lock_(lock)
+			, websocket_(socket)
 			, message_(message)
 			, before_message_send_(before_message_send)
 		{ }
@@ -149,7 +149,7 @@ void ClientListener::sendMessageAsync(const oatpp::String& message,
 		Action act() override
 		{
 			before_message_send_(message_);
-			return oatpp::async::synchronize(m_lock, websocket->sendOneFrameTextAsync(message_))
+			return oatpp::async::synchronize(lock_, websocket_->sendOneFrameTextAsync(message_))
 				.next(finish());
 		}
 	};

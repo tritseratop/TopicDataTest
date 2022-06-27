@@ -312,8 +312,8 @@ TEST(WsConnectionTest, RunWithoutCoroutine)
 		auto result = getTimeFromJsonString(message);
 		server_cache.push_back(result);
 	};
-	TestCallback test_callback = [&test_packets, &before_msg_send](Group& adapter) {
-		while (!adapter.hasClients())
+	TestCallback test_callback = [&test_packets, &before_msg_send](Group& group) {
+		while (!group.hasClients())
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		}
@@ -321,9 +321,9 @@ TEST(WsConnectionTest, RunWithoutCoroutine)
 		{
 			auto message = nlohmann::json(test_packets.back()).dump();
 			test_packets.pop_back();
-			adapter.sendTextMessageToAllAsync(oatpp::String(message), before_msg_send);
+			group.sendTextMessageToAllAsync(oatpp::String(message), before_msg_send);
 		}
-		adapter.sendCloseToAllAsync();
+		group.sendCloseToAllAsync();
 	};
 
 	runWsConnection(test_callback, on_message_read);
@@ -439,7 +439,7 @@ void DdsDataTest()
 	};
 
 	auto cacher = std::make_shared<DataCacher>(5, info);
-	SubscriberService* mysub = new SubscriberService(sub_config, cacher, on_topic_received);
+	SubscriberService* mysub = new SubscriberService(sub_config, cacher, {on_topic_received});
 
 	std::thread pub_thread([mypub, mysub, &before_topic_send]() {
 		mypub->testRunPublishers(before_topic_send);
@@ -463,14 +463,442 @@ void DdsDataTest()
 	}
 }
 
+void DdsDataTestManyTopics()
+{
+	ServiceConfigForTest<PublisherConfig> pub_config({"Participant_pub",
+													  Transport::TCP,
+													  "127.0.0.1",
+													  4043,
+													  {"127.0.0.1"},
+													  {},
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000});
+	PublisherConfig ddsdata_config1 = {
+		0, 10, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 2, false};
+	PublisherConfig ddsdata_config2 = {
+		0, 100, 10, "DDSData_Second", "DDSData", TopicType::DDS_DATA, 100, 8, false};
+	pub_config.configs = {ddsdata_config1, ddsdata_config2};
+
+	PublisherService* mypub = new PublisherService(pub_config);
+
+	std::vector<std::vector<DDSData>> dds_datas(2);
+
+	for (auto& dds_data : dds_datas)
+	{
+		for (size_t i = 0; i < 100; ++i)
+		{
+			dds_data.push_back(getDdsData(5, 3));
+		}
+	}
+
+	auto dds_data_tmp = dds_datas;
+	auto data = dds_data_tmp.back();
+
+	//BeforeTopicSend before_topic_send = [&dds_data_tmp,
+	//									 &data](eprosima::fastdds::dds::DataWriter* writer) {
+	//	//data_.time_service(TimeConverter::GetTime_LLmcs());
+	//	data = dds_data_tmp.back();
+	//	dds_data_tmp.pop_back();
+	//	if (!writer->write(&data))
+	//	{
+	//		return false;
+	//	}
+	//	return true;
+	//};
+
+	BeforeTopicSendData before_topic_send_data1 = [&dds_data_tmp](void* data) {
+		//data_.time_service(TimeConverter::GetTime_LLmcs());
+		auto tmp = dds_data_tmp[0].back();
+		(*static_cast<DDSData*>(data)) = tmp;
+		dds_data_tmp[0].pop_back();
+	};
+
+	BeforeTopicSendData before_topic_send_data2 = [&dds_data_tmp](void* data) {
+		//data_.time_service(TimeConverter::GetTime_LLmcs());
+		auto tmp = dds_data_tmp[1].back();
+		(*static_cast<DDSData*>(data)) = tmp;
+		dds_data_tmp[1].pop_back();
+	};
+
+	std::vector<BeforeTopicSendData> pub_callbacks{before_topic_send_data1,
+												   before_topic_send_data2};
+
+	mypub->initPublishers();
+
+	ServiceConfigForTest<SubscriberConfig> sub_config({"Participant_sub",
+													   Transport::TCP,
+													   "127.0.0.1",
+													   4043,
+													   {"127.0.0.1"},
+													   {},
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000});
+	AdditionalTopicInfo info = getAdditionalTopicInfo(100);
+	SubscriberConfig sub_ddsdata_config = {
+		0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 100, info, true};
+	SubscriberConfig sub_ddsdata_config2 = {
+		0, 100, "DDSData_Second", "DDSData", TopicType::DDS_DATA, 100, 100, info, true};
+	sub_config.configs = {sub_ddsdata_config, sub_ddsdata_config2};
+
+	std::vector<std::vector<DDSData>> sub_datas(2);
+	OnTopicReceived on_topic_received1 = [&sub_datas](std::shared_ptr<void> data_sample) {
+		auto data_sample_ = std::static_pointer_cast<DDSData>(data_sample);
+		sub_datas[0].push_back(*data_sample_);
+	};
+	OnTopicReceived on_topic_received2 = [&sub_datas](std::shared_ptr<void> data_sample) {
+		auto data_sample_ = std::static_pointer_cast<DDSData>(data_sample);
+		sub_datas[1].push_back(*data_sample_);
+	};
+	std::vector<OnTopicReceived> sub_callbacks{on_topic_received1, on_topic_received2};
+
+	auto cacher = std::make_shared<DataCacher>(5, info);
+	SubscriberService* mysub = new SubscriberService(sub_config, cacher, sub_callbacks);
+
+	std::thread pub_thread([mypub, mysub, &pub_callbacks]() {
+		mypub->testRunPublishers(pub_callbacks);
+		mysub->stopSubscribers();
+	});
+
+	mysub->initSubscribers();
+	mysub->runSubscribers();
+
+	pub_thread.join();
+	delete mypub;
+	delete mysub;
+
+	EXPECT_EQ(dds_datas[0].size(), sub_datas[0].size());
+	if (dds_datas[0].size() == sub_datas[0].size())
+	{
+		for (size_t i = 0; i < 100; ++i)
+		{
+			EXPECT_EQ(dds_datas[0][100 - i - 1], sub_datas[0][i]);
+		}
+	}
+
+	EXPECT_EQ(dds_datas[1].size(), sub_datas[1].size());
+	if (dds_datas[1].size() == sub_datas[1].size())
+	{
+		for (size_t i = 0; i < 100; ++i)
+		{
+			EXPECT_EQ(dds_datas[1][100 - i - 1], sub_datas[1][i]);
+		}
+	}
+}
+
+void DdsDataExTest()
+{
+	ServiceConfigForTest<PublisherConfig> pub_config({"Participant_pub",
+													  Transport::TCP,
+													  "127.0.0.1",
+													  4044,
+													  {"127.0.0.1"},
+													  {},
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000});
+	PublisherConfig ddsdata_config = {
+		1, 10, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, 100, 2, false};
+	pub_config.configs = {ddsdata_config};
+
+	PublisherService* mypub = new PublisherService(pub_config);
+
+	std::vector<DDSDataEx> dds_datas;
+	dds_datas.reserve(100);
+	AdditionalTopicInfo info = getAdditionalTopicInfo(100);
+
+	for (size_t i = 0; i < 100; ++i)
+	{
+		auto vectors = VectorsForData(5, 3);
+		dds_datas.push_back(getDdsDataEx(vectors, info));
+	}
+
+	auto dds_data_tmp = dds_datas;
+	auto data = dds_data_tmp.back();
+
+	BeforeTopicSend before_topic_send = [&dds_data_tmp,
+										 &data](eprosima::fastdds::dds::DataWriter* writer) {
+		//data_.time_service(TimeConverter::GetTime_LLmcs());
+		data = dds_data_tmp.back();
+		dds_data_tmp.pop_back();
+		if (!writer->write(&data))
+		{
+			return false;
+		}
+		return true;
+	};
+
+	BeforeTopicSendData before_topic_send_data = [&dds_data_tmp](void* data) {
+		//data_.time_service(TimeConverter::GetTime_LLmcs());
+		auto tmp = dds_data_tmp.back();
+		(*static_cast<DDSDataEx*>(data)) = tmp;
+		dds_data_tmp.pop_back();
+	};
+
+	mypub->initPublishers();
+
+	ServiceConfigForTest<SubscriberConfig> sub_config({"Participant_sub",
+													   Transport::TCP,
+													   "127.0.0.1",
+													   4044,
+													   {"127.0.0.1"},
+													   {},
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000});
+
+	SubscriberConfig sub_ddsdata_config = {
+		1, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, 100, 100, info, true};
+	sub_config.configs = {sub_ddsdata_config};
+
+	std::vector<DDSDataEx> sub_datas;
+	OnTopicReceived on_topic_received = [&sub_datas](std::shared_ptr<void> data_sample) {
+		auto data_sample_ = std::static_pointer_cast<DDSDataEx>(data_sample);
+		sub_datas.push_back(*data_sample_);
+	};
+
+	auto cacher = std::make_shared<DataCacher>(5, info);
+	SubscriberService* mysub = new SubscriberService(sub_config, cacher, {on_topic_received});
+
+	std::thread pub_thread([mypub, mysub, &before_topic_send]() {
+		mypub->testRunPublishers(before_topic_send);
+		mysub->stopSubscribers();
+	});
+
+	mysub->initSubscribers();
+	mysub->runSubscribers();
+
+	pub_thread.join();
+	delete mypub;
+	delete mysub;
+
+	EXPECT_EQ(dds_datas.size(), sub_datas.size());
+	if (dds_datas.size() != sub_datas.size())
+		return;
+
+	for (size_t i = 0; i < 100; ++i)
+	{
+		EXPECT_EQ(dds_datas[100 - i - 1], sub_datas[i]);
+	}
+}
+
+TEST(DdsConnectionTest, DdsDataExTest)
+{
+	//DdsDataExTest();
+}
+
 TEST(DdsConnectionTest, DdsDataTest)
 {
-	DdsDataTest();
+	//DdsDataTest();
+}
+
+TEST(DdsConnectionTest, DdsDataTestManyTopics)
+{
+	DdsDataTestManyTopics();
+}
+
+void OneToOneConnection()
+{
+	ServiceConfigForTest<PublisherConfig> pub_config({"Participant_pub",
+													  Transport::TCP,
+													  "127.0.0.1",
+													  4043,
+													  {"127.0.0.1"},
+													  {},
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000,
+													  10000});
+	PublisherConfig ddsdata_config = {
+		0, 10, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 100, false};
+	pub_config.configs = {ddsdata_config};
+
+	PublisherService* mypub = new PublisherService(pub_config);
+
+	std::vector<DDSData> dds_datas;
+	dds_datas.reserve(100);
+
+	for (size_t i = 0; i < 100; ++i)
+	{
+		dds_datas.push_back(getDdsData(5, 3));
+	}
+
+	auto dds_data_tmp = dds_datas;
+	auto data = dds_data_tmp.back();
+
+	BeforeTopicSend before_topic_send = [&dds_data_tmp,
+										 &data](eprosima::fastdds::dds::DataWriter* writer) {
+		//data_.time_service(TimeConverter::GetTime_LLmcs());
+		data = dds_data_tmp.back();
+		dds_data_tmp.pop_back();
+		if (!writer->write(&data))
+		{
+			return false;
+		}
+		return true;
+	};
+
+	BeforeTopicSendData before_topic_send_data = [&dds_data_tmp](void* data) {
+		//data_.time_service(TimeConverter::GetTime_LLmcs());
+		auto tmp = dds_data_tmp.back();
+		(*static_cast<DDSData*>(data)) = tmp;
+		dds_data_tmp.pop_back();
+	};
+
+	mypub->initPublishers();
+
+	ServiceConfigForTest<SubscriberConfig> sub_config({"Participant_sub",
+													   Transport::TCP,
+													   "127.0.0.1",
+													   4043,
+													   {"127.0.0.1"},
+													   {},
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000,
+													   10000});
+	AdditionalTopicInfo info = getAdditionalTopicInfo(100);
+	SubscriberConfig sub_ddsdata_config = {
+		0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 100, info, true};
+	sub_config.configs = {sub_ddsdata_config};
+
+	std::vector<DDSData> sub_datas;
+	OnTopicReceived on_topic_received = [&sub_datas](std::shared_ptr<void> data_sample) {
+		auto data_sample_ = std::static_pointer_cast<DDSData>(data_sample);
+		sub_datas.push_back(*data_sample_);
+	};
+
+	auto cacher = std::make_shared<DataCacher>(100, info);
+	SubscriberService* mysub = new SubscriberService(sub_config, cacher, {on_topic_received});
+
+	//******************** WS ********************//
+	ThreadSafeDeque<oatpp::String> client_cache;
+	OnMessageRead on_message_read = [&client_cache](const oatpp::String& message) {
+		client_cache.push_back(message);
+	};
+
+	bool ws_server_stop = false;
+	TestCallback test_callback = [&ws_server_stop](Group& group) {
+		while (!group.hasClients())
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		}
+		while (!ws_server_stop)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			group.sendCacherDataToAllAsync();
+		}
+		group.sendCloseToAllAsync();
+	};
+
+	std::thread ws_thread([&test_callback, &on_message_read, cacher]() {
+		runWsConnection(test_callback, on_message_read, cacher);
+	});
+	//******************** WS ********************//
+
+	std::thread pub_thread([mypub, mysub, &before_topic_send]() {
+		mypub->testRunPublishers(before_topic_send);
+		mysub->stopSubscribers();
+	});
+
+	mysub->initSubscribers();
+	mysub->runSubscribers();
+
+	pub_thread.join();
+	delete mypub;
+	delete mysub;
+
+	ws_server_stop = true;
+	ws_thread.join();
+
+	DdsDataMapper dds_data_mapper;
+	MediateDtoMapper mediate_dto_mapper;
+
+	EXPECT_EQ(client_cache.size(), sub_datas.size());
+	if (sub_datas.size() < client_cache.size())
+		return;
+	for (int i = 0; i < 100; ++i)
+	{
+		auto ws_data = std::string(client_cache.pop_front().value()->c_str());
+		auto dds_data = mediate_dto_mapper.toString(
+			dds_data_mapper.toMediateDataDto(dds_datas[100 - i - 1], info));
+		EXPECT_EQ(ws_data, dds_data);
+	}
+
+	EXPECT_EQ(dds_datas.size(), sub_datas.size());
+	if (dds_datas.size() != sub_datas.size())
+		return;
+
+	for (size_t i = 0; i < 100; ++i)
+	{
+		EXPECT_EQ(dds_datas[100 - i - 1], sub_datas[i]);
+	}
+}
+
+TEST(DdsWsService, OneToOneConnection)
+{
+	OneToOneConnection();
 }
 
 int main(int argc, char* argv[])
 {
 	::testing::InitGoogleTest(&argc, argv);
 	RUN_ALL_TESTS();
+
+#ifndef _DEBUG
 	system("pause");
+#endif
 }

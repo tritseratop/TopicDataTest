@@ -14,7 +14,7 @@ using eprosima::fastrtps::types::ReturnCode_t;
 
 SubscriberService::SubscriberService(const ServiceConfigForTest<SubscriberConfig>& config,
 									 std::shared_ptr<DataCacher> cacher,
-									 OnTopicReceived on_topic_received)
+									 std::vector<OnTopicReceived> on_topic_received)
 	: config_(config)
 	, participant_(nullptr)
 	, cacher_(cacher)
@@ -144,7 +144,7 @@ bool SubscriberService::initSubscriber(const SubscriberConfig& config)
 		participant_,
 		config,
 		config.isCache ? cacher_ : nullptr,
-		std::make_shared<OnTopicReceived>(on_topic_received_));
+		std::make_shared<OnTopicReceived>(on_topic_received_[subscribers_.size()]));
 	if (sub == nullptr)
 	{
 		return false;

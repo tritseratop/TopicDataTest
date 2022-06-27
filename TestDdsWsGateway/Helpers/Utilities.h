@@ -5,4 +5,9 @@
 
 void runWsConnection(TestCallback& test_callback, OnMessageRead& on_message_read);
 
+class Cacher;
+void runWsConnection(TestCallback& test_callback,
+					 OnMessageRead& on_message_read,
+					 std::shared_ptr<Cacher> cacher);
+
 #endif //!UTILITIES_H_
