@@ -1,8 +1,9 @@
-#include "Utilities.h"
+#include "TestDdsWsGateway/Helpers/Utilities.h"
 
-#include "../../DdsWsGatewayService/Lib/Common/DataCacher.h"
-#include "../../DdsWsGatewayService/Lib/WsService/Server.h"
-#include "../../WsClient/WSClient.hpp"
+#include "WsClient/WSClient.hpp"
+
+#include "DdsWsGatewayService/Lib/Common/DataCacher.h"
+#include "DdsWsGatewayService/Lib/WsService/Server.h"
 
 void runWsConnection(TestCallback& test_callback, OnMessageRead& on_message_read)
 {

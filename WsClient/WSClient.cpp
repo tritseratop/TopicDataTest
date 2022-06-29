@@ -1,5 +1,5 @@
-#include "WSClient.hpp"
-#include "AppComponent.hpp"
+#include "WsClient/WSClient.hpp"
+#include "WsClient/AppComponent.hpp"
 
 #include "oatpp-websocket/AsyncWebSocket.hpp"
 #include "oatpp-websocket/Connector.hpp"

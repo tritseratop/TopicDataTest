@@ -1,5 +1,5 @@
-#include "WSListener.hpp"
-#include "WSClient.hpp"
+#include "WsClient/WSListener.hpp"
+#include "WsClient/WSClient.hpp"
 
 #include "oatpp/parser/json/Beautifier.hpp"
 

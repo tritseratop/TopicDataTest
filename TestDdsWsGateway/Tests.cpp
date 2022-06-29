@@ -1,14 +1,13 @@
-#include "../DdsWsGatewayService/Lib/Common/Notifier.h"
-#include "../DdsWsGatewayService/Lib/DdsService/DdsSubscriber.h"
-#include "../DdsWsGatewayService/Utilities/PackageAnalyser.h"
-#include "../DdsWsGatewayService/Utilities/nlohmann/json.hpp"
+#include "TestDdsWsGateway/Helpers/Utilities.h"
 
-#include "../DdsWsGatewayService/Utilities/TestUtilities/DdsTestUtility.h"
-#include "../DdsWsGatewayService/Utilities/TestUtilities/WsTestUtility.h"
+#include "PublisherProject/DdsPublisher.h"
 
-#include "../PublisherProject/DdsPublisher.h"
-
-#include "Helpers/Utilities.h"
+#include "DdsWsGatewayService/Lib/Common/Notifier.h"
+#include "DdsWsGatewayService/Lib/DdsService/SubscriberService.h"
+#include "DdsWsGatewayService/Utilities/PackageAnalyser.h"
+#include "DdsWsGatewayService/Utilities/TestUtilities/DdsTestUtility.h"
+#include "DdsWsGatewayService/Utilities/TestUtilities/WsTestUtility.h"
+#include "DdsWsGatewayService/Utilities/nlohmann/json.hpp"
 
 #include "oatpp/parser/json/Beautifier.hpp"
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
@@ -719,20 +718,21 @@ void DdsDataExTest()
 	}
 }
 
-TEST(DdsConnectionTest, DdsDataExTest)
-{
-	//DdsDataExTest();
-}
-
-TEST(DdsConnectionTest, DdsDataTest)
-{
-	//DdsDataTest();
-}
-
-TEST(DdsConnectionTest, DdsDataTestManyTopics)
-{
-	DdsDataTestManyTopics();
-}
+//TEST(DdsConnectionTest, DdsDataExTest)
+//{
+//	DdsDataExTest();
+//}
+//
+//TEST(DdsConnectionTest, DdsDataTest)
+//{
+//	DdsDataTest();
+//}
+//
+//TEST(DdsConnectionTest, DdsDataTestManyTopics)
+//{
+//	std::this_thread::sleep_for(std::chrono::seconds(20));
+//	DdsDataTestManyTopics();
+//}
 
 void OneToOneConnection()
 {

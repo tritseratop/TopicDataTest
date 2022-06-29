@@ -1,4 +1,4 @@
-#include "Lib/DdsService/DdsSubscriber.h"
+#include "Lib/DdsService/SubscriberService.h"
 
 #include <fastdds/dds/domain/DomainParticipantFactory.hpp>
 
@@ -107,9 +107,9 @@ DomainParticipantQos SubscriberService::getParticipantQos()
 		qos.wire_protocol().builtin.initialPeersList.push_back(
 			initial_peer_locator); // Publisher's meta channel
 
-		qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
+		qos.wire_protocol().builtin.discovery_config.leaseDuration = Duration_t(10, 0);
 		qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(
-			5, 0);
+			2, 0);
 		qos.name(config_.participant_name);
 
 		qos.transport().use_builtin_transports = false;

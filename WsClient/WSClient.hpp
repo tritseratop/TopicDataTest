@@ -1,8 +1,9 @@
 #ifndef WSClient_hpp
 #define WSClient_hpp
 
-#include "../DdsWsGatewayService/Utilities/WsCommonClasses.h"
-#include "WSListener.hpp"
+#include "WsClient/WSListener.hpp"
+
+#include "DdsWsGatewayService/Utilities/WsCommonClasses.h"
 
 class WSClient
 {

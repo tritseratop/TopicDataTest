@@ -77,7 +77,7 @@ foreach (target ${targets})
     )
 endforeach ()
 
-target_link_libraries( DdsWsGatewayService 
+target_link_libraries(DdsWsGatewayService 
         PUBLIC DdsWsGatewayUtilities
         PUBLIC DdsWsGatewayLib 
     )

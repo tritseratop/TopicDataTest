@@ -1,9 +1,9 @@
 #ifndef PUBLISHER_FACTORY_H_
 #define PUBLISHER_FACTORY_H_
 
-#include "../DdsWsGatewayService/Utilities/DdsCommonClasses.h"
-#include "../DdsWsGatewayService/Utilities/TimeConverter/TimeConverter.hpp"
-#include "../DdsWsGatewayService/Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "DdsWsGatewayService/Utilities/DdsCommonClasses.h"
+#include "DdsWsGatewayService/Utilities/TimeConverter/TimeConverter.hpp"
+#include "DdsWsGatewayService/Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/publisher/DataWriter.hpp>

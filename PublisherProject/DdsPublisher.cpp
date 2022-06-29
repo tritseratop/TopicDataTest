@@ -1,9 +1,9 @@
+#include "PublisherProject/DdsPublisher.h"
+
 #include <fastdds/dds/domain/DomainParticipantFactory.hpp>
 
 #include <fastrtps/transport/TCPv4TransportDescriptor.h>
 #include <fastrtps/transport/UDPv4TransportDescriptor.h>
-
-#include "DdsPublisher.h"
 
 using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
@@ -148,8 +148,8 @@ bool PublisherService::initPublishers()
 	DomainParticipantQos qos;
 	qos.name(config_.participant_name);
 
-	qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
-	qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(5,
+	qos.wire_protocol().builtin.discovery_config.leaseDuration = Duration_t(5, 0);
+	qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(2,
 																							   0);
 
 	qos.transport().use_builtin_transports = false;

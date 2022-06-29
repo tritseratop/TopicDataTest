@@ -1,10 +1,11 @@
 #ifndef DDSPUBLISHER_H_
 #define DDSPUBLISHER_H_
 
-#include "../DdsWsGatewayService/Utilities/ConfigTopic/ConfigTopicPubSubTypes.h"
-#include "../DdsWsGatewayService/Utilities/DdsCommonClasses.h"
-#include "../DdsWsGatewayService/Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "PublisherFactory.h"
+#include "PublisherProject/PublisherFactory.h"
+
+#include "DdsWsGatewayService/Utilities/ConfigTopic/ConfigTopicPubSubTypes.h"
+#include "DdsWsGatewayService/Utilities/DdsCommonClasses.h"
+#include "DdsWsGatewayService/Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/publisher/DataWriter.hpp>

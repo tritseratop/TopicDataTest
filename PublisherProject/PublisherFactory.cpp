@@ -1,5 +1,6 @@
-#include "PublisherFactory.h"
-#include "../DdsWsGatewayService/Utilities/TestUtilities/DdsTestUtility.h"
+#include "PublisherProject/PublisherFactory.h"
+
+#include "DdsWsGatewayService/Utilities/TestUtilities/DdsTestUtility.h"
 
 using namespace eprosima::fastdds::dds;
 
