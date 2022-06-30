@@ -16,23 +16,22 @@ bool operator==(const SubscriberConfig& lhs, const SubscriberConfig& rhs)
 AbstractDdsSubscriber*
 SubscriberFactory::createSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
 									const SubscriberConfig& config,
-									std::shared_ptr<void> cacher,
-									std::shared_ptr<OnTopicReceived> on_topic_received) const
+									std::shared_ptr<void> cacher) const
 {
 	switch (config.topic_type)
 	{
 	case TopicType::DDS_DATA:
 		return new ConcreteSubscriber<DDSData, DDSDataPubSubType, DataCacher>(
-			participant, config, std::static_pointer_cast<DataCacher>(cacher), on_topic_received);
+			participant, config, std::static_pointer_cast<DataCacher>(cacher));
 	case TopicType::DDS_DATA_EX:
 		return new ConcreteSubscriber<DDSDataEx, DDSDataExPubSubType, DataCacher>(
-			participant, config, std::static_pointer_cast<DataCacher>(cacher), on_topic_received);
+			participant, config, std::static_pointer_cast<DataCacher>(cacher));
 	case TopicType::DDS_ALARM:
 		return new ConcreteSubscriber<DDSAlarm, DDSAlarmPubSubType, AlarmCacher>(
-			participant, config, std::static_pointer_cast<AlarmCacher>(cacher), on_topic_received);
+			participant, config, std::static_pointer_cast<AlarmCacher>(cacher));
 	case TopicType::DDS_EX_ALARM:
 		return new ConcreteSubscriber<DDSAlarmEx, DDSAlarmExPubSubType, AlarmCacher>(
-			participant, config, std::static_pointer_cast<AlarmCacher>(cacher), on_topic_received);
+			participant, config, std::static_pointer_cast<AlarmCacher>(cacher));
 	default:
 		std::cout << "Topic type " << config.topic_type_name << " is not found" << std::endl;
 		return nullptr;
@@ -43,8 +42,7 @@ template<class T, class TPubSubType, class Cacher>
 ConcreteSubscriber<T, TPubSubType, Cacher>::ConcreteSubscriber(
 	eprosima::fastdds::dds::DomainParticipant* participant,
 	const SubscriberConfig& config,
-	std::shared_ptr<Cacher> cacher,
-	std::shared_ptr<OnTopicReceived> on_topic_received)
+	std::shared_ptr<Cacher> cacher)
 	: participant_(participant)
 	, subscriber_(nullptr)
 	, reader_(nullptr)
@@ -54,7 +52,6 @@ ConcreteSubscriber<T, TPubSubType, Cacher>::ConcreteSubscriber(
 	, cacher_(cacher)
 	, stop_(false)
 	, listener_(this)
-	, on_topic_received_(on_topic_received)
 { }
 
 template<class T, class TPubSubType, class Cacher>
@@ -133,21 +130,6 @@ bool ConcreteSubscriber<T, TPubSubType, Cacher>::init()
 }
 
 template<class T, class TPubSubType, class Cacher>
-void ConcreteSubscriber<T, TPubSubType, Cacher>::run()
-{
-	while (!stop_)
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(config_.sleep));
-	}
-}
-
-template<class T, class TPubSubType, class Cacher>
-void ConcreteSubscriber<T, TPubSubType, Cacher>::stop()
-{
-	stop_ = true;
-}
-
-template<class T, class TPubSubType, class Cacher>
 void ConcreteSubscriber<T, TPubSubType, Cacher>::setConfig(const SubscriberConfig& config)
 {
 	config_ = config;
@@ -163,12 +145,6 @@ void ConcreteSubscriber<T, TPubSubType, Cacher>::cacheData(T data_)
 }
 
 template<class T, class TPubSubType, class Cacher>
-void ConcreteSubscriber<T, TPubSubType, Cacher>::setTestCallback(OnTopicReceived on_topic_received)
-{
-	*on_topic_received_ = on_topic_received;
-}
-
-template<class T, class TPubSubType, class Cacher>
 ConcreteSubscriber<T, TPubSubType, Cacher>::SubscriberListener::SubscriberListener(
 	ConcreteSubscriber* subscriber)
 	: sub_(subscriber)
@@ -180,41 +156,6 @@ ConcreteSubscriber<T, TPubSubType, Cacher>::SubscriberListener::SubscriberListen
 template<class T, class TPubSubType, class Cacher>
 ConcreteSubscriber<T, TPubSubType, Cacher>::SubscriberListener::~SubscriberListener()
 { }
-
-//void on_data_available(eprosima::fastdds::dds::DataReader* reader)
-//{
-//	eprosima::fastdds::dds::SampleInfo info;
-//	auto res = reader->take_next_sample(&data_sample_, &info);
-//	if (res == ReturnCode_t::RETCODE_OK)
-//	{
-//		auto timestamp = TimeConverter::GetTime_LLmcs();
-//		if (!first_)
-//		{
-//			analyser_ = PackageAnalyser::getInstance();
-//			analyser_->setInitialInfo(sub_->config_.topic_type_name + " "
-//									  + std::to_string(sub_->config_.vector_size));
-//			first_ = true;
-//		}
-//		analyser_->pushPackageTimestamp({data_sample_.time_service(),
-//										 timestamp,
-//										 timestamp - data_sample_.time_service(),
-//										 T::getCdrSerializedSize(data_sample_)});
-//		if (info.valid_data)
-//		{
-//			samples_++;
-//			//TODO по другому надо как то проверять
-//			{
-//				if (samples_ >= sub_->config_.samples)
-//				{
-//					sub_->stop_ = true;
-//				}
-//				sub_->cacheData(data_sample_);
-//			}
-//			std::cout << samples_ << ". Sub #" << sub_->config_.subscriber_id << " get data"
-//					  << std::endl;
-//		}
-//	}
-//}
 
 template<class T, class TPubSubType, class Cacher>
 void ConcreteSubscriber<T, TPubSubType, Cacher>::SubscriberListener::on_data_available(
@@ -234,7 +175,6 @@ void ConcreteSubscriber<T, TPubSubType, Cacher>::SubscriberListener::on_data_ava
 					sub_->stop_ = true;
 				}
 				auto data_ptr = std::make_shared<T>(data_sample_);
-				sub_->on_topic_received_->operator()(std::static_pointer_cast<void>(data_ptr));
 				sub_->cacheData(data_sample_);
 			}
 		}

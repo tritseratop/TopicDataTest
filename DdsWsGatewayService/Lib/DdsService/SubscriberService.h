@@ -21,8 +21,7 @@ class SubscriberService
 {
 public:
 	SubscriberService(const ServiceConfigForTest<SubscriberConfig>& config,
-					  std::shared_ptr<DataCacher> cacher,
-					  std::vector<OnTopicReceived> on_topic_received);
+					  std::shared_ptr<DataCacher> cacher);
 	virtual ~SubscriberService();
 
 	bool initSubscribers();
@@ -64,9 +63,7 @@ private:
 
 	PackageAnalyser* analyser_;
 
-	bool stop_ws_server_;
-
-	std::vector<OnTopicReceived> on_topic_received_;
+	bool stop_;
 };
 
 #endif //!DDS_SUBSCRIBER_H_

@@ -431,14 +431,8 @@ void DdsDataTest()
 		0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 100, info, true};
 	sub_config.configs = {sub_ddsdata_config};
 
-	std::vector<DDSData> sub_datas;
-	OnTopicReceived on_topic_received = [&sub_datas](std::shared_ptr<void> data_sample) {
-		auto data_sample_ = std::static_pointer_cast<DDSData>(data_sample);
-		sub_datas.push_back(*data_sample_);
-	};
-
-	auto cacher = std::make_shared<DataCacher>(5, info);
-	SubscriberService* mysub = new SubscriberService(sub_config, cacher, {on_topic_received});
+	auto cacher = std::make_shared<DataCacher>(100, info);
+	SubscriberService* mysub = new SubscriberService(sub_config, cacher);
 
 	std::thread pub_thread([mypub, mysub, &before_topic_send]() {
 		mypub->testRunPublishers(before_topic_send);
@@ -452,13 +446,19 @@ void DdsDataTest()
 	delete mypub;
 	delete mysub;
 
+	auto sub_datas = cacher->getDataCacheCopy();
 	EXPECT_EQ(dds_datas.size(), sub_datas.size());
 	if (dds_datas.size() != sub_datas.size())
 		return;
 
+	DdsDataMapper mapper;
+	MediateDtoMapper dto_mapper;
 	for (size_t i = 0; i < 100; ++i)
 	{
-		EXPECT_EQ(dds_datas[100 - i - 1], sub_datas[i]);
+		auto sended_data = dto_mapper.toString(
+			mapper.toMediateDataDto(dds_datas[100 - i - 1], info));
+		auto received_data = dto_mapper.toString(sub_datas[i]);
+		EXPECT_EQ(sended_data, received_data);
 	}
 }
 
@@ -492,38 +492,27 @@ void DdsDataTestManyTopics()
 
 	std::vector<std::vector<DDSData>> dds_datas(2);
 
+	size_t digit = 0;
 	for (auto& dds_data : dds_datas)
 	{
+		++digit;
 		for (size_t i = 0; i < 100; ++i)
 		{
 			dds_data.push_back(getDdsData(5, 3));
+			dds_data.back().time_service() = digit * 1000 + i;
 		}
 	}
 
 	auto dds_data_tmp = dds_datas;
 	auto data = dds_data_tmp.back();
 
-	//BeforeTopicSend before_topic_send = [&dds_data_tmp,
-	//									 &data](eprosima::fastdds::dds::DataWriter* writer) {
-	//	//data_.time_service(TimeConverter::GetTime_LLmcs());
-	//	data = dds_data_tmp.back();
-	//	dds_data_tmp.pop_back();
-	//	if (!writer->write(&data))
-	//	{
-	//		return false;
-	//	}
-	//	return true;
-	//};
-
 	BeforeTopicSendData before_topic_send_data1 = [&dds_data_tmp](void* data) {
-		//data_.time_service(TimeConverter::GetTime_LLmcs());
 		auto tmp = dds_data_tmp[0].back();
 		(*static_cast<DDSData*>(data)) = tmp;
 		dds_data_tmp[0].pop_back();
 	};
 
 	BeforeTopicSendData before_topic_send_data2 = [&dds_data_tmp](void* data) {
-		//data_.time_service(TimeConverter::GetTime_LLmcs());
 		auto tmp = dds_data_tmp[1].back();
 		(*static_cast<DDSData*>(data)) = tmp;
 		dds_data_tmp[1].pop_back();
@@ -559,19 +548,8 @@ void DdsDataTestManyTopics()
 		0, 100, "DDSData_Second", "DDSData", TopicType::DDS_DATA, 100, 100, info, true};
 	sub_config.configs = {sub_ddsdata_config, sub_ddsdata_config2};
 
-	std::vector<std::vector<DDSData>> sub_datas(2);
-	OnTopicReceived on_topic_received1 = [&sub_datas](std::shared_ptr<void> data_sample) {
-		auto data_sample_ = std::static_pointer_cast<DDSData>(data_sample);
-		sub_datas[0].push_back(*data_sample_);
-	};
-	OnTopicReceived on_topic_received2 = [&sub_datas](std::shared_ptr<void> data_sample) {
-		auto data_sample_ = std::static_pointer_cast<DDSData>(data_sample);
-		sub_datas[1].push_back(*data_sample_);
-	};
-	std::vector<OnTopicReceived> sub_callbacks{on_topic_received1, on_topic_received2};
-
-	auto cacher = std::make_shared<DataCacher>(5, info);
-	SubscriberService* mysub = new SubscriberService(sub_config, cacher, sub_callbacks);
+	auto cacher = std::make_shared<DataCacher>(200, info);
+	SubscriberService* mysub = new SubscriberService(sub_config, cacher);
 
 	std::thread pub_thread([mypub, mysub, &pub_callbacks]() {
 		mypub->testRunPublishers(pub_callbacks);
@@ -585,22 +563,27 @@ void DdsDataTestManyTopics()
 	delete mypub;
 	delete mysub;
 
-	EXPECT_EQ(dds_datas[0].size(), sub_datas[0].size());
-	if (dds_datas[0].size() == sub_datas[0].size())
-	{
-		for (size_t i = 0; i < 100; ++i)
-		{
-			EXPECT_EQ(dds_datas[0][100 - i - 1], sub_datas[0][i]);
-		}
-	}
+	auto sended_data = std::move(dds_datas[0]);
+	std::copy(dds_datas[1].begin(), dds_datas[1].end(), std::back_inserter(sended_data));
 
-	EXPECT_EQ(dds_datas[1].size(), sub_datas[1].size());
-	if (dds_datas[1].size() == sub_datas[1].size())
+	std::sort(sended_data.begin(), sended_data.end(), [](DDSData a, DDSData b) {
+		return a.time_service() < b.time_service();
+	});
+
+	auto received_data = cacher->getDataCacheCopy();
+	std::sort(received_data.begin(), received_data.end(), [](MediateDataDto a, MediateDataDto b) {
+		return a.time_service < b.time_service;
+	});
+
+	EXPECT_EQ(sended_data.size(), received_data.size());
+
+	DdsDataMapper mapper;
+	MediateDtoMapper dto_mapper;
+	for (size_t i = 0; i < 200; ++i)
 	{
-		for (size_t i = 0; i < 100; ++i)
-		{
-			EXPECT_EQ(dds_datas[1][100 - i - 1], sub_datas[1][i]);
-		}
+		auto sended_sample = dto_mapper.toString(mapper.toMediateDataDto(sended_data[i], info));
+		auto received_sample = dto_mapper.toString(received_data[i]);
+		EXPECT_EQ(sended_sample, received_sample);
 	}
 }
 
@@ -687,14 +670,8 @@ void DdsDataExTest()
 		1, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, 100, 100, info, true};
 	sub_config.configs = {sub_ddsdata_config};
 
-	std::vector<DDSDataEx> sub_datas;
-	OnTopicReceived on_topic_received = [&sub_datas](std::shared_ptr<void> data_sample) {
-		auto data_sample_ = std::static_pointer_cast<DDSDataEx>(data_sample);
-		sub_datas.push_back(*data_sample_);
-	};
-
-	auto cacher = std::make_shared<DataCacher>(5, info);
-	SubscriberService* mysub = new SubscriberService(sub_config, cacher, {on_topic_received});
+	auto cacher = std::make_shared<DataCacher>(100, info);
+	SubscriberService* mysub = new SubscriberService(sub_config, cacher);
 
 	std::thread pub_thread([mypub, mysub, &before_topic_send]() {
 		mypub->testRunPublishers(before_topic_send);
@@ -708,21 +685,27 @@ void DdsDataExTest()
 	delete mypub;
 	delete mysub;
 
+	auto sub_datas = cacher->getDataCacheCopy();
 	EXPECT_EQ(dds_datas.size(), sub_datas.size());
 	if (dds_datas.size() != sub_datas.size())
 		return;
 
+	DdsDataExMapper mapper;
+	MediateDtoMapper dto_mapper;
 	for (size_t i = 0; i < 100; ++i)
 	{
-		EXPECT_EQ(dds_datas[100 - i - 1], sub_datas[i]);
+		auto sended_data = dto_mapper.toString(
+			mapper.toMediateDataDto(dds_datas[100 - i - 1], info));
+		auto received_data = dto_mapper.toString(sub_datas[i]);
+		EXPECT_EQ(sended_data, received_data);
 	}
 }
 
-//TEST(DdsConnectionTest, DdsDataExTest)
-//{
-//	DdsDataExTest();
-//}
-//
+TEST(DdsConnectionTest, DdsDataExTest)
+{
+	DdsDataExTest();
+}
+
 //TEST(DdsConnectionTest, DdsDataTest)
 //{
 //	DdsDataTest();
@@ -815,14 +798,8 @@ void OneToOneConnection()
 		0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 100, info, true};
 	sub_config.configs = {sub_ddsdata_config};
 
-	std::vector<DDSData> sub_datas;
-	OnTopicReceived on_topic_received = [&sub_datas](std::shared_ptr<void> data_sample) {
-		auto data_sample_ = std::static_pointer_cast<DDSData>(data_sample);
-		sub_datas.push_back(*data_sample_);
-	};
-
 	auto cacher = std::make_shared<DataCacher>(100, info);
-	SubscriberService* mysub = new SubscriberService(sub_config, cacher, {on_topic_received});
+	SubscriberService* mysub = new SubscriberService(sub_config, cacher);
 
 	//******************** WS ********************//
 	ThreadSafeDeque<oatpp::String> client_cache;
@@ -867,8 +844,8 @@ void OneToOneConnection()
 	DdsDataMapper dds_data_mapper;
 	MediateDtoMapper mediate_dto_mapper;
 
-	EXPECT_EQ(client_cache.size(), sub_datas.size());
-	if (sub_datas.size() < client_cache.size())
+	EXPECT_EQ(client_cache.size(), dds_datas.size());
+	if (dds_datas.size() < client_cache.size())
 		return;
 	for (int i = 0; i < 100; ++i)
 	{
@@ -876,15 +853,6 @@ void OneToOneConnection()
 		auto dds_data = mediate_dto_mapper.toString(
 			dds_data_mapper.toMediateDataDto(dds_datas[100 - i - 1], info));
 		EXPECT_EQ(ws_data, dds_data);
-	}
-
-	EXPECT_EQ(dds_datas.size(), sub_datas.size());
-	if (dds_datas.size() != sub_datas.size())
-		return;
-
-	for (size_t i = 0; i < 100; ++i)
-	{
-		EXPECT_EQ(dds_datas[100 - i - 1], sub_datas[i]);
 	}
 }
 

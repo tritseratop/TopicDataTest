@@ -19,8 +19,6 @@ class AbstractDdsSubscriber
 public:
 	virtual ~AbstractDdsSubscriber(){};
 	virtual bool init() = 0;
-	virtual void run() = 0;
-	virtual void stop() = 0;
 	virtual void setConfig(const SubscriberConfig& config) = 0;
 };
 
@@ -30,23 +28,16 @@ class ConcreteSubscriber : public AbstractDdsSubscriber
 public:
 	ConcreteSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
 					   const SubscriberConfig& config,
-					   std::shared_ptr<Cacher> cacher,
-					   std::shared_ptr<OnTopicReceived> on_topic_received);
+					   std::shared_ptr<Cacher> cacher);
 
 	~ConcreteSubscriber() override;
 
 	bool init() override;
 
-	void run() override;
-
-	void stop() override;
-
 	void setConfig(const SubscriberConfig& config) override;
 
 private:
 	void cacheData(T data_);
-
-	void setTestCallback(OnTopicReceived on_topic_received);
 
 private:
 	eprosima::fastdds::dds::DomainParticipant* participant_;
@@ -101,11 +92,9 @@ class SubscriberFactory
 {
 public:
 	virtual ~SubscriberFactory() { }
-	AbstractDdsSubscriber*
-	createSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
-					 const SubscriberConfig& config,
-					 std::shared_ptr<void> cacher,
-					 std::shared_ptr<OnTopicReceived> on_topic_received) const;
+	AbstractDdsSubscriber* createSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
+											const SubscriberConfig& config,
+											std::shared_ptr<void> cacher) const;
 
 protected:
 };
