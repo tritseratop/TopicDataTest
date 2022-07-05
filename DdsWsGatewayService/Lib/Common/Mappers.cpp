@@ -40,39 +40,6 @@ MediateDataDto DdsDataMapper::toMediateDataDto(DDSData data, const AdditionalTop
 	return result;
 }
 
-MediateDataDtoWithVectorsOfStruct
-DdsDataMapper::toMediateDataDtoWithVectorsOfStruct(DDSData data, const AdditionalTopicInfo& info)
-{
-	size_t size = data.data_double().value().size();
-
-	MediateDataDtoWithVectorsOfStruct result;
-	result.data_int.reserve(size);
-	result.data_float.reserve(size);
-	result.data_double.reserve(size);
-	result.data_char.reserve(size);
-
-	for (int i = 0; i < size; ++i)
-	{
-		result.data_int.push_back({data.time_source(),
-								   info.tags.at(DataCollectiionType::DATA_INT)[i],
-								   data.data_int().value()[i],
-								   data.data_int().quality()[i]});
-		result.data_float.push_back({data.time_source(),
-									 info.tags.at(DataCollectiionType::DATA_FLOAT)[i],
-									 data.data_float().value()[i],
-									 data.data_float().quality()[i]});
-		result.data_double.push_back({data.time_source(),
-									  info.tags.at(DataCollectiionType::DATA_DOUBLE)[i],
-									  data.data_double().value()[i],
-									  data.data_double().quality()[i]});
-		result.data_char.push_back({data.time_source(),
-									info.tags.at(DataCollectiionType::DATA_CHAR)[i],
-									std::move(data.data_char().value()[i].value()),
-									data.data_char().quality()[i]});
-	}
-	return result;
-}
-
 MediateDataDto DdsDataExMapper::toMediateDataDto(DDSDataEx cur_data_ex,
 												 const AdditionalTopicInfo& info,
 												 MediateDataDto prev_dto)
@@ -128,65 +95,6 @@ void fillChanged(DataSampleSequence<T>& prev_dto_collection,
 		prev_dto_collection.id_tag[tag_to_index.at(sample.id_tag())] = sample.id_tag();
 		prev_dto_collection.value[tag_to_index.at(sample.id_tag())] = std::move(sample.value());
 		prev_dto_collection.quality[tag_to_index.at(sample.id_tag())] = sample.quality();
-	}
-}
-
-MediateDataDtoWithVectorsOfStruct
-DdsDataExMapper::toMediateDataDtoWithVectorsOfStruct(DDSDataEx cur_data_ex,
-													 MediateDataDtoWithVectorsOfStruct prev_dto,
-													 const AdditionalTopicInfo& info)
-{
-	prev_dto.time_service = cur_data_ex.time_service();
-	fillChanged(prev_dto.data_int,
-				std::move(cur_data_ex.data_int()),
-				info.tag_to_index.at(DataCollectiionType::DATA_INT));
-	fillChanged(prev_dto.data_float,
-				std::move(cur_data_ex.data_float()),
-				info.tag_to_index.at(DataCollectiionType::DATA_FLOAT));
-	fillChanged(prev_dto.data_double,
-				std::move(cur_data_ex.data_double()),
-				info.tag_to_index.at(DataCollectiionType::DATA_DOUBLE));
-	fillChanged(prev_dto.data_char,
-				std::move(cur_data_ex.data_char()),
-				info.tag_to_index.at(DataCollectiionType::DATA_CHAR));
-
-	return prev_dto;
-}
-
-template<class T, class DdsSample>
-void fillChanged(std::vector<DataSample<T>>& prev_dto_collection,
-				 std::vector<DdsSample> cur_samples,
-				 const TagToIndex& tag_to_index)
-{
-	for (auto sample : std::move(cur_samples))
-	{
-		if (tag_to_index.at(sample.id_tag()) >= prev_dto_collection.size())
-		{
-			prev_dto_collection.resize(tag_to_index.at(sample.id_tag()) + 1);
-		}
-		prev_dto_collection[tag_to_index.at(sample.id_tag())].time_source = sample.time_source();
-		prev_dto_collection[tag_to_index.at(sample.id_tag())].id_tag = sample.id_tag();
-		prev_dto_collection[tag_to_index.at(sample.id_tag())].value = sample.value();
-		prev_dto_collection[tag_to_index.at(sample.id_tag())].quality = sample.quality();
-	}
-}
-
-template<class DdsSample>
-void fillChanged(std::vector<DataSample<std::vector<char>>>& prev_dto_collection,
-				 std::vector<DdsSample> cur_samples,
-				 const TagToIndex& tag_to_index)
-{
-	size_t n = cur_samples.size();
-	for (auto sample : std::move(cur_samples))
-	{
-		if (tag_to_index.at(sample.id_tag()) >= prev_dto_collection.size())
-		{
-			prev_dto_collection.resize(tag_to_index.at(sample.id_tag()) + 1);
-		}
-		prev_dto_collection[tag_to_index.at(sample.id_tag())].time_source = sample.time_source();
-		prev_dto_collection[tag_to_index.at(sample.id_tag())].id_tag = sample.id_tag();
-		prev_dto_collection[tag_to_index.at(sample.id_tag())].value = std::move(sample.value());
-		prev_dto_collection[tag_to_index.at(sample.id_tag())].quality = sample.quality();
 	}
 }
 

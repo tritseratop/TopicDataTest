@@ -71,49 +71,6 @@ struct MediateDataDto
 	}
 };
 
-template<class T>
-struct DataSample
-{
-	int64_t time_source;
-	uint32_t id_tag;
-	T value;
-	char quality;
-
-	friend bool operator==(const DataSample& lhs, const DataSample& rhs)
-	{
-		return lhs.time_source == rhs.time_source && lhs.id_tag == rhs.id_tag
-			   && lhs.value == rhs.value && lhs.quality == rhs.quality;
-	}
-};
-
-struct MediateDataDtoWithVectorsOfStruct
-{
-	int64_t time_service;
-
-	std::vector<DataSample<int32_t>> data_int;
-	std::vector<DataSample<float>> data_float;
-	std::vector<DataSample<double>> data_double;
-	std::vector<DataSample<std::vector<char>>> data_char;
-
-	int64_t dispatch_time;
-	std::string topic_name = "";
-
-	friend bool operator==(const MediateDataDtoWithVectorsOfStruct& lhs,
-						   const MediateDataDtoWithVectorsOfStruct& rhs)
-	{
-		return lhs.time_service == rhs.time_service && lhs.data_int == rhs.data_int
-			   && lhs.data_double == rhs.data_double && lhs.data_char == rhs.data_char
-			   && lhs.topic_name == rhs.topic_name;
-	}
-
-	friend bool operator<(const MediateDataDtoWithVectorsOfStruct& lhs,
-						  const MediateDataDtoWithVectorsOfStruct& rhs)
-	{
-		return std::tie(lhs.topic_name, lhs.time_service)
-			   < std::tie(rhs.topic_name, rhs.time_service);
-	}
-};
-
 struct MediateAlarmDto
 {
 	int64_t time_service;

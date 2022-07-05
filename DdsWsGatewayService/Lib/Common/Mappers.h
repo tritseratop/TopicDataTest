@@ -18,11 +18,6 @@ void fillChanged(DataSampleSequence<T>& prev_dto_collection,
 				 std::vector<DdsSample> cur_samples,
 				 const TagToIndex& tag_to_index);
 
-template<class T, class DdsSample>
-void fillChanged(std::vector<DataSample<T>>& prev_dto_collection,
-				 std::vector<DdsSample> cur_samples,
-				 const TagToIndex& tag_to_index);
-
 class DdsDataMapper
 {
 public:
@@ -31,9 +26,6 @@ public:
 		: info_(info)
 	{ }
 	MediateDataDto toMediateDataDto(DDSData data, const AdditionalTopicInfo& info);
-
-	MediateDataDtoWithVectorsOfStruct
-	toMediateDataDtoWithVectorsOfStruct(DDSData data, const AdditionalTopicInfo& info);
 
 private:
 	AdditionalTopicInfo info_;
@@ -50,17 +42,6 @@ public:
 	MediateDataDto toMediateDataDto(DDSDataEx cur_data_ex,
 									const AdditionalTopicInfo& info,
 									MediateDataDto prev_dto = MediateDataDto());
-
-	MediateDataDtoWithVectorsOfStruct
-	toMediateDataDtoWithVectorsOfStruct(DDSDataEx, const AdditionalTopicInfo& info);
-
-	MediateDataDtoWithVectorsOfStruct
-	toMediateDataDtoWithVectorsOfStruct(DDSDataEx cur_data_ex,
-										MediateDataDtoWithVectorsOfStruct prev_dto,
-										const AdditionalTopicInfo& info);
-
-	MediateDataDtoWithVectorsOfStruct toMediateDataDtoWithVectorsOfStruct(
-		DDSDataEx cur_data_ex, MediateDataDtoWithVectorsOfStruct prev_dto);
 
 private:
 	AdditionalTopicInfo info_;
