@@ -55,12 +55,12 @@ foreach(SOURCE_DIR ${GATEWAY_SOURCE_DIRS})
     aux_source_directory(${SOURCE_DIR} GATEWAY_SOURCES)
 endforeach()
 
-add_library(DdsWsGatewayLib STATIC ${LIB_SOURCES})
 add_library(DdsWsGatewayUtilities STATIC ${UTILITIES_SOURCES})
+add_library(DdsWsGatewayLib STATIC ${LIB_SOURCES})
 
 add_executable(DdsWsGatewayService ${GATEWAY_SOURCES})
 
-set(targets DdsWsGatewayLib DdsWsGatewayUtilities DdsWsGatewayService)
+set(targets DdsWsGatewayUtilities DdsWsGatewayLib DdsWsGatewayService)
 #set(targets DdsWsGatewayLib DdsWsGatewayUtilities)
 
 foreach (target ${targets})

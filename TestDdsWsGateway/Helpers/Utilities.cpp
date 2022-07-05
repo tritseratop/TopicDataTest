@@ -26,7 +26,7 @@ void runWsConnection(TestCallback& test_callback, OnMessageRead& on_message_read
 		std::thread client_thread(
 			[&wsclient, &on_message_read]() { wsclient.run(on_message_read); });
 
-		group->runTestMessageSending(std::move(test_callback));
+		group->runTestMessageSending(test_callback);
 
 		client_thread.join();
 		server.stop();
@@ -58,7 +58,7 @@ void runWsConnection(TestCallback& test_callback,
 		std::thread client_thread(
 			[&wsclient, &on_message_read]() { wsclient.run(on_message_read); });
 
-		group->runTestMessageSending(std::move(test_callback));
+		group->runTestMessageSending(test_callback);
 
 		client_thread.join();
 		server.stop();

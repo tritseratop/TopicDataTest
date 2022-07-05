@@ -75,4 +75,6 @@ int main(int argc, char** argv)
 
 	delete mypub;
 	system("pause");
+
+	return 0;
 }

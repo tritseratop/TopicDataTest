@@ -1,5 +1,6 @@
 #pragma once
-#include<chrono>
+#include <chrono>
+#include <time.h>
 
 struct TimePoint
 {
@@ -16,7 +17,6 @@ struct TimePoint
 class TimeConverter
 {
 public:
-
 	static std::chrono::time_point<std::chrono::system_clock> GetTime_SysClock();
 	static long long GetTime_LLmcs();
 	static TimePoint GetTime_TimePoint();
@@ -26,4 +26,3 @@ public:
 	static TimePoint LLmcsToTimePoint(long long tp);
 	static TimePoint SysClockToTimePoint(std::chrono::time_point<std::chrono::system_clock> tp);
 };
-

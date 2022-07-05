@@ -1,6 +1,8 @@
 #ifndef COMMON_TEST_UTILITIES_H_
 #define COMMON_TEST_UTILITIES_H_
 
+#include <cstdint>
+#include <cstdlib>
 #include <vector>
 
 struct VectorsForData

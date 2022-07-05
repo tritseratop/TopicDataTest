@@ -87,14 +87,15 @@ public:
 		type_.register_type(participant_);
 
 		topic_ = participant_->create_topic(
-			config_.topic_name, config_.topic_type_name, TOPIC_QOS_DEFAULT);
+			config_.topic_name, config_.topic_type_name, eprosima::fastdds::dds::TOPIC_QOS_DEFAULT);
 		if (topic_ == nullptr)
 		{
 			return false;
 		}
 
 		// Create the Publisher
-		publisher_ = participant_->create_publisher(PUBLISHER_QOS_DEFAULT, nullptr);
+		publisher_ = participant_->create_publisher(eprosima::fastdds::dds::PUBLISHER_QOS_DEFAULT,
+													nullptr);
 		if (publisher_ == nullptr)
 		{
 			return false;

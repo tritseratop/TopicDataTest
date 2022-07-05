@@ -1,7 +1,3 @@
-#include <fastdds/dds/domain/DomainParticipant.hpp>
-#include <fastdds/dds/subscriber/DataReader.hpp>
-#include <fastdds/dds/subscriber/DataReaderListener.hpp>
-
 #include "Lib/DdsService/SubscriberFactory.h"
 
 using namespace eprosima::fastdds::dds;
@@ -37,22 +33,6 @@ SubscriberFactory::createSubscriber(eprosima::fastdds::dds::DomainParticipant* p
 		return nullptr;
 	}
 }
-
-template<class T, class TPubSubType, class Cacher>
-ConcreteSubscriber<T, TPubSubType, Cacher>::ConcreteSubscriber(
-	eprosima::fastdds::dds::DomainParticipant* participant,
-	const SubscriberConfig& config,
-	std::shared_ptr<Cacher> cacher)
-	: participant_(participant)
-	, subscriber_(nullptr)
-	, reader_(nullptr)
-	, topic_(nullptr)
-	, support_type_(new TPubSubType())
-	, config_(config)
-	, cacher_(cacher)
-	, stop_(false)
-	, listener_(this)
-{ }
 
 template<class T, class TPubSubType, class Cacher>
 ConcreteSubscriber<T, TPubSubType, Cacher>::~ConcreteSubscriber()
@@ -221,29 +201,28 @@ void ConcreteSubscriber<T, TPubSubType, Cacher>::SubscriberListener::on_requeste
 template<class T, class TPubSubType, class Cacher>
 void ConcreteSubscriber<T, TPubSubType, Cacher>::SubscriberListener::recieveMessageTest()
 {
-	auto timestamp = TimeConverter::GetTime_LLmcs();
-	if (!first_)
-	{
-		analyser_ = PackageAnalyser::getInstance();
-		analyser_->resetStart();
-		analyser_->setInitialInfo(sub_->config_.topic_type_name + " "
-								  + std::to_string(sub_->config_.vector_size));
-		first_ = true;
-	}
-	analyser_->pushPackageTimestamp({data_sample_.time_service(),
-									 timestamp,
-									 timestamp - data_sample_.time_service(),
-									 T::getCdrSerializedSize(data_sample_)});
-	if (info.valid_data)
-	{
-		samples_++;
-		//TODO по другому надо как то проверять
-		{
-			if (samples_ >= sub_->config_.samples)
-			{
-				sub_->stop_ = true;
-			}
-			sub_->cacheData(data_sample_);
-		}
-	}
+	//auto timestamp = TimeConverter::GetTime_LLmcs();
+	//if (!first_)
+	//{
+	//	analyser_ = PackageAnalyser::getInstance();
+	//	analyser_->setInitialInfo(sub_->config_.topic_type_name + " "
+	//							  + std::to_string(sub_->config_.vector_size));
+	//	first_ = true;
+	//}
+	//analyser_->pushPackageTimestamp({data_sample_.time_service(),
+	//								 timestamp,
+	//								 timestamp - data_sample_.time_service(),
+	//								 T::getCdrSerializedSize(data_sample_)});
+	//if (info.valid_data)
+	//{
+	//	samples_++;
+	//	//TODO по другому надо как то проверять
+	//	{
+	//		if (samples_ >= sub_->config_.samples)
+	//		{
+	//			sub_->stop_ = true;
+	//		}
+	//		sub_->cacheData(data_sample_);
+	//	}
+	//}
 }

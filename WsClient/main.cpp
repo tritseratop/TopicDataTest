@@ -4,7 +4,7 @@
 #include "DdsWsGatewayService/Utilities/TestUtilities/WsTestUtility.h"
 #include "DdsWsGatewayService/Utilities/WsCommonClasses.h"
 
-void main()
+int main()
 {
 	WsConfigure configure;
 #ifdef _DEBUG
@@ -54,4 +54,6 @@ void main()
 	std::cout << "avrg size" << sum / cache.size() << std::endl;
 
 	system("pause");
+
+	return 0;
 }

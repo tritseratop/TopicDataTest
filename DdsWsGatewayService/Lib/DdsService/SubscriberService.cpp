@@ -213,11 +213,6 @@ std::vector<AbstractDdsSubscriber*> SubscriberService::getSubscribers() const
 	return subscribers_;
 }
 
-std::deque<MediateDataDto> SubscriberService::getDataCacheCopy() const
-{
-	return cacher_->getDataCacheCopy();
-}
-
 // TODO: сделать макрос?
 void SubscriberService::setVectorSizesInDataTopic()
 {

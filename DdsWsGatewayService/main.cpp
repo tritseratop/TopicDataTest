@@ -25,7 +25,7 @@ void runWsConnection(TestCallback& test_callback)
 
 		std::thread server_thread([&server]() { server.run(); });
 
-		group->runTestMessageSending(std::move(test_callback));
+		group->runTestMessageSending(test_callback);
 
 		server.stopAfterAllTaskFinished();
 		server_thread.join();
@@ -83,4 +83,6 @@ int main(int argc, char* argv[])
 	};
 
 	runWsConnection(test_callback);
+
+	return 0;
 }

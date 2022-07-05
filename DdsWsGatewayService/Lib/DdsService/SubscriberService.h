@@ -1,11 +1,11 @@
 #ifndef DDS_SUBSCRIBER_H_
 #define DDS_SUBSCRIBER_H_
 
+#include "Lib/Common/DataCacher.h"
+#include "Lib/DdsService/AbstractSubscriber.h"
 #include "Lib/DdsService/ConfigSubscriber.h"
 #include "Lib/DdsService/SubscriberFactory.h"
 #include "Utilities/PackageAnalyser.h"
-#include "Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "Utilities/WsCommonClasses.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/subscriber/DataReader.hpp>
@@ -44,8 +44,6 @@ public:
 
 	bool initConfigSubscriber();
 	void runConfigSubscriber(uint32_t samples);
-
-	std::deque<MediateDataDto> getDataCacheCopy() const;
 
 private:
 	void setVectorSizesInDataTopic();

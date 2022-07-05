@@ -701,21 +701,21 @@ void DdsDataExTest()
 	}
 }
 
-TEST(DdsConnectionTest, DdsDataExTest)
+//TEST(DdsConnectionTest, DdsDataExTest)
+//{
+//	DdsDataExTest();
+//}
+
+TEST(DdsConnectionTest, DdsDataTest)
 {
-	DdsDataExTest();
+	DdsDataTest();
 }
 
-//TEST(DdsConnectionTest, DdsDataTest)
-//{
-//	DdsDataTest();
-//}
-//
-//TEST(DdsConnectionTest, DdsDataTestManyTopics)
-//{
-//	std::this_thread::sleep_for(std::chrono::seconds(20));
-//	DdsDataTestManyTopics();
-//}
+TEST(DdsConnectionTest, DdsDataTestManyTopics)
+{
+	std::this_thread::sleep_for(std::chrono::seconds(20));
+	DdsDataTestManyTopics();
+}
 
 void OneToOneConnection()
 {
@@ -856,10 +856,10 @@ void OneToOneConnection()
 	}
 }
 
-TEST(DdsWsService, OneToOneConnection)
-{
-	OneToOneConnection();
-}
+//TEST(DdsWsService, OneToOneConnection)
+//{
+//	OneToOneConnection();
+//}
 
 int main(int argc, char* argv[])
 {
@@ -869,4 +869,6 @@ int main(int argc, char* argv[])
 #ifndef _DEBUG
 	system("pause");
 #endif
+
+	return 0;
 }
