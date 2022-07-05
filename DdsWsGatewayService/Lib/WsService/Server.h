@@ -6,7 +6,6 @@
 
 #include "Utilities/ThreadSafeQueue/ThreadSafeQueue.h"
 #include "Utilities/WsCommonClasses.h"
-#include "Utilities/WsDto.h"
 
 #include "oatpp/network/Server.hpp"
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
@@ -22,10 +21,6 @@ public:
 
 	bool sendClose();
 
-	bool sendData(WsDataDto::Wrapper data)
-	{
-		return false;
-	};
 	bool sendData(oatpp::String data)
 	{
 		return false;

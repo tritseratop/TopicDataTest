@@ -6,7 +6,6 @@
 #include "DdsTestUtility.h"
 #include "Lib/WsService/Server.h"
 #include "Utilities/TestUtilities/CommonTestUtilities.h"
-#include "Utilities/WsDto.h"
 #include "Utilities/nlohmann/json.hpp"
 
 class Server;
@@ -15,7 +14,6 @@ struct WsDataUnion
 {
 	DDSData dds_data;
 	MediateDataDto data_dto;
-	WsDataDto::Wrapper ws_dto;
 };
 
 struct TestPacket

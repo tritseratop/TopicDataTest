@@ -196,42 +196,6 @@ void pushBackContainerWithChars(std::back_insert_iterator<T> result_it,
 	std::transform(chars.begin(), chars.end(), result_it, convert_char_to_string);
 }
 
-WsDataDto::Wrapper MediateDtoMapper::toWsDataDto(const MediateDataDto& data)
-{
-	auto collect_int = WsDataCollectionInt::createShared();
-	fillVector(collect_int->tsrc, data.data_int.time_source);
-	fillVector(collect_int->tag, data.data_int.id_tag);
-	fillVector(collect_int->val, data.data_int.value);
-	fillVector(collect_int->qlt, data.data_int.quality);
-
-	auto collect_float = WsDataCollectionFloat::createShared();
-	fillVector(collect_float->tsrc, data.data_float.time_source);
-	fillVector(collect_float->tag, data.data_float.id_tag);
-	fillVector(collect_float->val, data.data_float.value);
-	fillVector(collect_float->qlt, data.data_float.quality);
-
-	auto collect_double = WsDataCollectionDouble::createShared();
-	fillVector(collect_double->tsrc, data.data_double.time_source);
-	fillVector(collect_double->tag, data.data_double.id_tag);
-	fillVector(collect_double->val, data.data_double.value);
-	fillVector(collect_double->qlt, data.data_double.quality);
-
-	auto collect_char = WsDataCollectionChar::createShared();
-	fillVector(collect_char->tsrc, data.data_char.time_source);
-	fillVector(collect_char->tag, data.data_char.id_tag);
-	fillVector(collect_char->val, data.data_char.value);
-	fillVector(collect_char->qlt, data.data_char.quality);
-
-	auto ws_data_dto = WsDataDto::createShared();
-	ws_data_dto->tsrv = data.time_service;
-	ws_data_dto->di = collect_int;
-	ws_data_dto->df = collect_float;
-	ws_data_dto->dd = collect_double;
-	ws_data_dto->dc = collect_char;
-
-	return ws_data_dto;
-}
-
 template<class OatppT, class T>
 void MediateDtoMapper::fillVector(oatpp::Vector<OatppT>& oatpp_v, const std::vector<T>& v)
 {

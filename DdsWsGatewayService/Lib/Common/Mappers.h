@@ -4,8 +4,9 @@
 #include "Utilities/DdsCommonClasses.h"
 #include "Utilities/MediateDto.h"
 #include "Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "Utilities/WsDto.h"
 #include "Utilities/nlohmann/json.hpp"
+
+#include "oatpp/core/Types.hpp"
 
 template<class T>
 void pushBackContainerWithChars(std::back_insert_iterator<T> result_it,
@@ -84,8 +85,6 @@ public:
 	std::string toString(const MediateDataDto& dto);
 
 	std::string toStringWithCharVectors(const MediateDataDto& dto);
-
-	WsDataDto::Wrapper toWsDataDto(const MediateDataDto& data);
 
 private:
 	template<class OatppT, class T>

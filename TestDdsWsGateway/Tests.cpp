@@ -109,37 +109,6 @@ TEST(DdsToDtoMapping, DdsDataExToMediateDto)
 	}
 }
 
-TEST(DtoToWsMapping, MediateDtoToWsWrapper)
-{
-	MediateDtoMapper mapper;
-	auto serializeConfig = oatpp::parser::json::mapping::Serializer::Config::createShared();
-	auto deserializeConfig = oatpp::parser::json::mapping::Deserializer::Config::createShared();
-
-	/* enable beautifier */
-	serializeConfig->useBeautifier = true;
-	auto json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared(
-		serializeConfig, deserializeConfig);
-
-	{
-		auto data = getWsDataUnion(100, 20);
-		auto dto = mapper.toWsDataDto(data.data_dto);
-		auto res1 = json_object_mapper->writeToString(data.ws_dto);
-		auto res2 = json_object_mapper->writeToString(dto);
-		EXPECT_EQ(res1, res2);
-	}
-
-	auto data = getWsDataUnion(20, 0);
-	auto dto = mapper.toWsDataDto(data.data_dto);
-	auto res1 = json_object_mapper->writeToString(data.ws_dto);
-	auto res2 = json_object_mapper->writeToString(dto);
-	EXPECT_EQ(res1, res2);
-
-	auto data1 = getWsDataUnion(0, 20);
-	auto dto1 = mapper.toWsDataDto(data1.data_dto);
-	EXPECT_EQ(json_object_mapper->writeToString(data1.ws_dto),
-			  json_object_mapper->writeToString(dto1));
-}
-
 TEST(DtoToWsMapping, MediateDtoToString)
 {
 	MediateDtoMapper mapper;
@@ -229,63 +198,9 @@ TEST(JsonParsing, WriteSizes)
 	}
 }
 
-TEST(JsonParsing, GettingTime)
-{
-	WsDataUnion ws_data = getWsDataUnion(10, 10);
-	ws_data.ws_dto->tsrv = 1'000'000'000'000'000;
+TEST(setTimeToJsonTest, replace) { }
 
-	auto json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
-	oatpp::String data = json_object_mapper->writeToString(ws_data.ws_dto);
-	int64_t time = 2'222'222'222'222'222;
-	replaceTimeToJson(data, time);
-
-	EXPECT_EQ(time, getTimeFromJsonString(data));
-
-	ws_data.ws_dto->tsrv = TimeConverter::GetTime_LLmcs();
-	data = json_object_mapper->writeToString(ws_data.ws_dto);
-	time = TimeConverter::GetTime_LLmcs();
-	replaceTimeToJson(data, time);
-
-	EXPECT_EQ(time, getTimeFromJsonString(data));
-
-	ws_data = getWsDataUnion(5, 1);
-	ws_data.ws_dto->tsrv = TimeConverter::GetTime_LLmcs();
-	data = json_object_mapper->writeToString(ws_data.ws_dto);
-	time = TimeConverter::GetTime_LLmcs();
-	replaceTimeToJson(data, time);
-
-	EXPECT_EQ(time, getTimeFromJsonString(data));
-
-	ws_data = getWsDataUnion(10, 1);
-	ws_data.ws_dto->tsrv = TimeConverter::GetTime_LLmcs();
-	data = json_object_mapper->writeToString(ws_data.ws_dto);
-	time = TimeConverter::GetTime_LLmcs();
-	replaceTimeToJson(data, time);
-
-	EXPECT_EQ(time, getTimeFromJsonString(data));
-}
-
-TEST(setTimeToJsonTest, replace)
-{
-	auto json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
-	WsDataUnion ws_data = getWsDataUnion(2, 1);
-	oatpp::String result = json_object_mapper->writeToString(ws_data.ws_dto);
-	replaceTimeToJson(result);
-	auto dto = json_object_mapper->readFromString<WsDataDto::Wrapper>(result);
-	auto expected = json_object_mapper->writeToString(dto);
-	EXPECT_EQ(result.getValue(""), expected.getValue(""));
-}
-
-TEST(setTimeToJsonTest, insert)
-{
-	auto json_object_mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
-	WsDataUnion ws_data = getWsDataUnion(2, 1);
-	oatpp::String result = json_object_mapper->writeToString(ws_data.ws_dto);
-	insertTimeToJson(result);
-	auto dto = json_object_mapper->readFromString<WsDataDto::Wrapper>(result);
-	auto expected = json_object_mapper->writeToString(dto);
-	EXPECT_EQ(result.getValue(""), expected.getValue(""));
-}
+TEST(setTimeToJsonTest, insert) { }
 
 TEST(WsConnectionTest, RunWithoutCoroutine)
 {

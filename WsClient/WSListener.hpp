@@ -3,7 +3,6 @@
 
 #include "DdsWsGatewayService/Utilities/PackageAnalyser.h"
 #include "DdsWsGatewayService/Utilities/WsCommonClasses.h"
-#include "DdsWsGatewayService/Utilities/WsDto.h"
 
 #include "oatpp-websocket/AsyncWebSocket.hpp"
 #include "oatpp-websocket/ConnectionHandler.hpp"
@@ -32,7 +31,6 @@ private:
 
 	PackageAnalyser* analyser;
 	bool first_package;
-	WsDataDto::Wrapper dto;
 	size_t prev_size;
 	OnMessageRead on_message_read_;
 

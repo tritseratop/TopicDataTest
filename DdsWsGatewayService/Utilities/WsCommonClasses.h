@@ -1,7 +1,8 @@
 #ifndef WS_COMMON_CLASSES_H_
 #define WS_COMMON_CLASSES_H_
 
-#include "WsDto.h"
+#include "oatpp/core/Types.hpp"
+
 #include <functional>
 
 class Group;
