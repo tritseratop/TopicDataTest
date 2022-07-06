@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <vector>
 
+namespace scada_ate
+{
 struct VectorsForData
 {
 	int64_t time_service;
@@ -47,5 +49,6 @@ std::vector<T> getFilledVector(size_t size, T filler)
 	std::vector<T> result(size, filler);
 	return result;
 }
+} // namespace scada_ate
 
 #endif //!COMMON_TEST_UTILITIES_H_

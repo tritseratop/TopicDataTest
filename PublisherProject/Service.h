@@ -1,11 +1,10 @@
 #ifndef DDSPUBLISHER_H_
 #define DDSPUBLISHER_H_
 
-#include "PublisherProject/PublisherFactory.h"
+#include "PublisherProject/Factory.h"
 
-#include "DdsWsGatewayService/Utilities/ConfigTopic/ConfigTopicPubSubTypes.h"
-#include "DdsWsGatewayService/Utilities/DdsCommonClasses.h"
-#include "DdsWsGatewayService/Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "DdsWsGatewayService/Utilities/Dds/Callbacks.h"
+#include "DdsWsGatewayService/Utilities/Dds/ConfigTopic/ConfigTopicPubSubTypes.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/publisher/DataWriter.hpp>
@@ -16,12 +15,14 @@
 #include <mutex>
 #include <thread>
 
-class PublisherService
+namespace scada_ate::dds::publisher
+{
+class Service
 {
 public:
-	PublisherService(const ServiceConfigForTest<PublisherConfig>& config);
-	PublisherService();
-	virtual ~PublisherService();
+	Service(const ServiceConfigForTest<Configure>& config);
+	Service();
+	virtual ~Service();
 
 	bool initConfigPub();
 	void runConfigPub(uint32_t number, uint32_t sleep);
@@ -30,17 +31,17 @@ public:
 	void runPublishers();
 	void testRunPublishers(BeforeTopicSend&);
 	void testRunPublishers(std::vector<BeforeTopicSendData>&);
-	void changeSubsConfig(const ServiceConfigForTest<PublisherConfig>& config);
+	void changeSubsConfig(const ServiceConfigForTest<Configure>& config);
 	void setData();
 	void setDdsData(DDSData* data);
 	void setDdsDataEx(DDSDataEx* data);
 
-	bool createNewPublisher(const PublisherConfig& config);
+	bool createNewPublisher(const Configure& config);
 
 private:
-	ServiceConfigForTest<PublisherConfig> config_;
+	ServiceConfigForTest<Configure> config_;
 
-	PublisherFactory factory_;
+	Factory factory_;
 	std::vector<AbstractDdsPublisher*> publishers_;
 
 	ConfigTopic config_topic_data_;
@@ -82,5 +83,6 @@ public:
 				 const DdsPublisherListener* listener,
 				 uint32_t samples_sent);
 };
+} // namespace scada_ate::dds::publisher
 
 #endif /* DDSPUBLISHER_H_ */

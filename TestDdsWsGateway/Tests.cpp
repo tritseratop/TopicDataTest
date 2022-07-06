@@ -1,43 +1,46 @@
 #include "TestDdsWsGateway/Helpers/Utilities.h"
 
-#include "PublisherProject/DdsPublisher.h"
+#include "PublisherProject/Service.h"
 
 #include "DdsWsGatewayService/Lib/Common/Notifier.h"
-#include "DdsWsGatewayService/Lib/DdsService/SubscriberService.h"
-#include "DdsWsGatewayService/Utilities/PackageAnalyser.h"
-#include "DdsWsGatewayService/Utilities/TestUtilities/DdsTestUtility.h"
-#include "DdsWsGatewayService/Utilities/TestUtilities/WsTestUtility.h"
-#include "DdsWsGatewayService/Utilities/nlohmann/json.hpp"
+#include "DdsWsGatewayService/Lib/DdsService/Service.h"
+#include "DdsWsGatewayService/Lib/WsService/Group.h"
+#include "DdsWsGatewayService/Utilities/Common/PackageAnalyser.h"
+#include "DdsWsGatewayService/Utilities/Common/nlohmann/json.hpp"
+#include "DdsWsGatewayService/Utilities/Dds/TestUtility.h"
+#include "DdsWsGatewayService/Utilities/Ws/TestUtility.h"
 
 #include "oatpp/parser/json/Beautifier.hpp"
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
 
 #include <gtest/gtest.h>
 
-std::vector<SubscriberConfig> configs({
-	{0, 100, "DDSData1", "DDSData", TopicType::DDS_DATA, 100, 100},
+namespace scada_ate
+{
+std::vector<dds::subscriber::Configure> configs({
+	{0, 100, "DDSData1", "DDSData", dds::TopicType::DDS_DATA, 100, 100},
 	//        {1, 10000, "DDSData2", "DDSData", TopicType::DDS_DATA, 100, 100},
 	//        {2, 10000, "DDSData3", "DDSData", TopicType::DDS_DATA, 100, 100},
 });
 
-ServiceConfigForTest<SubscriberConfig> config({"Participant_sub",
-											   Transport::TCP,
-											   "127.0.0.1",
-											   4042,
-											   {"127.0.0.1"},
-											   configs,
-											   1000,
-											   1000,
-											   1000,
-											   1000,
-											   1000,
-											   1000,
-											   1000,
-											   1000,
-											   1000,
-											   1000,
-											   1000,
-											   1000});
+dds::ServiceConfigForTest<dds::subscriber::Configure> config({"Participant_sub",
+															  dds::Transport::TCP,
+															  "127.0.0.1",
+															  4042,
+															  {"127.0.0.1"},
+															  configs,
+															  1000,
+															  1000,
+															  1000,
+															  1000,
+															  1000,
+															  1000,
+															  1000,
+															  1000,
+															  1000,
+															  1000,
+															  1000,
+															  1000});
 
 TEST(HelloTest, BasicAssertions)
 {
@@ -49,6 +52,7 @@ TEST(HelloTest, BasicAssertions)
 
 TEST(DdsToDtoMapping, DdsDataToMediateDto)
 {
+	using namespace scada_ate::dds;
 	{
 		auto dds_data = getEqualDdsData(4, 1);
 
@@ -74,6 +78,7 @@ TEST(DdsToDtoMapping, DdsDataToMediateDto)
 
 TEST(DdsToDtoMapping, DdsDataExToMediateDto)
 {
+	using namespace scada_ate::dds;
 	auto vectors = VectorsForData(4, 1);
 
 	DdsDataExMapper ddsdataex_mapper;
@@ -112,12 +117,13 @@ TEST(DdsToDtoMapping, DdsDataExToMediateDto)
 TEST(DtoToWsMapping, MediateDtoToString)
 {
 	MediateDtoMapper mapper;
-	auto data1 = getMediateDataDto(1, 1);
+	auto data1 = dds::getMediateDataDto(1, 1);
 	EXPECT_NE(mapper.toString(data1), mapper.toStringWithCharVectors(data1));
 }
 
 TEST(JsonParsing, JsonToTestConditionParsing)
 {
+	using namespace scada_ate::dds;
 	std::istringstream is("{\n"
 						  "\"conditions\": [\n"
 						  "    {\n"
@@ -178,6 +184,7 @@ TEST(JsonParsing, JsonToTestConditionParsing)
 
 TEST(JsonParsing, WriteSizes)
 {
+	using namespace scada_ate::dds;
 	std::ifstream ifile("test_char_size.json");
 	nlohmann::json json;
 	ifile >> json;
@@ -204,6 +211,7 @@ TEST(setTimeToJsonTest, insert) { }
 
 TEST(WsConnectionTest, RunWithoutCoroutine)
 {
+	using namespace scada_ate::ws;
 	int64_t init_disp = 1'000'000'000'000'000;
 
 	size_t packet_number = 100;
@@ -267,29 +275,30 @@ TEST(WsConnectionTest, RunWithoutCoroutine)
 
 void DdsDataTest()
 {
-	ServiceConfigForTest<PublisherConfig> pub_config({"Participant_pub",
-													  Transport::TCP,
-													  "127.0.0.1",
-													  4043,
-													  {"127.0.0.1"},
-													  {},
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000});
-	PublisherConfig ddsdata_config = {
+	using namespace scada_ate::dds;
+	ServiceConfigForTest<publisher::Configure> pub_config({"Participant_pub",
+														   Transport::TCP,
+														   "127.0.0.1",
+														   4043,
+														   {"127.0.0.1"},
+														   {},
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000});
+	publisher::Configure ddsdata_config = {
 		0, 10, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 2, false};
 	pub_config.configs = {ddsdata_config};
 
-	PublisherService* mypub = new PublisherService(pub_config);
+	publisher::Service* mypub = new publisher::Service(pub_config);
 
 	std::vector<DDSData> dds_datas;
 	dds_datas.reserve(100);
@@ -323,31 +332,31 @@ void DdsDataTest()
 
 	mypub->initPublishers();
 
-	ServiceConfigForTest<SubscriberConfig> sub_config({"Participant_sub",
-													   Transport::TCP,
-													   "127.0.0.1",
-													   4043,
-													   {"127.0.0.1"},
-													   {},
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000});
+	ServiceConfigForTest<subscriber::Configure> sub_config({"Participant_sub",
+															Transport::TCP,
+															"127.0.0.1",
+															4043,
+															{"127.0.0.1"},
+															{},
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000});
 	AdditionalTopicInfo info = getAdditionalTopicInfo(100);
-	SubscriberConfig sub_ddsdata_config = {
+	subscriber::Configure sub_ddsdata_config = {
 		0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 100, info, true};
 	sub_config.configs = {sub_ddsdata_config};
 
 	auto cacher = std::make_shared<DataCacher>(100, info);
-	SubscriberService* mysub = new SubscriberService(sub_config, cacher);
+	subscriber::Service* mysub = new subscriber::Service(sub_config, cacher);
 
 	std::thread pub_thread([mypub, mysub, &before_topic_send]() {
 		mypub->testRunPublishers(before_topic_send);
@@ -379,31 +388,32 @@ void DdsDataTest()
 
 void DdsDataTestManyTopics()
 {
-	ServiceConfigForTest<PublisherConfig> pub_config({"Participant_pub",
-													  Transport::TCP,
-													  "127.0.0.1",
-													  4043,
-													  {"127.0.0.1"},
-													  {},
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000});
-	PublisherConfig ddsdata_config1 = {
+	using namespace scada_ate::dds;
+	ServiceConfigForTest<publisher::Configure> pub_config({"Participant_pub",
+														   Transport::TCP,
+														   "127.0.0.1",
+														   4043,
+														   {"127.0.0.1"},
+														   {},
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000});
+	publisher::Configure ddsdata_config1 = {
 		0, 10, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 2, false};
-	PublisherConfig ddsdata_config2 = {
+	publisher::Configure ddsdata_config2 = {
 		0, 100, 10, "DDSData_Second", "DDSData", TopicType::DDS_DATA, 100, 8, false};
 	pub_config.configs = {ddsdata_config1, ddsdata_config2};
 
-	PublisherService* mypub = new PublisherService(pub_config);
+	publisher::Service* mypub = new publisher::Service(pub_config);
 
 	std::vector<std::vector<DDSData>> dds_datas(2);
 
@@ -438,33 +448,33 @@ void DdsDataTestManyTopics()
 
 	mypub->initPublishers();
 
-	ServiceConfigForTest<SubscriberConfig> sub_config({"Participant_sub",
-													   Transport::TCP,
-													   "127.0.0.1",
-													   4043,
-													   {"127.0.0.1"},
-													   {},
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000});
+	ServiceConfigForTest<subscriber::Configure> sub_config({"Participant_sub",
+															Transport::TCP,
+															"127.0.0.1",
+															4043,
+															{"127.0.0.1"},
+															{},
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000});
 	AdditionalTopicInfo info = getAdditionalTopicInfo(100);
-	SubscriberConfig sub_ddsdata_config = {
+	subscriber::Configure sub_ddsdata_config = {
 		0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 100, info, true};
-	SubscriberConfig sub_ddsdata_config2 = {
+	subscriber::Configure sub_ddsdata_config2 = {
 		0, 100, "DDSData_Second", "DDSData", TopicType::DDS_DATA, 100, 100, info, true};
 	sub_config.configs = {sub_ddsdata_config, sub_ddsdata_config2};
 
 	auto cacher = std::make_shared<DataCacher>(200, info);
-	SubscriberService* mysub = new SubscriberService(sub_config, cacher);
+	subscriber::Service* mysub = new subscriber::Service(sub_config, cacher);
 
 	std::thread pub_thread([mypub, mysub, &pub_callbacks]() {
 		mypub->testRunPublishers(pub_callbacks);
@@ -504,29 +514,30 @@ void DdsDataTestManyTopics()
 
 void DdsDataExTest()
 {
-	ServiceConfigForTest<PublisherConfig> pub_config({"Participant_pub",
-													  Transport::TCP,
-													  "127.0.0.1",
-													  4044,
-													  {"127.0.0.1"},
-													  {},
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000});
-	PublisherConfig ddsdata_config = {
+	using namespace scada_ate::dds;
+	ServiceConfigForTest<publisher::Configure> pub_config({"Participant_pub",
+														   Transport::TCP,
+														   "127.0.0.1",
+														   4044,
+														   {"127.0.0.1"},
+														   {},
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000});
+	publisher::Configure ddsdata_config = {
 		1, 10, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, 100, 2, false};
 	pub_config.configs = {ddsdata_config};
 
-	PublisherService* mypub = new PublisherService(pub_config);
+	publisher::Service* mypub = new publisher::Service(pub_config);
 
 	std::vector<DDSDataEx> dds_datas;
 	dds_datas.reserve(100);
@@ -562,31 +573,31 @@ void DdsDataExTest()
 
 	mypub->initPublishers();
 
-	ServiceConfigForTest<SubscriberConfig> sub_config({"Participant_sub",
-													   Transport::TCP,
-													   "127.0.0.1",
-													   4044,
-													   {"127.0.0.1"},
-													   {},
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000});
+	ServiceConfigForTest<subscriber::Configure> sub_config({"Participant_sub",
+															Transport::TCP,
+															"127.0.0.1",
+															4044,
+															{"127.0.0.1"},
+															{},
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000});
 
-	SubscriberConfig sub_ddsdata_config = {
+	subscriber::Configure sub_ddsdata_config = {
 		1, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, 100, 100, info, true};
 	sub_config.configs = {sub_ddsdata_config};
 
 	auto cacher = std::make_shared<DataCacher>(100, info);
-	SubscriberService* mysub = new SubscriberService(sub_config, cacher);
+	subscriber::Service* mysub = new subscriber::Service(sub_config, cacher);
 
 	std::thread pub_thread([mypub, mysub, &before_topic_send]() {
 		mypub->testRunPublishers(before_topic_send);
@@ -628,35 +639,35 @@ TEST(DdsConnectionTest, DdsDataTest)
 
 TEST(DdsConnectionTest, DdsDataTestManyTopics)
 {
-	std::this_thread::sleep_for(std::chrono::seconds(20));
 	DdsDataTestManyTopics();
 }
 
 void OneToOneConnection()
 {
-	ServiceConfigForTest<PublisherConfig> pub_config({"Participant_pub",
-													  Transport::TCP,
-													  "127.0.0.1",
-													  4043,
-													  {"127.0.0.1"},
-													  {},
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000,
-													  10000});
-	PublisherConfig ddsdata_config = {
+	using namespace scada_ate::dds;
+	ServiceConfigForTest<publisher::Configure> pub_config({"Participant_pub",
+														   Transport::TCP,
+														   "127.0.0.1",
+														   4043,
+														   {"127.0.0.1"},
+														   {},
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000,
+														   10000});
+	publisher::Configure ddsdata_config = {
 		0, 10, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 100, false};
 	pub_config.configs = {ddsdata_config};
 
-	PublisherService* mypub = new PublisherService(pub_config);
+	publisher::Service* mypub = new publisher::Service(pub_config);
 
 	std::vector<DDSData> dds_datas;
 	dds_datas.reserve(100);
@@ -690,40 +701,40 @@ void OneToOneConnection()
 
 	mypub->initPublishers();
 
-	ServiceConfigForTest<SubscriberConfig> sub_config({"Participant_sub",
-													   Transport::TCP,
-													   "127.0.0.1",
-													   4043,
-													   {"127.0.0.1"},
-													   {},
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000,
-													   10000});
+	ServiceConfigForTest<subscriber::Configure> sub_config({"Participant_sub",
+															Transport::TCP,
+															"127.0.0.1",
+															4043,
+															{"127.0.0.1"},
+															{},
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000,
+															10000});
 	AdditionalTopicInfo info = getAdditionalTopicInfo(100);
-	SubscriberConfig sub_ddsdata_config = {
+	subscriber::Configure sub_ddsdata_config = {
 		0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 100, info, true};
 	sub_config.configs = {sub_ddsdata_config};
 
 	auto cacher = std::make_shared<DataCacher>(100, info);
-	SubscriberService* mysub = new SubscriberService(sub_config, cacher);
+	subscriber::Service* mysub = new subscriber::Service(sub_config, cacher);
 
 	//******************** WS ********************//
 	ThreadSafeDeque<oatpp::String> client_cache;
-	OnMessageRead on_message_read = [&client_cache](const oatpp::String& message) {
+	ws::OnMessageRead on_message_read = [&client_cache](const oatpp::String& message) {
 		client_cache.push_back(message);
 	};
 
 	bool ws_server_stop = false;
-	TestCallback test_callback = [&ws_server_stop](Group& group) {
+	ws::TestCallback test_callback = [&ws_server_stop](ws::Group& group) {
 		while (!group.hasClients())
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -775,6 +786,8 @@ void OneToOneConnection()
 //{
 //	OneToOneConnection();
 //}
+
+} // namespace scada_ate
 
 int main(int argc, char* argv[])
 {

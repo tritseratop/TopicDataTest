@@ -5,6 +5,8 @@
 #include <utility>
 #include <vector>
 
+namespace scada_ate
+{
 template<class T>
 bool operator==(const std::vector<T>& lhs, const std::vector<T>& rhs)
 {
@@ -113,5 +115,6 @@ struct MediateAlarmDto
 				   lhs.quality.begin(), lhs.quality.end(), rhs.quality.begin(), rhs.quality.end());
 	}
 };
+} // namespace scada_ate
 
 #endif //!MEDIATE_DTO_H_

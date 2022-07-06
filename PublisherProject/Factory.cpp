@@ -1,15 +1,10 @@
-#include "PublisherProject/PublisherFactory.h"
+#include "PublisherProject/Factory.h"
 
-#include "DdsWsGatewayService/Utilities/TestUtilities/DdsTestUtility.h"
+#include "DdsWsGatewayService/Utilities/Dds/TestUtility.h"
 
-using namespace eprosima::fastdds::dds;
-
-bool operator==(const PublisherConfig& lhs, const PublisherConfig& rhs)
+namespace scada_ate::dds::publisher
 {
-	return lhs.pub_id == rhs.pub_id && lhs.vector_size == rhs.vector_size
-		   && lhs.topic_name == rhs.topic_name && lhs.topic_type_name == rhs.topic_type_name
-		   && lhs.topic_type == rhs.topic_type;
-}
+using namespace eprosima::fastdds::dds;
 
 template<>
 void ConcretePublisher<DDSData, DDSDataPubSubType>::setData()
@@ -31,8 +26,8 @@ template<>
 void ConcretePublisher<DDSAlarmEx, DDSAlarmExPubSubType>::setData()
 { }
 
-AbstractDdsPublisher* PublisherFactory::createPublisher(
-	eprosima::fastdds::dds::DomainParticipant* participant, const PublisherConfig& config) const
+AbstractDdsPublisher* Factory::createPublisher(
+	eprosima::fastdds::dds::DomainParticipant* participant, const Configure& config) const
 {
 	switch (config.topic_type)
 	{
@@ -49,3 +44,4 @@ AbstractDdsPublisher* PublisherFactory::createPublisher(
 		return nullptr;
 	}
 }
+} // namespace scada_ate::dds::publisher

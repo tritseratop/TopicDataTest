@@ -1,7 +1,9 @@
-#include "Utilities/TestUtilities/DdsTestUtility.h"
-#include "Utilities/TestUtilities/WsTestUtility.h"
-#include "Utilities/TimeConverter/TimeConverter.hpp"
+#include "Utilities/Dds/TestUtility.h"
 
+#include <random>
+
+namespace scada_ate::dds
+{
 AdditionalTopicInfo getAdditionalTopicInfo(size_t size)
 {
 	AdditionalTopicInfo info;
@@ -287,63 +289,9 @@ GlobalTestConditions parseJsonToGlobalTestConditions(const nlohmann::json& json)
 	return conditions;
 }
 
-std::vector<ServiceConfigForTest<SubscriberConfig>>
-createDdsServiceConfigs(const GlobalTestConditions& conditions)
-{
-	// изменяемые настройки
-	Transport transport = Transport::TCP;
-	std::string ip = conditions.ip;
-	std::string log_file = "logs.txt";
-
-	ServiceConfigForTest<SubscriberConfig> default_service_config({"Participant_sub",
-																   transport,
-																   ip,
-																   4042,
-																   {"127.0.0.1"},
-																   {},
-																   10000,
-																   10000,
-																   10000,
-																   10000,
-																   10000,
-																   10000,
-																   10000,
-																   10000,
-																   10000,
-																   10000,
-																   10000,
-																   10000});
-
-	SubscriberConfig ddsdata_config = {0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 0, 1000};
-	SubscriberConfig ddsdataex_config = {
-		0, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, 0, 1000};
-
-	std::vector<ServiceConfigForTest<SubscriberConfig>> configs;
-
-	for (const auto& c : conditions.conditions)
-	{
-		ddsdata_config.samples = conditions.samples_number;
-		ddsdata_config.sleep = c.publication_interval;
-		ddsdata_config.vector_size = c.all_vectors_sizes;
-		ddsdata_config.info = getAdditionalTopicInfo(c.all_vectors_sizes);
-		ddsdata_config.isCache = true;
-		default_service_config.configs = {ddsdata_config};
-		configs.push_back(default_service_config);
-
-		ddsdataex_config.samples = conditions.samples_number;
-		ddsdataex_config.sleep = c.publication_interval;
-		ddsdataex_config.vector_size = c.all_vectors_sizes;
-		ddsdataex_config.info = getAdditionalTopicInfo(c.all_vectors_sizes);
-		ddsdataex_config.isCache = true;
-		default_service_config.configs = {ddsdataex_config};
-		configs.push_back(default_service_config);
-	}
-
-	return configs;
-}
-
 std::string formMappingTestName(std::string description, const OneTestConditions& cond)
 {
 	return "\n" + description + " v = " + std::to_string(cond.all_vectors_sizes)
 		   + " cv = " + std::to_string(cond.char_vector_sizes);
 }
+} // namespace scada_ate::dds

@@ -1,7 +1,9 @@
-#include "WsTestUtility.h"
+#include "Utilities/Ws/TestUtility.h"
 
-#include "Utilities/TimeConverter/TimeConverter.hpp"
+#include "Utilities/Common/TimeConverter/TimeConverter.hpp"
 
+namespace scada_ate::ws
+{
 void to_json(nlohmann::json& json, const TestPacket& packet)
 {
 	json = {{"disp", packet.disp}, {"str", packet.str}};
@@ -16,17 +18,6 @@ void from_json(const nlohmann::json& json, TestPacket& packet)
 TestPacket createTestPacket(size_t str_size)
 {
 	return {1'000'000'000'000'000, std::string(str_size, 'a')};
-}
-
-WsDataUnion getWsDataUnion(size_t size, size_t char_size)
-{
-	auto vectors = VectorsForData(size, char_size);
-	auto tag_info = getAdditionalTopicInfo(size);
-
-	WsDataUnion data_union;
-	data_union.data_dto = getMediateDataDto(vectors, tag_info);
-
-	return data_union;
 }
 
 void insertTimeToJson(oatpp::String str)
@@ -63,3 +54,4 @@ int64_t getTimeFromJsonString(oatpp::String str)
 
 	return time;
 }
+} // namespace scada_ate::ws

@@ -3,17 +3,19 @@
 
 #include "WsClient/WSListener.hpp"
 
-#include "DdsWsGatewayService/Utilities/WsCommonClasses.h"
+#include "DdsWsGatewayService/Utilities/Ws/Configure.h"
 
+namespace scada_ate::ws
+{
 class WSClient
 {
 private:
 	std::string login;
-	const WsConfigure config;
+	const Configure config;
 	std::deque<int64_t> cache_;
 
 public:
-	WSClient(const WsConfigure& config_)
+	WSClient(const Configure& config_)
 		: config(config_)
 	{ }
 	void run(const OnMessageRead& on_message_read);
@@ -23,5 +25,6 @@ public:
 	void cache(int64_t disp);
 	std::deque<int64_t> getCache();
 };
+} // namespace scada_ate::ws
 
 #endif //WSClient_hpp

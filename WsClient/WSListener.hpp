@@ -1,14 +1,16 @@
 #ifndef WSListener_hpp
 #define WSListener_hpp
 
-#include "DdsWsGatewayService/Utilities/PackageAnalyser.h"
-#include "DdsWsGatewayService/Utilities/WsCommonClasses.h"
+#include "DdsWsGatewayService/Utilities/Common/PackageAnalyser.h"
+#include "DdsWsGatewayService/Utilities/Ws/Callbacks.h"
 
 #include "oatpp-websocket/AsyncWebSocket.hpp"
 #include "oatpp-websocket/ConnectionHandler.hpp"
 #include "oatpp-websocket/Connector.hpp"
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
 
+namespace scada_ate::ws
+{
 class WSClient;
 
 /**
@@ -99,5 +101,6 @@ public:
 	onConnected(const oatpp::provider::ResourceHandle<oatpp::data::stream::IOStream>& connection);
 	Action onFinishListen();
 };
+} // namespace scada_ate::ws
 
 #endif // WSListener_hpp

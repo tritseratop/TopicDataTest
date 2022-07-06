@@ -3,15 +3,16 @@
 
 #include "Lib/Common/DataCacher.h"
 #include "Lib/WsService/Server.h"
-#include "Utilities/WsCommonClasses.h"
 
 #include <deque>
 #include <unordered_map>
 
+namespace scada_ate
+{
 class Notifier
 {
 public:
-	Notifier(Server& ws_server, DataCacher& cacher);
+	Notifier(ws::Server& ws_server, DataCacher& cacher);
 
 	bool sendDdsData();
 	bool sendDdsAlarm();
@@ -22,7 +23,7 @@ public:
 	bool is_data_cache_empty();
 
 private:
-	Server& server_;
+	ws::Server& server_;
 	DataCacher& cacher_;
 
 	bool stop_sending_data_;
@@ -30,5 +31,6 @@ private:
 
 	MediateDtoMapper mapper_;
 };
+} // namespace scada_ate
 
 #endif //!DATA_OBSERVER_H_

@@ -1,19 +1,21 @@
-#include "Lib/DdsService/SubscriberService.h"
+#include "Lib/DdsService/Service.h"
 
 #include <fastdds/dds/domain/DomainParticipantFactory.hpp>
 
 #include <fastrtps/Domain.h>
+
 #include <fastrtps/transport/TCPv4TransportDescriptor.h>
 #include <fastrtps/transport/UDPv4TransportDescriptor.h>
 #include <fastrtps/utils/IPLocator.h>
 
 #include <mutex>
 
+namespace scada_ate::dds::subscriber
+{
 using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
 
-SubscriberService::SubscriberService(const ServiceConfigForTest<SubscriberConfig>& config,
-									 std::shared_ptr<DataCacher> cacher)
+Service::Service(const ServiceConfigForTest<Configure>& config, std::shared_ptr<DataCacher> cacher)
 	: config_(config)
 	, participant_(nullptr)
 	, cacher_(cacher)
@@ -23,7 +25,7 @@ SubscriberService::SubscriberService(const ServiceConfigForTest<SubscriberConfig
 	setVectorSizesInDataTopic();
 }
 
-SubscriberService::~SubscriberService()
+Service::~Service()
 {
 	deleteSubscribers();
 
@@ -42,7 +44,7 @@ SubscriberService::~SubscriberService()
 	}
 }
 
-bool SubscriberService::initSubscribers()
+bool Service::initSubscribers()
 {
 	setVectorSizesInDataTopic();
 	initParticipant();
@@ -67,7 +69,7 @@ bool SubscriberService::initSubscribers()
 	return true;
 }
 
-bool SubscriberService::initParticipant()
+bool Service::initParticipant()
 {
 	if (participant_ == nullptr)
 	{
@@ -81,7 +83,7 @@ bool SubscriberService::initParticipant()
 	return true;
 }
 
-DomainParticipantQos SubscriberService::getParticipantQos()
+DomainParticipantQos Service::getParticipantQos()
 {
 	using namespace eprosima::fastrtps;
 	using namespace eprosima::fastrtps::rtps;
@@ -136,10 +138,10 @@ DomainParticipantQos SubscriberService::getParticipantQos()
 	return qos;
 }
 
-bool SubscriberService::initSubscriber(const SubscriberConfig& config)
+bool Service::initSubscriber(const Configure& config)
 {
 	// TODO: узнать че менять в SUBSCRIBER_QOS_DEFAULT
-	AbstractDdsSubscriber* sub = factory_.createSubscriber(
+	AbstractSubscriber* sub = factory_.createSubscriber(
 		participant_, config, config.isCache ? cacher_ : nullptr);
 	if (sub == nullptr)
 	{
@@ -151,7 +153,7 @@ bool SubscriberService::initSubscriber(const SubscriberConfig& config)
 	return true;
 }
 
-void SubscriberService::deleteSubscribers()
+void Service::deleteSubscribers()
 {
 	for (auto& sub : subscribers_)
 	{
@@ -160,7 +162,7 @@ void SubscriberService::deleteSubscribers()
 	subscribers_.clear();
 }
 
-void SubscriberService::runSubscribers()
+void Service::runSubscribers()
 {
 	std::vector<std::thread> threads;
 	//analyser_ = PackageAnalyser::getInstance();
@@ -183,7 +185,7 @@ void SubscriberService::runSubscribers()
 	//analyser_->writeResultsAndClear("");
 }
 
-void SubscriberService::stopSubscribers()
+void Service::stopSubscribers()
 {
 	stop_ = true;
 	/*for (auto& sub : subscribers_)
@@ -192,8 +194,7 @@ void SubscriberService::stopSubscribers()
 	}*/
 }
 
-void SubscriberService::changeSubscribersConfig(
-	const ServiceConfigForTest<SubscriberConfig>& config)
+void Service::changeSubscribersConfig(const ServiceConfigForTest<Configure>& config)
 {
 	if (config_ == config)
 	{
@@ -208,13 +209,13 @@ void SubscriberService::changeSubscribersConfig(
 	}
 }
 
-std::vector<AbstractDdsSubscriber*> SubscriberService::getSubscribers() const
+std::vector<AbstractSubscriber*> Service::getSubscribers() const
 {
 	return subscribers_;
 }
 
 // TODO: сделать макрос?
-void SubscriberService::setVectorSizesInDataTopic()
+void Service::setVectorSizesInDataTopic()
 {
 	scada_ate::typetopics::SetMaxSizeDataChar(config_.MaxSizeSizeDataChar);
 	scada_ate::typetopics::SetMaxSizeDataCollectionInt(config_.MaxSizeDataCollectionInt);
@@ -232,3 +233,4 @@ void SubscriberService::setVectorSizesInDataTopic()
 
 	scada_ate::typetopics::SetMaxSizeDDSAlarmExVectorAlarms(config_.MaxSizeDDSExVectorAlarms);
 }
+} // namespace scada_ate::dds::subscriber

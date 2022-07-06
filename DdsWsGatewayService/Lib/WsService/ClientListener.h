@@ -1,8 +1,7 @@
 #ifndef ClientListener_hpp
 #define ClientListener_hpp
 
-#include "Lib/Common/DataCacher.h"
-#include "Utilities/WsCommonClasses.h"
+#include "Utilities/Ws/Callbacks.h"
 
 #include "oatpp-websocket/AsyncConnectionHandler.hpp"
 #include "oatpp-websocket/AsyncWebSocket.hpp"
@@ -10,6 +9,8 @@
 #include "oatpp/core/macro/component.hpp"
 #include "oatpp/network/ConnectionProvider.hpp"
 
+namespace scada_ate::ws
+{
 class Group;
 
 // слушает события подключенных соединений
@@ -58,5 +59,6 @@ public:
 	void sendMessageAsync(const oatpp::String& message,
 						  const BeforeMessageSend& before_message_send);
 };
+} // namespace scada_ate::ws
 
 #endif // !ClientListener_hpp

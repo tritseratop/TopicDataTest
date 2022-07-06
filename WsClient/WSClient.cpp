@@ -11,6 +11,8 @@
 #include <iostream>
 #include <thread>
 
+namespace scada_ate::ws
+{
 void WSClient::run(const OnMessageRead& on_message_read)
 {
 	//oatpp::base::Environment::init();
@@ -66,3 +68,4 @@ std::deque<int64_t> WSClient::getCache()
 {
 	return cache_;
 }
+} // namespace scada_ate::ws

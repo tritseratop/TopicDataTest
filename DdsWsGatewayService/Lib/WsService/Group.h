@@ -3,9 +3,12 @@
 
 #include "Lib/Common/DataCacher.h"
 #include "Lib/WsService/ClientListener.h"
+#include "Utilities/Ws/Callbacks.h"
 
 #include <unordered_map>
 
+namespace scada_ate::ws
+{
 class Group
 {
 private:
@@ -32,5 +35,6 @@ public:
 	bool hasClients() const;
 	int64_t getId() const;
 };
+} // namespace scada_ate::ws
 
 #endif //!ADAPTER_UNIT_H_

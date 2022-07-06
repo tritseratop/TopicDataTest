@@ -1,5 +1,7 @@
-#include "Utilities/TestUtilities/CommonTestUtilities.h"
+#include "Utilities/Common/Generators.h"
 
+namespace scada_ate
+{
 VectorsForData::VectorsForData(size_t size, size_t char_size)
 	: time_service(rand())
 	, time_values(generateVector<int64_t>(size))
@@ -28,3 +30,4 @@ std::vector<char> generateVector(size_t size)
 	}
 	return result;
 }
+} // namespace scada_ate

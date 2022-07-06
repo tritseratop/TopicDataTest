@@ -1,5 +1,7 @@
 #include "Lib/DdsService/ConfigSubscriber.h"
 
+namespace scada_ate::dds::subscriber
+{
 ConfigSubscriber::ConfigSubscriber(eprosima::fastdds::dds::DomainParticipant* participant)
 	: participant_(participant)
 	, subscriber_(nullptr)
@@ -31,7 +33,6 @@ ConfigSubscriber::~ConfigSubscriber()
 bool ConfigSubscriber::initSubscriber()
 {
 	using namespace eprosima::fastdds::dds;
-
 	if (participant_ == nullptr)
 	{
 		return false;
@@ -111,3 +112,4 @@ void ConfigSubscriber::Listener::on_subscription_matched(
 				  << std::endl;
 	}
 }
+} // namespace scada_ate::dds::subscriber

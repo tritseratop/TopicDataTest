@@ -1,12 +1,16 @@
 #include "WsClient/WSClient.hpp"
 
-#include "DdsWsGatewayService/Utilities/PackageAnalyser.h"
-#include "DdsWsGatewayService/Utilities/TestUtilities/WsTestUtility.h"
-#include "DdsWsGatewayService/Utilities/WsCommonClasses.h"
+#include "DdsWsGatewayService/Utilities/Common/PackageAnalyser.h"
+#include "DdsWsGatewayService/Utilities/Ws/TestUtility.h"
+
+#include <iostream>
+
+using namespace scada_ate;
+using namespace scada_ate::ws;
 
 int main()
 {
-	WsConfigure configure;
+	Configure configure;
 #ifdef _DEBUG
 	configure.host = "127.0.0.1";
 #else

@@ -1,5 +1,9 @@
 #include "Lib/Common/Mappers.h"
 
+namespace scada_ate
+{
+using namespace dds;
+
 MediateDataDto DdsDataMapper::toMediateDataDto(DDSData data, const AdditionalTopicInfo& info)
 {
 	std::vector<std::vector<char>> data_char;
@@ -224,3 +228,4 @@ void MediateDtoMapper::fillVector(oatpp::String& oatpp_v, const std::vector<char
 	std::string str(v.begin(), v.end());
 	oatpp_v = oatpp::String(str.c_str());
 }
+} // namespace scada_ate

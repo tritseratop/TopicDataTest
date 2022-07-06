@@ -2,12 +2,14 @@
 #define DATA_CACHER_H_
 
 #include "Lib/Common/Mappers.h"
-#include "Utilities/PackageAnalyser.h"
-#include "Utilities/ThreadSafeQueue/ThreadSafeQueue.h"
+#include "Utilities/Common/PackageAnalyser.h"
+#include "Utilities/Common/ThreadSafeQueue/ThreadSafeQueue.h"
 
 #include <deque>
 #include <unordered_map>
 
+namespace scada_ate
+{
 class Cacher
 {
 public:
@@ -17,7 +19,7 @@ public:
 class DataCacher : public Cacher
 {
 public:
-	DataCacher(size_t depth, AdditionalTopicInfo mapping_info);
+	DataCacher(size_t depth, dds::AdditionalTopicInfo mapping_info);
 
 	void cache(DDSData data);
 	void cache(const DDSDataEx& data);
@@ -34,7 +36,7 @@ private:
 	DdsDataExMapper ddsdata_ex_mapper_;
 	DdsDataMapper ddsdata_mapper_;
 
-	const AdditionalTopicInfo mapping_info_;
+	const dds::AdditionalTopicInfo mapping_info_;
 
 	PackageAnalyser* analyser_;
 };
@@ -42,7 +44,7 @@ private:
 class AlarmCacher : public Cacher
 {
 public:
-	AlarmCacher(size_t depth, AdditionalTopicInfo mapping_info_);
+	AlarmCacher(size_t depth, dds::AdditionalTopicInfo mapping_info_);
 
 	void cache(DDSAlarm data);
 	void cache(const DDSAlarmEx& data);
@@ -58,7 +60,8 @@ private:
 	DdsAlarmMapper dds_alarm_mapper_;
 	DdsAlarmExMapper dds_alarm_ex_mapper_;
 
-	const AdditionalTopicInfo mapping_info_;
+	const dds::AdditionalTopicInfo mapping_info_;
 };
+} // namespace scada_ate
 
 #endif //!DATA_CACHER_H_

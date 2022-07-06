@@ -1,13 +1,15 @@
 #ifndef MAPPERS_H_
 #define MAPPERS_H_
 
-#include "Utilities/DdsCommonClasses.h"
-#include "Utilities/MediateDto.h"
-#include "Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "Utilities/nlohmann/json.hpp"
+#include "Utilities/Common/MediateDto.h"
+#include "Utilities/Common/nlohmann/json.hpp"
+#include "Utilities/Dds/Configure.h"
+#include "Utilities/Dds/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 
 #include "oatpp/core/Types.hpp"
 
+namespace scada_ate
+{
 template<class T>
 void pushBackContainerWithChars(std::back_insert_iterator<T> result_it,
 								const std::vector<char>& chars);
@@ -17,66 +19,66 @@ std::string convertCharVectorToString(const std::vector<char>& chars);
 template<class T, class DdsSample>
 void fillChanged(DataSampleSequence<T>& prev_dto_collection,
 				 std::vector<DdsSample> cur_samples,
-				 const TagToIndex& tag_to_index);
+				 const dds::TagToIndex& tag_to_index);
 
 class DdsDataMapper
 {
 public:
 	DdsDataMapper() { }
-	DdsDataMapper(const AdditionalTopicInfo& info)
+	DdsDataMapper(const dds::AdditionalTopicInfo& info)
 		: info_(info)
 	{ }
-	MediateDataDto toMediateDataDto(DDSData data, const AdditionalTopicInfo& info);
+	MediateDataDto toMediateDataDto(DDSData data, const dds::AdditionalTopicInfo& info);
 
 private:
-	AdditionalTopicInfo info_;
+	dds::AdditionalTopicInfo info_;
 };
 
 class DdsDataExMapper
 {
 public:
 	DdsDataExMapper() { }
-	DdsDataExMapper(const AdditionalTopicInfo& info)
+	DdsDataExMapper(const dds::AdditionalTopicInfo& info)
 		: info_(info)
 	{ }
 
 	MediateDataDto toMediateDataDto(DDSDataEx cur_data_ex,
-									const AdditionalTopicInfo& info,
+									const dds::AdditionalTopicInfo& info,
 									MediateDataDto prev_dto = MediateDataDto());
 
 private:
-	AdditionalTopicInfo info_;
+	dds::AdditionalTopicInfo info_;
 };
 
 class DdsAlarmMapper
 {
 public:
 	DdsAlarmMapper() { }
-	DdsAlarmMapper(const AdditionalTopicInfo& info)
+	DdsAlarmMapper(const dds::AdditionalTopicInfo& info)
 		: info_(info)
 	{ }
 
 	MediateAlarmDto toMediateAlarmDto(DDSAlarm data);
-	MediateAlarmDto toMediateAlarmDto(DDSAlarm data, const AdditionalTopicInfo& info);
+	MediateAlarmDto toMediateAlarmDto(DDSAlarm data, const dds::AdditionalTopicInfo& info);
 
 private:
-	AdditionalTopicInfo info_;
+	dds::AdditionalTopicInfo info_;
 };
 
 class DdsAlarmExMapper
 {
 public:
 	DdsAlarmExMapper() { }
-	DdsAlarmExMapper(const AdditionalTopicInfo& info)
+	DdsAlarmExMapper(const dds::AdditionalTopicInfo& info)
 		: info_(info)
 	{ }
 
 	MediateAlarmDto toMediateAlarmDto(MediateAlarmDto prev_dto,
 									  const DDSAlarmEx& cur_data_ex,
-									  const AdditionalTopicInfo& info);
+									  const dds::AdditionalTopicInfo& info);
 
 private:
-	AdditionalTopicInfo info_;
+	dds::AdditionalTopicInfo info_;
 };
 
 class MediateDtoMapper
@@ -92,5 +94,6 @@ private:
 	void fillVector(oatpp::Vector<oatpp::String>& oatpp_v, const std::vector<std::vector<char>>& v);
 	void fillVector(oatpp::String& oatpp_v, const std::vector<char>& v);
 };
+} // namespace scada_ate
 
 #endif //!MAPPERS_H_

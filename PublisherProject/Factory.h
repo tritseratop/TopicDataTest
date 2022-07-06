@@ -1,9 +1,11 @@
 #ifndef PUBLISHER_FACTORY_H_
 #define PUBLISHER_FACTORY_H_
 
-#include "DdsWsGatewayService/Utilities/DdsCommonClasses.h"
-#include "DdsWsGatewayService/Utilities/TimeConverter/TimeConverter.hpp"
-#include "DdsWsGatewayService/Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "PublisherProject/Configure.h"
+
+#include "DdsWsGatewayService/Utilities/Common/TimeConverter/TimeConverter.hpp"
+#include "DdsWsGatewayService/Utilities/Dds/Callbacks.h"
+#include "DdsWsGatewayService/Utilities/Dds/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/publisher/DataWriter.hpp>
@@ -16,6 +18,8 @@
 #include <mutex>
 #include <thread>
 
+namespace scada_ate::dds::publisher
+{
 using eprosima::fastrtps::types::ReturnCode_t;
 
 class AbstractDdsPublisher
@@ -31,7 +35,7 @@ public:
 	virtual void setData() = 0;
 	virtual void setData(void* data) = 0;
 	virtual TopicType getTopicType() = 0;
-	//virtual void setConfig(const SubscriberConfig& config) = 0;
+	//virtual void setConfig(const Configure& config) = 0;
 protected:
 };
 
@@ -40,7 +44,7 @@ class ConcretePublisher : public AbstractDdsPublisher
 {
 public:
 	ConcretePublisher(eprosima::fastdds::dds::DomainParticipant* participant,
-					  const PublisherConfig& config)
+					  const Configure& config)
 		: participant_(participant)
 		, config_(config)
 		, publisher_(nullptr)
@@ -174,7 +178,7 @@ private:
 	const TopicType topic_type_;
 	bool stop_;
 
-	PublisherConfig config_;
+	Configure config_;
 
 	eprosima::fastdds::dds::DomainParticipant* participant_;
 	eprosima::fastdds::dds::Publisher* publisher_;
@@ -272,14 +276,15 @@ private:
 	}
 };
 
-class PublisherFactory
+class Factory
 {
 public:
-	virtual ~PublisherFactory() { }
+	virtual ~Factory() { }
 	AbstractDdsPublisher* createPublisher(eprosima::fastdds::dds::DomainParticipant* participant,
-										  const PublisherConfig& config) const;
+										  const Configure& config) const;
 
 protected:
 };
+} // namespace scada_ate::dds::publisher
 
 #endif //!PUBLISHER_FACTORY_H_

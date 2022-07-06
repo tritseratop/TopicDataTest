@@ -4,6 +4,11 @@
 
 #include "DdsWsGatewayService/Lib/Common/DataCacher.h"
 #include "DdsWsGatewayService/Lib/WsService/Server.h"
+#include "Lib/WsService/AppComponent.h"
+
+namespace scada_ate
+{
+using namespace ws;
 
 void runWsConnection(TestCallback& test_callback, OnMessageRead& on_message_read)
 {
@@ -11,7 +16,7 @@ void runWsConnection(TestCallback& test_callback, OnMessageRead& on_message_read
 	{
 		int64_t init_disp = 1'000'000'000'000'000;
 
-		const WsConfigure ws_conf;
+		const Configure ws_conf;
 		auto group = std::make_shared<Group>(0);
 		std::unordered_map<int64_t, std::shared_ptr<Group>> groups;
 		groups[group->getId()] = group;
@@ -43,7 +48,7 @@ void runWsConnection(TestCallback& test_callback,
 	{
 		int64_t init_disp = 1'000'000'000'000'000;
 
-		const WsConfigure ws_conf;
+		const Configure ws_conf;
 		auto group = std::make_shared<Group>(0, cacher);
 		std::unordered_map<int64_t, std::shared_ptr<Group>> groups;
 		groups[group->getId()] = group;
@@ -66,3 +71,4 @@ void runWsConnection(TestCallback& test_callback,
 	}
 	oatpp::base::Environment::destroy();
 }
+} // namespace scada_ate

@@ -1,5 +1,7 @@
-#include "DdsCommonClasses.h"
+#include "Utilities/Dds/Configure.h"
 
+namespace scada_ate::dds
+{
 TopicType StringToTopicType(std::string type_name)
 {
 	if (type_name == "DDSData")
@@ -40,3 +42,4 @@ std::string TopicTypeToString(TopicType type)
 		return "";
 	}
 }
+} // namespace scada_ate::dds

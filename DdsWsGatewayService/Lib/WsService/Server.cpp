@@ -1,5 +1,10 @@
 #include "Lib/WsService/Server.h"
 
+#include "Lib/WsService/AppComponent.h"
+#include "Lib/WsService/Controller.h"
+
+namespace scada_ate::ws
+{
 Server::Server()
 {
 	OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router);
@@ -47,3 +52,4 @@ bool Server::sendClose()
 	sock_listener->sendCloseToAllAsync();
 	return true;
 }
+} // namespace scada_ate::ws

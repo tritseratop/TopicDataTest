@@ -1,13 +1,15 @@
 #ifndef CONFIG_SUBSCRIBER_H_
 #define CONFIG_SUBSCRIBER_H_
 
-#include "Utilities/ConfigTopic/ConfigTopicPubSubTypes.h"
+#include "Utilities/Dds/ConfigTopic/ConfigTopicPubSubTypes.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/subscriber/DataReader.hpp>
 #include <fastdds/dds/subscriber/DataReaderListener.hpp>
 #include <fastdds/dds/subscriber/Subscriber.hpp>
 
+namespace scada_ate::dds::subscriber
+{
 class ConfigSubscriber
 {
 public:
@@ -42,5 +44,6 @@ private:
 		int matched_;
 	} listener_;
 };
+} // namespace scada_ate::dds::subscriber
 
 #endif //!CONFIG_SUBSCRIBER_H_

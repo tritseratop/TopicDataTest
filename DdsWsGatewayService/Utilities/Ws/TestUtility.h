@@ -1,21 +1,15 @@
 #ifndef WS_TEST_UTILITY_H_
 #define WS_TEST_UTILITY_H_
 
+#include "Utilities/Common/Generators.h"
+#include "Utilities/Common/nlohmann/json.hpp"
+
+#include "oatpp/core/Types.hpp"
+
 #include <functional>
 
-#include "DdsTestUtility.h"
-#include "Lib/WsService/Server.h"
-#include "Utilities/TestUtilities/CommonTestUtilities.h"
-#include "Utilities/nlohmann/json.hpp"
-
-class Server;
-
-struct WsDataUnion
+namespace scada_ate::ws
 {
-	DDSData dds_data;
-	MediateDataDto data_dto;
-};
-
 struct TestPacket
 {
 	int64_t disp = 0;
@@ -28,13 +22,12 @@ struct TestPacket
 
 TestPacket createTestPacket(size_t str_size);
 
-WsDataUnion getWsDataUnion(size_t size = 4, size_t char_size = 1);
-
 void insertTimeToJson(oatpp::String str);
 
 void replaceTimeToJson(oatpp::String str);
 void replaceTimeToJson(oatpp::String str, int64_t time);
 
 int64_t getTimeFromJsonString(oatpp::String str);
+} // namespace scada_ate::ws
 
 #endif //!WS_TEST_UTILITY_H_

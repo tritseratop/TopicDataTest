@@ -1,13 +1,16 @@
 #ifndef UTILITIES_H_
 #define UTILITIES_H_
 
-#include "DdsWsGatewayService/Utilities/WsCommonClasses.h"
+#include "DdsWsGatewayService/Utilities/Ws/Callbacks.h"
 
-void runWsConnection(TestCallback& test_callback, OnMessageRead& on_message_read);
+namespace scada_ate
+{
+void runWsConnection(ws::TestCallback& test_callback, ws::OnMessageRead& on_message_read);
 
 class Cacher;
-void runWsConnection(TestCallback& test_callback,
-					 OnMessageRead& on_message_read,
+void runWsConnection(ws::TestCallback& test_callback,
+					 ws::OnMessageRead& on_message_read,
 					 std::shared_ptr<Cacher> cacher);
+} // namespace scada_ate
 
 #endif //!UTILITIES_H_

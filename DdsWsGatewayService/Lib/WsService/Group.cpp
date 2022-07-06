@@ -1,5 +1,7 @@
 #include "Lib/WsService/Group.h"
 
+namespace scada_ate::ws
+{
 Group::Group(int64_t id, std::shared_ptr<Cacher> cacher)
 	: id_(id)
 	, cacher_(cacher)
@@ -78,3 +80,4 @@ int64_t Group::getId() const
 {
 	return id_;
 }
+} // namespace scada_ate::ws

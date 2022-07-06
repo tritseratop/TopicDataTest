@@ -31,7 +31,7 @@ add_library(PublisherProjectLib STATIC ${DDS_PUBLISHER_SOURCES})
 target_link_libraries(PublisherProjectLib 
     fastrtps 
     fastcdr
-    DdsWsGatewayUtilities
+    DdsUtilities
 )
 
 message(STATUS "Configuring WsClient...")
@@ -57,8 +57,7 @@ target_link_libraries(WsClientLib
     PUBLIC oatpp::oatpp
     PUBLIC oatpp::oatpp-test
     PUBLIC oatpp::oatpp-websocket
-    PUBLIC DdsWsGatewayUtilities
-    PUBLIC DdsWsGatewayLib
+    PUBLIC WsUtilities
 )
 
 message(STATUS "Configuring TestDdsWsGateway...")
@@ -78,7 +77,8 @@ add_executable(RunUnitTests ${TEST_SOURCES})
 target_link_libraries(RunUnitTests ${GTEST_BOTH_LIBRARIES} 
 	fastrtps 
     fastcdr
-	DdsWsGatewayUtilities
+	WsUtilities
+	DdsUtilities
 	DdsWsGatewayLib
 	WsClientLib
 	PublisherProjectLib

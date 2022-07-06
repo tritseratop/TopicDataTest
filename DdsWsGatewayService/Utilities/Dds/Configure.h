@@ -1,20 +1,13 @@
-#ifndef DDS_COMMON_CLASSES_H_
-#define DDS_COMMON_CLASSES_H_
-
-#include <fastdds/dds/publisher/DataWriter.hpp>
+#ifndef DDS_CONFIGURE_H_
+#define DDS_CONFIGURE_H_
 
 #include <algorithm>
-#include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-using BeforeTopicSend = std::function<bool(eprosima::fastdds::dds::DataWriter*)>;
-
-using BeforeTopicSendData = std::function<void(void*)>;
-
-using OnTopicReceived = std::function<void(std::shared_ptr<void>)>;
-
+namespace scada_ate::dds
+{
 enum Transport
 {
 	UDP,
@@ -107,44 +100,8 @@ struct ServiceConfigForTest
 	}
 };
 
-struct PublisherConfig
-{
-	int16_t pub_id = 0;
-	uint16_t vector_size = 0;
-	uint16_t char_vector_size = 0;
-	std::string topic_name = "";
-	std::string topic_type_name = "";
-	TopicType topic_type = TopicType::UNKNOWN;
-
-	// listener settings
-	uint32_t samples = 10;
-	uint32_t sleep = 1000;
-
-	bool isSync = false;
-
-	friend bool operator==(const PublisherConfig& lhs, const PublisherConfig& rhs);
-};
-
-struct SubscriberConfig
-{
-	int16_t subscriber_id = 0;
-	size_t vector_size = 0;
-	std::string topic_name = "";
-	std::string topic_type_name = "";
-	TopicType topic_type = TopicType::UNKNOWN;
-
-	// listener settings
-	size_t samples = 10;
-	int64_t sleep = 1000;
-
-	AdditionalTopicInfo info;
-
-	bool isCache = false;
-
-	friend bool operator==(const SubscriberConfig& lhs, const SubscriberConfig& rhs);
-};
-
 struct ParticipantConfig
 { };
+} // namespace scada_ate::dds
 
-#endif //!DDS_COMMON_CLASSES_H_
+#endif //!DDS_CONFIGURE_H_

@@ -1,5 +1,7 @@
 #include "TimeConverter.hpp"
 
+namespace scada_ate
+{
 std::chrono::time_point<std::chrono::system_clock> TimeConverter::GetTime_SysClock()
 {
 	return std::chrono::system_clock::now();
@@ -117,3 +119,4 @@ TimePoint TimeConverter::SysClockToTimePoint(std::chrono::time_point<std::chrono
 
 	return t;
 }
+} // namespace scada_ate

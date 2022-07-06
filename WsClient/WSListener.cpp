@@ -5,9 +5,8 @@
 
 #include <iostream>
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// WSListener
-
+namespace scada_ate::ws
+{
 void WSListener::setLogin(std::string login_)
 {
 	login = login_;
@@ -85,3 +84,4 @@ oatpp::async::Action ClientCoroutine::onFinishListen()
 	client->stop();
 	return finish();
 }
+} // namespace scada_ate::ws

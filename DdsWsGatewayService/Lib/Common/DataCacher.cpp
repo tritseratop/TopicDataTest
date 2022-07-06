@@ -2,6 +2,10 @@
 
 #include <utility>
 
+namespace scada_ate
+{
+using namespace dds;
+
 DataCacher::DataCacher(size_t depth, AdditionalTopicInfo mapping_info)
 	: depth_(depth)
 	, mapping_info_(std::move(mapping_info))
@@ -91,3 +95,4 @@ std::deque<MediateDataDto> DataCacher::getDataCacheCopy() const
 {
 	return data_cache_.getDequeCopy();
 }
+} // namespace scada_ate

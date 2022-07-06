@@ -1,30 +1,31 @@
 #ifndef SUBSCRIBER_FACTORY_H_
 #define SUBSCRIBER_FACTORY_H_
 
-#include "Lib/Common/DataCacher.h"
 #include "Lib/DdsService/AbstractSubscriber.h"
-#include "Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "Utilities/Dds/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/subscriber/DataReader.hpp>
 #include <fastdds/dds/subscriber/DataReaderListener.hpp>
 #include <fastdds/dds/subscriber/Subscriber.hpp>
 
-class SubscriberFactory
+namespace scada_ate::dds::subscriber
+{
+class Factory
 {
 public:
-	virtual ~SubscriberFactory() { }
-	AbstractDdsSubscriber* createSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
-											const SubscriberConfig& config,
-											std::shared_ptr<void> cacher) const;
+	virtual ~Factory() { }
+	AbstractSubscriber* createSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
+										 const Configure& config,
+										 std::shared_ptr<void> cacher) const;
 };
 
 template<class T, class TPubSubType, class Cacher>
-class ConcreteSubscriber : public AbstractDdsSubscriber
+class ConcreteSubscriber : public AbstractSubscriber
 {
 public:
 	ConcreteSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
-					   const SubscriberConfig& config,
+					   const Configure& config,
 					   std::shared_ptr<Cacher> cacher)
 		: participant_(participant)
 		, subscriber_(nullptr)
@@ -41,7 +42,7 @@ public:
 
 	bool init() override;
 
-	void setConfig(const SubscriberConfig& config) override;
+	void setConfig(const Configure& config) override;
 
 private:
 	void cacheData(T data_);
@@ -53,13 +54,11 @@ private:
 	eprosima::fastdds::dds::Topic* topic_;
 	eprosima::fastdds::dds::TypeSupport support_type_; // TODO не нужна как поле ?
 
-	SubscriberConfig config_;
+	Configure config_;
 
 	std::shared_ptr<Cacher> cacher_;
 
 	std::atomic<bool> stop_;
-
-	std::shared_ptr<OnTopicReceived> on_topic_received_;
 
 	class SubscriberListener : public eprosima::fastdds::dds::DataReaderListener
 	{
@@ -93,5 +92,6 @@ private:
 
 	} listener_;
 };
+} // namespace scada_ate::dds::subscriber
 
 #endif //!SUBSCRIBER_FACTORY_H_

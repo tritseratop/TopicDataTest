@@ -1,11 +1,14 @@
 #ifndef PACKAGE_ANALYSER_H_
 #define PACKAGE_ANALYSER_H_
 
-#include "ThreadSafeQueue/ThreadSafeQueue.h"
-#include "TimeConverter/TimeConverter.hpp"
+#include "Utilities/Common/ThreadSafeQueue/ThreadSafeQueue.h"
+#include "Utilities/Common/TimeConverter/TimeConverter.hpp"
 
 #include <fstream>
+#include <unordered_map>
 
+namespace scada_ate
+{
 struct PackageTimestamp
 {
 	int64_t dispatch_time;
@@ -64,5 +67,5 @@ private:
 
 	mutable std::fstream file;
 };
-
+} // namespace scada_ate
 #endif //!PACKAGE_ANALYSER_H_

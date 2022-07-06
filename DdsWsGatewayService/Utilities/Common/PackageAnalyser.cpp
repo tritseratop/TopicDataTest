@@ -1,5 +1,7 @@
-#include "PackageAnalyser.h"
+#include "Utilities/Common/PackageAnalyser.h"
 
+namespace scada_ate
+{
 PackageAnalyser* PackageAnalyser::getInstance(const std::string& fname)
 {
 	{
@@ -119,3 +121,4 @@ void PackageAnalyser::clear()
 PackageAnalyser* PackageAnalyser::analyser_ = nullptr;
 
 std::mutex PackageAnalyser::gen_instance_;
+} // namespace scada_ate

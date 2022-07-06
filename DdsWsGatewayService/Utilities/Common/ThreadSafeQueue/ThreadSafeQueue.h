@@ -5,8 +5,8 @@
 #include <optional>
 #include <shared_mutex>
 
-#include "Utilities/DdsCommonClasses.h"
-
+namespace scada_ate
+{
 template<typename T>
 class ThreadSafeDeque
 {
@@ -91,5 +91,6 @@ public:
 		return queue_;
 	}
 };
+} // namespace scada_ate
 
 #endif //!THREAD_SAFE_QUEUE_H_

@@ -3,12 +3,12 @@
 
 #include "Lib/WsService/ClientListener.h"
 #include "Lib/WsService/Group.h"
-#include "Utilities/WsCommonClasses.h"
 
 #include <map>
 #include <unordered_map>
 
-//template<class T>
+namespace scada_ate::ws
+{
 class SocketListener : public oatpp::websocket::AsyncConnectionHandler::SocketInstanceListener
 {
 private:
@@ -32,5 +32,6 @@ public:
 	void onBeforeDestroy_NonBlocking(
 		const std::shared_ptr<ClientListener::AsyncWebSocket>& socket) override;
 };
+} // namespace scada_ate::ws
 
 #endif //!WS_SOCKET_LISTENER_H_

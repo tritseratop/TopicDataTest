@@ -2,6 +2,8 @@
 #include <chrono>
 #include <time.h>
 
+namespace scada_ate
+{
 struct TimePoint
 {
 	unsigned int year;
@@ -26,3 +28,4 @@ public:
 	static TimePoint LLmcsToTimePoint(long long tp);
 	static TimePoint SysClockToTimePoint(std::chrono::time_point<std::chrono::system_clock> tp);
 };
+} // namespace scada_ate

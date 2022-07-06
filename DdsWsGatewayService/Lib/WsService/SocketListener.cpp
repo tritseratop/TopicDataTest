@@ -1,5 +1,7 @@
 #include "Lib/WsService/SocketListener.h"
 
+namespace scada_ate::ws
+{
 SocketListener::SocketListener(std::unordered_map<int64_t, std::shared_ptr<Group>> groups)
 	: groups_counter_(0)
 	, groups_(std::move(groups))
@@ -62,3 +64,4 @@ void SocketListener::onBeforeDestroy_NonBlocking(
 
 	client->invalidateSocket();
 }
+} // namespace scada_ate::ws

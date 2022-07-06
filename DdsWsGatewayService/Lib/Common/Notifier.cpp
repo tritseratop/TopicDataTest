@@ -2,7 +2,9 @@
 
 #include "Notifier.h"
 
-Notifier::Notifier(Server& ws_server, DataCacher& cacher)
+namespace scada_ate
+{
+Notifier::Notifier(ws::Server& ws_server, DataCacher& cacher)
 	: server_(ws_server)
 	, cacher_(cacher)
 	, stop_sending_data_(false)
@@ -39,3 +41,4 @@ bool Notifier::sendDdsAlarm()
 {
 	return false;
 }
+} // namespace scada_ate

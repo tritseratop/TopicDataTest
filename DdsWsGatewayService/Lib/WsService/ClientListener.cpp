@@ -1,7 +1,8 @@
 #include "Lib/WsService/ClientListener.h"
 #include "Lib/WsService/Group.h"
-#include "Utilities/TimeConverter/TimeConverter.hpp"
 
+namespace scada_ate::ws
+{
 ClientListener::ClientListener(const std::shared_ptr<AsyncWebSocket>& socket,
 							   int64_t id,
 							   std::shared_ptr<Group> group)
@@ -160,3 +161,4 @@ void ClientListener::sendMessageAsync(const oatpp::String& message,
 			&write_lock_, socket_, message, before_message_send);
 	}
 }
+} // namespace scada_ate::ws

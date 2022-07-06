@@ -1,18 +1,14 @@
-#include "Lib/DdsService/SubscriberFactory.h"
+#include "Lib/DdsService/Factory.h"
 
-using namespace eprosima::fastdds::dds;
+#include "Lib/Common/DataCacher.h"
+#include "Utilities/Dds/Configure.h"
 
-bool operator==(const SubscriberConfig& lhs, const SubscriberConfig& rhs)
+namespace scada_ate::dds::subscriber
 {
-	return lhs.subscriber_id == rhs.subscriber_id && lhs.vector_size == rhs.subscriber_id
-		   && lhs.topic_name == rhs.topic_name && lhs.topic_type_name == rhs.topic_type_name
-		   && lhs.topic_type == rhs.topic_type;
-}
-
-AbstractDdsSubscriber*
-SubscriberFactory::createSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
-									const SubscriberConfig& config,
-									std::shared_ptr<void> cacher) const
+AbstractSubscriber*
+Factory::createSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
+						  const Configure& config,
+						  std::shared_ptr<void> cacher) const
 {
 	switch (config.topic_type)
 	{
@@ -110,7 +106,7 @@ bool ConcreteSubscriber<T, TPubSubType, Cacher>::init()
 }
 
 template<class T, class TPubSubType, class Cacher>
-void ConcreteSubscriber<T, TPubSubType, Cacher>::setConfig(const SubscriberConfig& config)
+void ConcreteSubscriber<T, TPubSubType, Cacher>::setConfig(const Configure& config)
 {
 	config_ = config;
 }
@@ -226,3 +222,4 @@ void ConcreteSubscriber<T, TPubSubType, Cacher>::SubscriberListener::recieveMess
 	//	}
 	//}
 }
+} // namespace scada_ate::dds::subscriber

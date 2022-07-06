@@ -1,27 +1,34 @@
 #include "Lib/Common/Notifier.h"
-#include "Lib/DdsService/SubscriberService.h"
-#include "Utilities/TestUtilities/WsTestUtility.h"
+#include "Lib/DdsService/Service.h"
+#include "Lib/WsService/AppComponent.h"
+#include "Lib/WsService/Group.h"
 
-void runWsConnection(TestCallback& test_callback)
+#include "Utilities/Ws/Callbacks.h"
+#include "Utilities/Ws/Configure.h"
+#include "Utilities/Ws/TestUtility.h"
+
+using namespace scada_ate;
+
+void runWsConnection(ws::TestCallback& test_callback)
 {
 	oatpp::base::Environment::init();
 	{
 		int64_t init_disp = 1'000'000'000'000'000;
 
-		WsConfigure ws_conf;
+		ws::Configure ws_conf;
 #ifdef _DEBUG
 		ws_conf.host = "127.0.0.1";
 #else
 		ws_conf.host = "192.168.0.185";
 		//ws_conf.host = "127.0.0.1";
 #endif
-		auto group = std::make_shared<Group>(0);
-		std::unordered_map<int64_t, std::shared_ptr<Group>> groups;
+		auto group = std::make_shared<ws::Group>(0);
+		std::unordered_map<int64_t, std::shared_ptr<ws::Group>> groups;
 		groups[group->getId()] = group;
 
-		AppComponent component(ws_conf, groups);
+		ws::AppComponent component(ws_conf, groups);
 
-		Server server;
+		ws::Server server;
 
 		std::thread server_thread([&server]() { server.run(); });
 
@@ -58,16 +65,16 @@ int main(int argc, char* argv[])
 									 10'000'000};
 
 	ThreadSafeDeque<int64_t> server_cache;
-	BeforeMessageSend before_msg_send = [&server_cache](oatpp::String& message) {
-		replaceTimeToJson(message);
+	ws::BeforeMessageSend before_msg_send = [&server_cache](oatpp::String& message) {
+		ws::replaceTimeToJson(message);
 	};
 
-	TestCallback test_callback = [&before_msg_send, &string_sizes, number](Group& adapter) {
+	ws::TestCallback test_callback = [&before_msg_send, &string_sizes, number](ws::Group& adapter) {
 		while (!adapter.hasClients())
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		}
-		TestPacket test_packet{1'000'000'000'000'000, "a"};
+		ws::TestPacket test_packet{1'000'000'000'000'000, "a"};
 		for (auto& string_size : string_sizes)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(2000));

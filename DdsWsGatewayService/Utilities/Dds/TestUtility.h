@@ -1,14 +1,14 @@
 #ifndef TEST_UTILITY_H_
 #define TEST_UTILITY_H_
 
-#include "Utilities/DdsCommonClasses.h"
-#include "Utilities/MediateDto.h"
-#include "Utilities/TestUtilities/CommonTestUtilities.h"
-#include "Utilities/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
-#include "Utilities/nlohmann/json.hpp"
+#include "Utilities/Common/Generators.h"
+#include "Utilities/Common/MediateDto.h"
+#include "Utilities/Common/nlohmann/json.hpp"
+#include "Utilities/Dds/Configure.h"
+#include "Utilities/Dds/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 
-#include "oatpp/core/Types.hpp"
-
+namespace scada_ate::dds
+{
 AdditionalTopicInfo getAdditionalTopicInfo(size_t size = 4);
 
 struct DdsDataUnion
@@ -65,9 +65,7 @@ struct GlobalTestConditions
 
 GlobalTestConditions parseJsonToGlobalTestConditions(const nlohmann::json& json);
 
-std::vector<ServiceConfigForTest<SubscriberConfig>>
-createDdsServiceConfigs(const GlobalTestConditions& conditions);
-
 std::string formMappingTestName(std::string description, const OneTestConditions& cond);
+} // namespace scada_ate::dds
 
 #endif //!TEST_UTILITY_H_
