@@ -25,60 +25,36 @@ class DdsDataMapper
 {
 public:
 	DdsDataMapper() { }
-	DdsDataMapper(const dds::AdditionalTopicInfo& info)
-		: info_(info)
-	{ }
 	MediateDataDto toMediateDataDto(DDSData data, const dds::AdditionalTopicInfo& info);
-
-private:
-	dds::AdditionalTopicInfo info_;
 };
 
 class DdsDataExMapper
 {
 public:
 	DdsDataExMapper() { }
-	DdsDataExMapper(const dds::AdditionalTopicInfo& info)
-		: info_(info)
-	{ }
 
 	MediateDataDto toMediateDataDto(DDSDataEx cur_data_ex,
 									const dds::AdditionalTopicInfo& info,
 									MediateDataDto prev_dto = MediateDataDto());
-
-private:
-	dds::AdditionalTopicInfo info_;
 };
 
 class DdsAlarmMapper
 {
 public:
 	DdsAlarmMapper() { }
-	DdsAlarmMapper(const dds::AdditionalTopicInfo& info)
-		: info_(info)
-	{ }
 
 	MediateAlarmDto toMediateAlarmDto(DDSAlarm data);
 	MediateAlarmDto toMediateAlarmDto(DDSAlarm data, const dds::AdditionalTopicInfo& info);
-
-private:
-	dds::AdditionalTopicInfo info_;
 };
 
 class DdsAlarmExMapper
 {
 public:
 	DdsAlarmExMapper() { }
-	DdsAlarmExMapper(const dds::AdditionalTopicInfo& info)
-		: info_(info)
-	{ }
 
 	MediateAlarmDto toMediateAlarmDto(MediateAlarmDto prev_dto,
 									  const DDSAlarmEx& cur_data_ex,
 									  const dds::AdditionalTopicInfo& info);
-
-private:
-	dds::AdditionalTopicInfo info_;
 };
 
 class MediateDtoMapper
