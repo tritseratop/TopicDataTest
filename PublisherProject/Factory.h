@@ -236,7 +236,7 @@ private:
 				 uint32_t samples_sent)
 	{
 		//std::lock_guard<std::mutex> guard(std::mutex());
-		if (listener > 0 && listener->first_connected_)
+		if (listener != nullptr && listener->first_connected_)
 		{
 			data_.time_service(TimeConverter::GetTime_LLmcs());
 			if (!writer->write(&data_))
@@ -251,7 +251,7 @@ private:
 	bool testPublish(BeforeTopicSend& before_topic_send, const DDSDataListener* listener)
 	{
 		//std::lock_guard<std::mutex> guard(std::mutex());
-		if (listener > 0 && listener->first_connected_)
+		if (listener != nullptr && listener->first_connected_)
 		{
 			return before_topic_send(writer_);
 		}
@@ -263,7 +263,7 @@ private:
 					 const DDSDataListener* listener)
 	{
 		//std::lock_guard<std::mutex> guard(std::mutex());
-		if (listener > 0 && listener->first_connected_)
+		if (listener != nullptr && listener->first_connected_)
 		{
 			before_topic_send(&data_);
 			if (!writer->write(&data_))

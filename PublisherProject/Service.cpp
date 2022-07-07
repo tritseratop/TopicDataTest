@@ -319,7 +319,7 @@ bool Service::publish(DataWriter* writer,
 					  uint32_t samples_sent)
 {
 	//std::lock_guard<std::mutex> guard(std::mutex());
-	if (listener > 0 && listener_.first_connected_)
+	if (listener != nullptr && listener_.first_connected_)
 	{
 		writer->write(&config_topic_data_);
 		return true;
