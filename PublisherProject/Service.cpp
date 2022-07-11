@@ -10,7 +10,7 @@ namespace scada_ate::dds::publisher
 using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
 
-Service::Service(const ServiceConfigForTest<Configure>& config)
+Service::Service(const ParticipantConfigure<Configure>& config)
 	: participant_(nullptr)
 	, config_(config)
 	, publisher_(nullptr)
@@ -256,7 +256,7 @@ void Service::testRunPublishers(std::vector<BeforeTopicSendData>& before_topic_s
 	}
 }
 
-void Service::changeSubsConfig(const ServiceConfigForTest<Configure>& config)
+void Service::changeSubsConfig(const ParticipantConfigure<Configure>& config)
 {
 	if (config_ == config)
 	{

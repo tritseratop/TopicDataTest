@@ -42,4 +42,26 @@ std::string TopicTypeToString(TopicType type)
 		return "";
 	}
 }
+
+//template<class T>
+//bool operator==(const ParticipantConfigure<T>& lhs, const ParticipantConfigure<T>& rhs)
+//{
+//	return lhs.domain_id == rhs.domain_id && lhs.participant_name == rhs.participant_name
+//		   && lhs.transport == rhs.transport && lhs.ip == rhs.ip && lhs.port == rhs.port
+//		   && lhs.whitelist == rhs.whitelist && lhs.lease_duration == rhs.lease_duration
+//		   && lhs.lease_duration_announcement_period == rhs.lease_duration_announcement_period
+//		   && lhs.configs == rhs.configs && lhs.MaxSizeSizeDataChar == rhs.MaxSizeSizeDataChar
+//		   && lhs.MaxSizeDataCollectionInt == rhs.MaxSizeDataCollectionInt
+//		   && lhs.MaxSizeDataCollectionFloat == rhs.MaxSizeDataCollectionFloat
+//		   && lhs.MaxSizeDataCollectionDouble == rhs.MaxSizeDataCollectionDouble
+//		   && lhs.MaxSizeDataCollectionChar == rhs.MaxSizeDataCollectionChar
+//		   && lhs.MaxSizeSizeDataExVectorChar == rhs.MaxSizeSizeDataExVectorChar
+//		   && lhs.MaxSizeDDSDataExVectorInt == rhs.MaxSizeDDSDataExVectorInt
+//		   && lhs.MaxSizeDDSDataExVectorFloat == rhs.MaxSizeDDSDataExVectorFloat
+//		   && lhs.MaxSizeDDSDataExVectorDouble == rhs.MaxSizeDDSDataExVectorDouble
+//		   && lhs.MaxSizeDDSDataExVectorChar == rhs.MaxSizeDDSDataExVectorChar
+//		   && lhs.MaxSizeDDSAlarmVectorAlarm == rhs.MaxSizeDDSAlarmVectorAlarm
+//		   && lhs.MaxSizeDDSExVectorAlarms == rhs.MaxSizeDDSExVectorAlarms
+//		   && lhs.logfile_name == rhs.logfile_name;
+//}
 } // namespace scada_ate::dds

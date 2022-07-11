@@ -9,27 +9,26 @@
 
 namespace scada_ate::dds
 {
-AdditionalTopicInfo getAdditionalTopicInfo(size_t size = 4);
+MappingInfo getMappingInfo(size_t size = 4);
 
 struct DdsDataUnion
 {
 	DDSData data;
 	MediateDataDto dto;
-	AdditionalTopicInfo tags_info;
+	MappingInfo tags_info;
 };
 
 DdsDataUnion getEqualDdsData(size_t size, size_t char_size = 1);
-DdsDataUnion getEqualDdsData(const VectorsForData& vectors, const AdditionalTopicInfo& tag_info);
+DdsDataUnion getEqualDdsData(const VectorsForData& vectors, const MappingInfo& tag_info);
 
 MediateDataDto getMediateDataDto(size_t size, size_t char_size = 1);
-MediateDataDto getMediateDataDto(const VectorsForData& vectors,
-								 const AdditionalTopicInfo& tag_info);
+MediateDataDto getMediateDataDto(const VectorsForData& vectors, const MappingInfo& tag_info);
 
 DDSData getDdsData(size_t size, size_t char_size = 1);
 DDSData getDdsData(const VectorsForData& vectors);
 
 DDSDataEx getDdsDataEx(size_t size, size_t char_size = 1);
-DDSDataEx getDdsDataEx(const VectorsForData& vectors, const AdditionalTopicInfo& tag_info);
+DDSDataEx getDdsDataEx(const VectorsForData& vectors, const MappingInfo& tag_info);
 
 struct DdsDataExUnion
 {
@@ -37,7 +36,7 @@ struct DdsDataExUnion
 	DDSDataEx data_ex;
 	MediateDataDto dto_to_change;
 	MediateDataDto result_dto;
-	AdditionalTopicInfo tags_info;
+	MappingInfo tags_info;
 };
 
 DdsDataExUnion getEqualDdsDataEx(size_t data_ex_size, size_t data_size, size_t char_size = 1);

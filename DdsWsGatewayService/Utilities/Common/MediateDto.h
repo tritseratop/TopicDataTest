@@ -2,7 +2,7 @@
 #define MEDIATE_DTO_H_
 
 #include <string>
-#include <utility>
+#include <tuple>
 #include <vector>
 
 namespace scada_ate

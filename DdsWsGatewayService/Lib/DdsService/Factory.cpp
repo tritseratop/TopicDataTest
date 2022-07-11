@@ -94,7 +94,7 @@ bool ConcreteSubscriber<T, TPubSubType, Cacher>::init()
 	rqos.resource_limits().allocated_samples = 20;
 	rqos.reliability().kind = eprosima::fastdds::dds::RELIABLE_RELIABILITY_QOS;
 	rqos.durability().kind = eprosima::fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
-	rqos.deadline().period.nanosec = config_.sleep * 1000;
+	rqos.deadline().period.nanosec = config_.period * 1000;
 
 	reader_ = subscriber_->create_datareader(topic_, rqos, &listener_);
 	if (reader_ == nullptr)
@@ -106,9 +106,9 @@ bool ConcreteSubscriber<T, TPubSubType, Cacher>::init()
 }
 
 template<class T, class TPubSubType, class Cacher>
-void ConcreteSubscriber<T, TPubSubType, Cacher>::setConfig(const Configure& config)
+void ConcreteSubscriber<T, TPubSubType, Cacher>::setSamples(uint32_t sample_number)
 {
-	config_ = config;
+	sample_number_ = sample_number;
 }
 
 template<class T, class TPubSubType, class Cacher>
@@ -146,7 +146,7 @@ void ConcreteSubscriber<T, TPubSubType, Cacher>::SubscriberListener::on_data_ava
 			samples_++;
 			//TODO по другому надо как то проверять
 			{
-				if (samples_ >= sub_->config_.samples)
+				if (samples_ >= sub_->sample_number_)
 				{
 					sub_->stop_ = true;
 				}
@@ -202,7 +202,7 @@ void ConcreteSubscriber<T, TPubSubType, Cacher>::SubscriberListener::recieveMess
 	//{
 	//	analyser_ = PackageAnalyser::getInstance();
 	//	analyser_->setInitialInfo(sub_->config_.topic_type_name + " "
-	//							  + std::to_string(sub_->config_.vector_size));
+	//							  + std::to_string(sub_->config_.max_vector_size));
 	//	first_ = true;
 	//}
 	//analyser_->pushPackageTimestamp({data_sample_.time_service(),

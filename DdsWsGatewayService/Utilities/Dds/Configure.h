@@ -48,7 +48,7 @@ struct AdditionalPackageInfo
 using Tags = std::vector<uint32_t>;
 using TagToIndex = std::unordered_map<uint32_t, uint32_t>;
 
-struct AdditionalTopicInfo
+struct MappingInfo
 {
 	std::unordered_map<DataCollectiionType, Tags> tags;
 	std::unordered_map<DataCollectiionType, TagToIndex> tag_to_index;
@@ -57,51 +57,64 @@ struct AdditionalTopicInfo
 };
 
 template<class T>
-struct ServiceConfigForTest
+struct ParticipantConfigure
 {
+	uint32_t domain_id = 0;
 	// participant params
-	std::string participant_name;
+	std::string participant_name = "participant_0";
 
 	// transport params
 	Transport transport = Transport::TCP;
-	std::string ip;
+	std::string ip = "127.0.0.1";
 	uint16_t port = 4042;
 	std::vector<std::string> whitelist;
+
+	int64_t lease_duration_ms = 20000;
+	int64_t lease_duration_announcement_period_ms = 5000;
 
 	// subs/pubs params
 	std::vector<T> configs;
 
 	// vector_size
-	size_t MaxSizeSizeDataChar = 0;
-	size_t MaxSizeDataCollectionInt = 0;
-	size_t MaxSizeDataCollectionFloat = 0;
-	size_t MaxSizeDataCollectionDouble = 0;
-	size_t MaxSizeDataCollectionChar = 0;
+	size_t MaxSizeSizeDataChar = 100;
+	size_t MaxSizeDataCollectionInt = 100;
+	size_t MaxSizeDataCollectionFloat = 100;
+	size_t MaxSizeDataCollectionDouble = 100;
+	size_t MaxSizeDataCollectionChar = 100;
 
-	size_t MaxSizeSizeDataExVectorChar = 0;
-	size_t MaxSizeDDSDataExVectorInt = 0;
-	size_t MaxSizeDDSDataExVectorFloat = 0;
-	size_t MaxSizeDDSDataExVectorDouble = 0;
-	size_t MaxSizeDDSDataExVectorChar = 0;
+	size_t MaxSizeSizeDataExVectorChar = 100;
+	size_t MaxSizeDDSDataExVectorInt = 100;
+	size_t MaxSizeDDSDataExVectorFloat = 100;
+	size_t MaxSizeDDSDataExVectorDouble = 100;
+	size_t MaxSizeDDSDataExVectorChar = 100;
 
-	size_t MaxSizeDDSAlarmVectorAlarm = 0;
-	size_t MaxSizeDDSExVectorAlarms = 0;
+	size_t MaxSizeDDSAlarmVectorAlarm = 100;
+	size_t MaxSizeDDSExVectorAlarms = 100;
 
-	uint32_t ws_data_sleep = 100;
-	uint32_t ws_alarm_sleep = 100;
+	std::string logfile_name = "log.txt";
 
-	std::string log_file_name = "log.txt";
-
-	friend bool operator==(const ServiceConfigForTest& lhs, const ServiceConfigForTest& rhs)
+	friend bool operator==(const ParticipantConfigure& lhs, const ParticipantConfigure& rhs)
 	{
-		return lhs.participant_name == rhs.participant_name && lhs.ip == rhs.ip
-			   && lhs.port == rhs.port && lhs.whitelist == rhs.whitelist
-			   && lhs.configs == rhs.configs;
+		return lhs.domain_id == rhs.domain_id && lhs.participant_name == rhs.participant_name
+			   && lhs.transport == rhs.transport && lhs.ip == rhs.ip && lhs.port == rhs.port
+			   && lhs.whitelist == rhs.whitelist && lhs.lease_duration_ms == rhs.lease_duration_ms
+			   && lhs.lease_duration_announcement_period_ms
+					  == rhs.lease_duration_announcement_period_ms
+			   && lhs.configs == rhs.configs && lhs.MaxSizeSizeDataChar == rhs.MaxSizeSizeDataChar
+			   && lhs.MaxSizeDataCollectionInt == rhs.MaxSizeDataCollectionInt
+			   && lhs.MaxSizeDataCollectionFloat == rhs.MaxSizeDataCollectionFloat
+			   && lhs.MaxSizeDataCollectionDouble == rhs.MaxSizeDataCollectionDouble
+			   && lhs.MaxSizeDataCollectionChar == rhs.MaxSizeDataCollectionChar
+			   && lhs.MaxSizeSizeDataExVectorChar == rhs.MaxSizeSizeDataExVectorChar
+			   && lhs.MaxSizeDDSDataExVectorInt == rhs.MaxSizeDDSDataExVectorInt
+			   && lhs.MaxSizeDDSDataExVectorFloat == rhs.MaxSizeDDSDataExVectorFloat
+			   && lhs.MaxSizeDDSDataExVectorDouble == rhs.MaxSizeDDSDataExVectorDouble
+			   && lhs.MaxSizeDDSDataExVectorChar == rhs.MaxSizeDDSDataExVectorChar
+			   && lhs.MaxSizeDDSAlarmVectorAlarm == rhs.MaxSizeDDSAlarmVectorAlarm
+			   && lhs.MaxSizeDDSExVectorAlarms == rhs.MaxSizeDDSExVectorAlarms
+			   && lhs.logfile_name == rhs.logfile_name;
 	}
 };
-
-struct ParticipantConfig
-{ };
 } // namespace scada_ate::dds
 
 #endif //!DDS_CONFIGURE_H_

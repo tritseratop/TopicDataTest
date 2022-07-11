@@ -4,9 +4,9 @@
 
 namespace scada_ate::dds
 {
-AdditionalTopicInfo getAdditionalTopicInfo(size_t size)
+MappingInfo getMappingInfo(size_t size)
 {
-	AdditionalTopicInfo info;
+	MappingInfo info;
 	info.tag_to_index[DataCollectiionType::DATA_INT];
 	info.tag_to_index[DataCollectiionType::DATA_FLOAT];
 	info.tag_to_index[DataCollectiionType::DATA_DOUBLE];
@@ -67,11 +67,11 @@ DDSData getDdsData(const VectorsForData& vectors)
 DDSDataEx getDdsDataEx(size_t size, size_t char_size)
 {
 	auto vectors = VectorsForData(size, char_size);
-	auto tag_info = getAdditionalTopicInfo(size);
+	auto tag_info = getMappingInfo(size);
 	return getDdsDataEx(vectors, tag_info);
 }
 
-DDSDataEx getDdsDataEx(const VectorsForData& vectors, const AdditionalTopicInfo& tag_info)
+DDSDataEx getDdsDataEx(const VectorsForData& vectors, const MappingInfo& tag_info)
 {
 	DDSDataEx data;
 	DataExInt data_ex_int;
@@ -114,12 +114,12 @@ DDSDataEx getDdsDataEx(const VectorsForData& vectors, const AdditionalTopicInfo&
 DdsDataUnion getEqualDdsData(size_t size, size_t char_size)
 {
 	auto vectors = VectorsForData(size, char_size);
-	auto tag_info = getAdditionalTopicInfo(size);
+	auto tag_info = getMappingInfo(size);
 
 	return getEqualDdsData(vectors, tag_info);
 }
 
-DdsDataUnion getEqualDdsData(const VectorsForData& vectors, const AdditionalTopicInfo& tag_info)
+DdsDataUnion getEqualDdsData(const VectorsForData& vectors, const MappingInfo& tag_info)
 {
 	auto vectors_ = vectors;
 	for (auto& el : vectors_.time_values)
@@ -135,11 +135,11 @@ DdsDataUnion getEqualDdsData(const VectorsForData& vectors, const AdditionalTopi
 MediateDataDto getMediateDataDto(size_t size, size_t char_size)
 {
 	auto vectors = VectorsForData(size, char_size);
-	auto tag_info = getAdditionalTopicInfo(size);
+	auto tag_info = getMappingInfo(size);
 	return getMediateDataDto(vectors, tag_info);
 }
 
-MediateDataDto getMediateDataDto(const VectorsForData& vectors, const AdditionalTopicInfo& tag_info)
+MediateDataDto getMediateDataDto(const VectorsForData& vectors, const MappingInfo& tag_info)
 {
 	std::vector<uint32_t> int_tags;
 	int_tags.reserve(vectors.int_values.size());
@@ -188,7 +188,7 @@ DdsDataExUnion getEqualDdsDataEx(size_t data_ex_size, size_t data_size, size_t c
 {
 	auto vectors = VectorsForData(data_size, char_size);
 	auto ex_vectors = VectorsForData(data_ex_size, char_size);
-	auto tag_info = getAdditionalTopicInfo(data_size > data_ex_size ? data_size : data_ex_size);
+	auto tag_info = getMappingInfo(data_size > data_ex_size ? data_size : data_ex_size);
 
 	auto data = getDdsData(vectors);
 	auto dto = getMediateDataDto(vectors, tag_info);

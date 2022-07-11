@@ -20,30 +20,13 @@ int main(int argc, char** argv)
 	bool isWsServerRun = conditions.isWsServerRun;
 	bool isSync = conditions.isSync;
 
-	ServiceConfigForTest<Configure> default_service_config({"Participant_pub",
-															transport,
-															ip,
-															4042,
-															{"127.0.0.1"},
-															{},
-															10000,
-															10000,
-															10000,
-															10000,
-															10000,
-															10000,
-															10000,
-															10000,
-															10000,
-															10000,
-															10000,
-															10000});
+	ParticipantConfigure<Configure> default_service_config;
 	Configure ddsdata_config = {
 		0, 10, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 0, 1000, isSync};
 	Configure ddsdataex_config = {
 		0, 10, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, 0, 1000, isSync};
 
-	std::vector<ServiceConfigForTest<Configure>> configs;
+	std::vector<ParticipantConfigure<Configure>> configs;
 
 	for (const auto& c : conditions.conditions)
 	{

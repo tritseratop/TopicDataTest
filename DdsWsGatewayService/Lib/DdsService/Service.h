@@ -20,7 +20,7 @@ namespace scada_ate::dds::subscriber
 class Service
 {
 public:
-	Service(const ServiceConfigForTest<Configure>& config, std::shared_ptr<DataCacher> cacher);
+	Service(const ParticipantConfigure<Configure>& config, std::shared_ptr<DataCacher> cacher);
 	virtual ~Service();
 
 	bool initSubscribers();
@@ -37,7 +37,7 @@ public:
 	void stopSubscribers();
 	void notifyingWsService();
 
-	void changeSubscribersConfig(const ServiceConfigForTest<Configure>& config);
+	void changeSubscribersConfig(const ParticipantConfigure<Configure>& config);
 
 	std::vector<AbstractSubscriber*> getSubscribers() const;
 
@@ -48,7 +48,7 @@ private:
 	void setVectorSizesInDataTopic();
 
 private:
-	ServiceConfigForTest<Configure> config_;
+	ParticipantConfigure<Configure> config_;
 
 	eprosima::fastdds::dds::DomainParticipant* participant_;
 

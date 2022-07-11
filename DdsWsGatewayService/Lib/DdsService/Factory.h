@@ -42,7 +42,7 @@ public:
 
 	bool init() override;
 
-	void setConfig(const Configure& config) override;
+	void setSamples(uint32_t sample_number) override;
 
 private:
 	void cacheData(T data_);
@@ -59,6 +59,8 @@ private:
 	std::shared_ptr<Cacher> cacher_;
 
 	std::atomic<bool> stop_;
+
+	uint32_t sample_number_;
 
 	class SubscriberListener : public eprosima::fastdds::dds::DataReaderListener
 	{

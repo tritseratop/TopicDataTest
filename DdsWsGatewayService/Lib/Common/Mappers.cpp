@@ -4,7 +4,7 @@ namespace scada_ate
 {
 using namespace dds;
 
-MediateDataDto DdsDataMapper::toMediateDataDto(DDSData data, const AdditionalTopicInfo& info)
+MediateDataDto DdsDataMapper::toMediateDataDto(DDSData data, const MappingInfo& info)
 {
 	std::vector<std::vector<char>> data_char;
 	data_char.reserve(data.data_char().value().size());
@@ -45,7 +45,7 @@ MediateDataDto DdsDataMapper::toMediateDataDto(DDSData data, const AdditionalTop
 }
 
 MediateDataDto DdsDataExMapper::toMediateDataDto(DDSDataEx cur_data_ex,
-												 const AdditionalTopicInfo& info,
+												 const MappingInfo& info,
 												 MediateDataDto prev_dto)
 {
 	prev_dto.time_service = cur_data_ex.time_service();
@@ -102,7 +102,7 @@ void fillChanged(DataSampleSequence<T>& prev_dto_collection,
 	}
 }
 
-MediateAlarmDto DdsAlarmMapper::toMediateAlarmDto(DDSAlarm data, const AdditionalTopicInfo& info)
+MediateAlarmDto DdsAlarmMapper::toMediateAlarmDto(DDSAlarm data, const MappingInfo& info)
 {
 	auto tags = info.tags.at(DataCollectiionType::ALARM_UINT32);
 	tags.resize(data.alarms().size());
@@ -117,7 +117,7 @@ MediateAlarmDto DdsAlarmMapper::toMediateAlarmDto(DDSAlarm data, const Additiona
 
 MediateAlarmDto DdsAlarmExMapper::toMediateAlarmDto(MediateAlarmDto prev_dto,
 													const DDSAlarmEx& cur_data_ex,
-													const AdditionalTopicInfo& info)
+													const MappingInfo& info)
 {
 	prev_dto.time_service = cur_data_ex.time_service();
 	/*fillChanged(

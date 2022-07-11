@@ -10,7 +10,7 @@ class AbstractSubscriber
 public:
 	virtual ~AbstractSubscriber(){};
 	virtual bool init() = 0;
-	virtual void setConfig(const Configure& config) = 0;
+	virtual void setSamples(uint32_t sample_number) = 0;
 };
 } // namespace scada_ate::dds::subscriber
 

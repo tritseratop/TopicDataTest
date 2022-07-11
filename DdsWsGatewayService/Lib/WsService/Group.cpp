@@ -21,7 +21,7 @@ void Group::removeClientById(int64_t id)
 
 void Group::sendCacherDataToAllAsync()
 {
-	auto data = cacher_->popAsString();
+	auto data = cacher_->pop();
 	if (data.has_value())
 	{
 		auto data_to_send = oatpp::String(std::move(data.value()));

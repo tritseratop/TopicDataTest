@@ -9,19 +9,13 @@ namespace scada_ate::dds::subscriber
 {
 struct Configure
 {
-	int16_t subscriber_id = 0;
-	size_t vector_size = 0;
+	int16_t id_map = 0;
+	size_t max_vector_size = 0; //TODO отдельно для каждого вектора в топике?
 	std::string topic_name = "";
 	std::string topic_type_name = "";
 	TopicType topic_type = TopicType::UNKNOWN;
 
-	// listener settings
-	size_t samples = 10;
-	int64_t sleep = 1000;
-
-	AdditionalTopicInfo info;
-
-	bool isCache = false;
+	int64_t period = 1000;
 
 	friend bool operator==(const Configure& lhs, const Configure& rhs);
 };
