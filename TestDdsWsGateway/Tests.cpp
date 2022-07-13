@@ -218,7 +218,7 @@ TEST(WsConnectionTest, RunWithoutCoroutine)
 		{
 			auto message = nlohmann::json(test_packets.back()).dump();
 			test_packets.pop_back();
-			group.sendTextMessageToAllAsync(oatpp::String(message), before_msg_send);
+			group.sendMessageToAllAsync(oatpp::String(message), before_msg_send);
 		}
 		group.sendCloseToAllAsync();
 	};
@@ -251,8 +251,8 @@ TEST(WsConnectionTest, RunWithoutCoroutine)
 void DdsDataTest()
 {
 	using namespace scada_ate::dds;
-	ParticipantConfigure<publisher::Configure> pub_config;
-	publisher::Configure ddsdata_config = {
+	ParticipantConfig<publisher::Config> pub_config;
+	publisher::Config ddsdata_config = {
 		0, 10, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 10, false};
 	pub_config.configs = {ddsdata_config};
 
@@ -290,10 +290,9 @@ void DdsDataTest()
 
 	mypub->initPublishers();
 
-	ParticipantConfigure<subscriber::Configure> sub_config;
+	ParticipantConfig<subscriber::Config> sub_config;
 	MappingInfo info = getMappingInfo(100);
-	subscriber::Configure sub_ddsdata_config = {
-		0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100};
+	subscriber::Config sub_ddsdata_config = {0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100};
 	sub_config.configs = {sub_ddsdata_config};
 
 	auto cacher = std::make_shared<DataCacher>(100, info);
@@ -330,10 +329,10 @@ void DdsDataTest()
 void DdsDataTestManyTopics()
 {
 	using namespace scada_ate::dds;
-	ParticipantConfigure<publisher::Configure> pub_config;
-	publisher::Configure ddsdata_config1 = {
+	ParticipantConfig<publisher::Config> pub_config;
+	publisher::Config ddsdata_config1 = {
 		0, 10, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 50, false};
-	publisher::Configure ddsdata_config2 = {
+	publisher::Config ddsdata_config2 = {
 		0, 100, 10, "DDSData_Second", "DDSData", TopicType::DDS_DATA, 100, 50, false};
 	pub_config.configs = {ddsdata_config1, ddsdata_config2};
 
@@ -372,11 +371,10 @@ void DdsDataTestManyTopics()
 
 	mypub->initPublishers();
 
-	ParticipantConfigure<subscriber::Configure> sub_config;
+	ParticipantConfig<subscriber::Config> sub_config;
 	MappingInfo info = getMappingInfo(100);
-	subscriber::Configure sub_ddsdata_config = {
-		0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100};
-	subscriber::Configure sub_ddsdata_config2 = {
+	subscriber::Config sub_ddsdata_config = {0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100};
+	subscriber::Config sub_ddsdata_config2 = {
 		0, 100, "DDSData_Second", "DDSData", TopicType::DDS_DATA, 100};
 	sub_config.configs = {sub_ddsdata_config, sub_ddsdata_config2};
 
@@ -422,8 +420,8 @@ void DdsDataTestManyTopics()
 void DdsDataExTest()
 {
 	using namespace scada_ate::dds;
-	ParticipantConfigure<publisher::Configure> pub_config;
-	publisher::Configure ddsdata_config = {
+	ParticipantConfig<publisher::Config> pub_config;
+	publisher::Config ddsdata_config = {
 		1, 10, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, 100, 2, false};
 	pub_config.configs = {ddsdata_config};
 
@@ -463,9 +461,9 @@ void DdsDataExTest()
 
 	mypub->initPublishers();
 
-	ParticipantConfigure<subscriber::Configure> sub_config;
+	ParticipantConfig<subscriber::Config> sub_config;
 
-	subscriber::Configure sub_ddsdata_config = {
+	subscriber::Config sub_ddsdata_config = {
 		1, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, 100};
 	sub_config.configs = {sub_ddsdata_config};
 
@@ -518,8 +516,8 @@ TEST(DdsConnectionTest, DdsDataTestManyTopics)
 void OneToOneConnection()
 {
 	using namespace scada_ate::dds;
-	ParticipantConfigure<publisher::Configure> pub_config;
-	publisher::Configure ddsdata_config = {
+	ParticipantConfig<publisher::Config> pub_config;
+	publisher::Config ddsdata_config = {
 		0, 10, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 100, false};
 	pub_config.configs = {ddsdata_config};
 
@@ -557,10 +555,9 @@ void OneToOneConnection()
 
 	mypub->initPublishers();
 
-	ParticipantConfigure<subscriber::Configure> sub_config;
+	ParticipantConfig<subscriber::Config> sub_config;
 	MappingInfo info = getMappingInfo(100);
-	subscriber::Configure sub_ddsdata_config = {
-		0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100};
+	subscriber::Config sub_ddsdata_config = {0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100};
 	sub_config.configs = {sub_ddsdata_config};
 
 	auto cacher = std::make_shared<DataCacher>(100, info);
@@ -581,7 +578,7 @@ void OneToOneConnection()
 		while (!ws_server_stop)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
-			group.sendCacherDataToAllAsync();
+			group.sendCachedValuesToAllAsync();
 		}
 		group.sendCloseToAllAsync();
 	};
@@ -614,7 +611,7 @@ void OneToOneConnection()
 		return;
 	for (int i = 0; i < 100; ++i)
 	{
-		auto ws_data = std::string(client_cache.pop_front().value()->c_str());
+		auto ws_data = std::string(client_cache.pop_front_and_return().value()->c_str());
 		auto dds_data = mediate_dto_mapper.toString(
 			dds_data_mapper.toMediateDataDto(dds_datas[100 - i - 1], info));
 		EXPECT_EQ(ws_data, dds_data);

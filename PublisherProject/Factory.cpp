@@ -27,7 +27,7 @@ void ConcretePublisher<DDSAlarmEx, DDSAlarmExPubSubType>::setData()
 { }
 
 AbstractDdsPublisher* Factory::createPublisher(
-	eprosima::fastdds::dds::DomainParticipant* participant, const Configure& config) const
+	eprosima::fastdds::dds::DomainParticipant* participant, const Config& config) const
 {
 	switch (config.topic_type)
 	{

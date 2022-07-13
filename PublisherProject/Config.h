@@ -1,14 +1,14 @@
-#ifndef DDS_PUB_CONFIGURE_H_
-#define DDS_PUB_CONFIGURE_H_
+#ifndef DDS_PUB_CONFIG_H_
+#define DDS_PUB_CONFIG_H_
 
-#include "DdsWsGatewayService/Utilities/Dds/Configure.h"
+#include "DdsWsGatewayService/Utilities/Dds/Config.h"
 
 #include <cstdint>
 #include <string>
 
 namespace scada_ate::dds::publisher
 {
-struct Configure
+struct Config
 {
 	int16_t pub_id = 0;
 	uint16_t vector_size = 0;
@@ -23,8 +23,8 @@ struct Configure
 
 	bool isSync = false;
 
-	friend bool operator==(const Configure& lhs, const Configure& rhs);
+	friend bool operator==(const Config& lhs, const Config& rhs);
 };
 } // namespace scada_ate::dds::publisher
 
-#endif //!DDS_PUB_CONFIGURE_H_
+#endif //!DDS_PUB_CONFIG_H_

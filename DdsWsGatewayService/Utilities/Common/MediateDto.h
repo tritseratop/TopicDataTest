@@ -14,7 +14,7 @@ bool operator==(const std::vector<T>& lhs, const std::vector<T>& rhs)
 }
 
 template<class T>
-struct DataSampleSequence
+struct DataSequence
 {
 	std::vector<int64_t> time_source;
 	std::vector<uint32_t> id_tag;
@@ -40,7 +40,7 @@ struct DataSampleSequence
 		quality.resize(size);
 	}
 
-	friend bool operator==(const DataSampleSequence& lhs, const DataSampleSequence& rhs)
+	friend bool operator==(const DataSequence& lhs, const DataSequence& rhs)
 	{
 		return lhs.time_source == rhs.time_source && lhs.id_tag == rhs.id_tag
 			   && lhs.value == rhs.value && lhs.quality == rhs.quality;
@@ -51,10 +51,10 @@ struct MediateDataDto
 {
 	int64_t time_service;
 
-	DataSampleSequence<int32_t> data_int;
-	DataSampleSequence<float> data_float;
-	DataSampleSequence<double> data_double;
-	DataSampleSequence<std::vector<char>> data_char;
+	DataSequence<int32_t> data_int;
+	DataSequence<float> data_float;
+	DataSequence<double> data_double;
+	DataSequence<std::vector<char>> data_char;
 
 	int64_t dispatch_time;
 	std::string topic_name = "";

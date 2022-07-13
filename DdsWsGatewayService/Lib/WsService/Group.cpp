@@ -19,25 +19,60 @@ void Group::removeClientById(int64_t id)
 	clients_.erase(id);
 }
 
-void Group::sendCacherDataToAllAsync()
+void Group::runSendingUpdatedValues()
+{
+	while (!stop_)
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(period_ms_));
+		sendCachedValuesToAllAsync();
+	}
+}
+
+bool Group::sendUpdatedValuesToAllAsync()
+{
+	auto data = cacher_->getLast();
+	if (data.has_value())
+	{
+		auto data_to_send = oatpp::String(std::move(data.value()));
+		sendMessageToAllAsync(data_to_send);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void Group::runSendingCachedValues()
+{
+	while (!stop_)
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(period_ms_));
+		sendCachedValuesToAllAsync();
+	}
+}
+
+bool Group::sendCachedValuesToAllAsync()
 {
 	auto data = cacher_->pop();
 	if (data.has_value())
 	{
 		auto data_to_send = oatpp::String(std::move(data.value()));
-		std::lock_guard<std::mutex> m(clients_mutex_);
-		for (auto& [id, client] : clients_)
-		{
-			client->sendMessageAsync(data_to_send);
-		}
+		sendMessageToAllAsync(data_to_send);
+		return true;
 	}
 	else
 	{
-		//TODO
+		return false;
 	}
 }
 
-void Group::sendTextMessageToAllAsync(const oatpp::String& message)
+void Group::stopSending()
+{
+	stop_ = true;
+}
+
+void Group::sendMessageToAllAsync(const oatpp::String& message)
 {
 	std::lock_guard<std::mutex> m(clients_mutex_);
 	for (auto& [id, client] : clients_)
@@ -55,13 +90,13 @@ void Group::sendCloseToAllAsync()
 	}
 }
 
-void Group::runTestMessageSending(TestCallback& test_callback)
+void Group::runTestCallback(TestCallback& test_callback)
 {
 	test_callback(*this);
 }
 
-void Group::sendTextMessageToAllAsync(const oatpp::String& message,
-									  const BeforeMessageSend& before_msg_send)
+void Group::sendMessageToAllAsync(const oatpp::String& message,
+								  const BeforeMessageSend& before_msg_send)
 {
 	std::lock_guard<std::mutex> m(clients_mutex_);
 	for (auto& [id, client] : clients_)

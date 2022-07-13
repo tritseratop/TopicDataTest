@@ -16,7 +16,7 @@ using namespace eprosima::fastdds;
 using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
 
-Service::Service(const ParticipantConfigure<Configure>& config, std::shared_ptr<DataCacher> cacher)
+Service::Service(const ParticipantConfig<Config>& config, std::shared_ptr<DataCacher> cacher)
 	: config_(config)
 	, participant_(nullptr)
 	, cacher_(cacher)
@@ -139,7 +139,7 @@ DomainParticipantQos Service::getParticipantQos()
 	return qos;
 }
 
-bool Service::initSubscriber(const Configure& config)
+bool Service::initSubscriber(const Config& config)
 {
 	// TODO: узнать че менять в SUBSCRIBER_QOS_DEFAULT
 	AbstractSubscriber* sub = factory_.createSubscriber(participant_, config, cacher_);
@@ -194,7 +194,7 @@ void Service::stopSubscribers()
 	}*/
 }
 
-void Service::changeSubscribersConfig(const ParticipantConfigure<Configure>& config)
+void Service::changeSubscribersConfig(const ParticipantConfig<Config>& config)
 {
 	if (config_ == config)
 	{

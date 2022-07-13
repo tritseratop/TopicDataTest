@@ -2,7 +2,7 @@
 #define APP_COMPONENT_HPP
 
 #include "Lib/WsService/SocketListener.h"
-#include "Utilities/Ws/Configure.h"
+#include "Utilities/Ws/Config.h"
 
 #include "oatpp/core/macro/component.hpp"
 #include "oatpp/network/tcp/server/ConnectionProvider.hpp"
@@ -15,12 +15,11 @@ namespace scada_ate::ws
 class AppComponent
 {
 private:
-	const Configure config_;
+	const Config config_;
 	std::unordered_map<int64_t, std::shared_ptr<Group>> groups_;
 
 public:
-	AppComponent(const Configure& config_,
-				 std::unordered_map<int64_t, std::shared_ptr<Group>> groups)
+	AppComponent(const Config& config_, std::unordered_map<int64_t, std::shared_ptr<Group>> groups)
 		: config_(config_)
 		, groups_(groups)
 	{ }

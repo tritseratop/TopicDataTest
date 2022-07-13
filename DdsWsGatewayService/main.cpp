@@ -4,7 +4,7 @@
 #include "Lib/WsService/Group.h"
 
 #include "Utilities/Ws/Callbacks.h"
-#include "Utilities/Ws/Configure.h"
+#include "Utilities/Ws/Config.h"
 #include "Utilities/Ws/TestUtility.h"
 
 using namespace scada_ate;
@@ -15,7 +15,7 @@ void runWsConnection(ws::TestCallback& test_callback)
 	{
 		int64_t init_disp = 1'000'000'000'000'000;
 
-		ws::Configure ws_conf;
+		ws::Config ws_conf;
 #ifdef _DEBUG
 		ws_conf.host = "127.0.0.1";
 #else
@@ -32,7 +32,7 @@ void runWsConnection(ws::TestCallback& test_callback)
 
 		std::thread server_thread([&server]() { server.run(); });
 
-		group->runTestMessageSending(test_callback);
+		group->runTestCallback(test_callback);
 
 		server.stopAfterAllTaskFinished();
 		server_thread.join();
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 			for (int i = 0; i < number; ++i)
 			{
 				auto message = nlohmann::json(test_packet).dump();
-				adapter.sendTextMessageToAllAsync(oatpp::String(message), before_msg_send);
+				adapter.sendMessageToAllAsync(oatpp::String(message), before_msg_send);
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			}
 		}

@@ -1,5 +1,5 @@
-#ifndef DDS_CONFIGURE_H_
-#define DDS_CONFIGURE_H_
+#ifndef DDS_CONFIG_H_
+#define DDS_CONFIG_H_
 
 #include <algorithm>
 #include <string>
@@ -24,13 +24,24 @@ enum TopicType
 	UNKNOWN
 };
 
-enum DataCollectiionType
+enum DatasetType
 {
 	DATA_INT,
 	DATA_FLOAT,
 	DATA_DOUBLE,
 	DATA_CHAR,
 	ALARM_UINT32
+};
+
+using Tags = std::vector<uint32_t>;
+using TagToIndex = std::unordered_map<uint32_t, uint32_t>;
+
+struct MappingInfo
+{
+	std::unordered_map<DatasetType, Tags> tags;
+	std::unordered_map<DatasetType, TagToIndex> tag_to_index;
+	std::string topic_name;
+	std::string info;
 };
 
 TopicType StringToTopicType(std::string type_name);
@@ -45,19 +56,8 @@ struct AdditionalPackageInfo
 	std::string info;
 };
 
-using Tags = std::vector<uint32_t>;
-using TagToIndex = std::unordered_map<uint32_t, uint32_t>;
-
-struct MappingInfo
-{
-	std::unordered_map<DataCollectiionType, Tags> tags;
-	std::unordered_map<DataCollectiionType, TagToIndex> tag_to_index;
-	std::string topic_name;
-	std::string info;
-};
-
 template<class T>
-struct ParticipantConfigure
+struct ParticipantConfig
 {
 	uint32_t domain_id = 0;
 	// participant params
@@ -93,7 +93,7 @@ struct ParticipantConfigure
 
 	std::string logfile_name = "log.txt";
 
-	friend bool operator==(const ParticipantConfigure& lhs, const ParticipantConfigure& rhs)
+	friend bool operator==(const ParticipantConfig& lhs, const ParticipantConfig& rhs)
 	{
 		return lhs.domain_id == rhs.domain_id && lhs.participant_name == rhs.participant_name
 			   && lhs.transport == rhs.transport && lhs.ip == rhs.ip && lhs.port == rhs.port
@@ -117,4 +117,4 @@ struct ParticipantConfigure
 };
 } // namespace scada_ate::dds
 
-#endif //!DDS_CONFIGURE_H_
+#endif //!DDS_CONFIG_H_

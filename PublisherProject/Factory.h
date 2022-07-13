@@ -1,7 +1,7 @@
 #ifndef PUBLISHER_FACTORY_H_
 #define PUBLISHER_FACTORY_H_
 
-#include "PublisherProject/Configure.h"
+#include "PublisherProject/Config.h"
 
 #include "DdsWsGatewayService/Utilities/Common/TimeConverter/TimeConverter.hpp"
 #include "DdsWsGatewayService/Utilities/Dds/Callbacks.h"
@@ -35,7 +35,7 @@ public:
 	virtual void setData() = 0;
 	virtual void setData(void* data) = 0;
 	virtual TopicType getTopicType() = 0;
-	//virtual void setConfig(const Configure& config) = 0;
+	//virtual void setConfig(const Config& config) = 0;
 protected:
 };
 
@@ -43,8 +43,7 @@ template<class T, class TPubSubType>
 class ConcretePublisher : public AbstractDdsPublisher
 {
 public:
-	ConcretePublisher(eprosima::fastdds::dds::DomainParticipant* participant,
-					  const Configure& config)
+	ConcretePublisher(eprosima::fastdds::dds::DomainParticipant* participant, const Config& config)
 		: participant_(participant)
 		, config_(config)
 		, publisher_(nullptr)
@@ -178,7 +177,7 @@ private:
 	const TopicType topic_type_;
 	bool stop_;
 
-	Configure config_;
+	Config config_;
 
 	eprosima::fastdds::dds::DomainParticipant* participant_;
 	eprosima::fastdds::dds::Publisher* publisher_;
@@ -281,7 +280,7 @@ class Factory
 public:
 	virtual ~Factory() { }
 	AbstractDdsPublisher* createPublisher(eprosima::fastdds::dds::DomainParticipant* participant,
-										  const Configure& config) const;
+										  const Config& config) const;
 
 protected:
 };

@@ -7,14 +7,14 @@ namespace scada_ate::dds
 MappingInfo getMappingInfo(size_t size)
 {
 	MappingInfo info;
-	info.tag_to_index[DataCollectiionType::DATA_INT];
-	info.tag_to_index[DataCollectiionType::DATA_FLOAT];
-	info.tag_to_index[DataCollectiionType::DATA_DOUBLE];
-	info.tag_to_index[DataCollectiionType::DATA_CHAR];
-	info.tags[DataCollectiionType::DATA_INT];
-	info.tags[DataCollectiionType::DATA_FLOAT];
-	info.tags[DataCollectiionType::DATA_DOUBLE];
-	info.tags[DataCollectiionType::DATA_CHAR];
+	info.tag_to_index[DatasetType::DATA_INT];
+	info.tag_to_index[DatasetType::DATA_FLOAT];
+	info.tag_to_index[DatasetType::DATA_DOUBLE];
+	info.tag_to_index[DatasetType::DATA_CHAR];
+	info.tags[DatasetType::DATA_INT];
+	info.tags[DatasetType::DATA_FLOAT];
+	info.tags[DatasetType::DATA_DOUBLE];
+	info.tags[DatasetType::DATA_CHAR];
 
 	auto tags = generateVector<uint32_t>(size);
 
@@ -83,22 +83,22 @@ DDSDataEx getDdsDataEx(const VectorsForData& vectors, const MappingInfo& tag_inf
 	for (int i = 0; i < vectors.int_values.size(); ++i)
 	{
 		data_ex_int.time_source(vectors.time_values[i]);
-		data_ex_int.id_tag(tag_info.tags.at(DataCollectiionType::DATA_INT)[i]);
+		data_ex_int.id_tag(tag_info.tags.at(DatasetType::DATA_INT)[i]);
 		data_ex_int.value(vectors.int_values[i]);
 		data_ex_int.quality(vectors.int_qualities[i]);
 
 		data_ex_float.time_source(vectors.time_values[i]);
-		data_ex_float.id_tag(tag_info.tags.at(DataCollectiionType::DATA_FLOAT)[i]);
+		data_ex_float.id_tag(tag_info.tags.at(DatasetType::DATA_FLOAT)[i]);
 		data_ex_float.value(vectors.float_values[i]);
 		data_ex_float.quality(vectors.float_qualities[i]);
 
 		data_ex_double.time_source(vectors.time_values[i]);
-		data_ex_double.id_tag(tag_info.tags.at(DataCollectiionType::DATA_DOUBLE)[i]);
+		data_ex_double.id_tag(tag_info.tags.at(DatasetType::DATA_DOUBLE)[i]);
 		data_ex_double.value(vectors.double_values[i]);
 		data_ex_double.quality(vectors.double_qualities[i]);
 
 		data_ex_char.time_source(vectors.time_values[i]);
-		data_ex_char.id_tag(tag_info.tags.at(DataCollectiionType::DATA_CHAR)[i]);
+		data_ex_char.id_tag(tag_info.tags.at(DatasetType::DATA_CHAR)[i]);
 		data_ex_char.value(vectors.char_value);
 		data_ex_char.quality(vectors.char_qualities[i]);
 
@@ -143,25 +143,25 @@ MediateDataDto getMediateDataDto(const VectorsForData& vectors, const MappingInf
 {
 	std::vector<uint32_t> int_tags;
 	int_tags.reserve(vectors.int_values.size());
-	std::copy_n(tag_info.tags.at(DataCollectiionType::DATA_INT).begin(),
+	std::copy_n(tag_info.tags.at(DatasetType::DATA_INT).begin(),
 				vectors.int_values.size(),
 				std::back_inserter(int_tags));
 
 	std::vector<uint32_t> float_tags;
 	float_tags.reserve(vectors.float_values.size());
-	std::copy_n(tag_info.tags.at(DataCollectiionType::DATA_FLOAT).begin(),
+	std::copy_n(tag_info.tags.at(DatasetType::DATA_FLOAT).begin(),
 				vectors.float_values.size(),
 				std::back_inserter(float_tags));
 
 	std::vector<uint32_t> double_tags;
 	double_tags.reserve(vectors.double_values.size());
-	std::copy_n(tag_info.tags.at(DataCollectiionType::DATA_DOUBLE).begin(),
+	std::copy_n(tag_info.tags.at(DatasetType::DATA_DOUBLE).begin(),
 				vectors.double_values.size(),
 				std::back_inserter(double_tags));
 
 	std::vector<uint32_t> char_tags;
 	char_tags.reserve(vectors.char_qualities.size());
-	std::copy_n(tag_info.tags.at(DataCollectiionType::DATA_CHAR).begin(),
+	std::copy_n(tag_info.tags.at(DatasetType::DATA_CHAR).begin(),
 				vectors.char_qualities.size(),
 				std::back_inserter(char_tags));
 
@@ -194,17 +194,17 @@ DdsDataExUnion getEqualDdsDataEx(size_t data_ex_size, size_t data_size, size_t c
 	auto dto = getMediateDataDto(vectors, tag_info);
 
 	auto ex_tag_info = tag_info;
-	shuffleVector(ex_tag_info.tags.at(DataCollectiionType::DATA_INT));
-	shuffleVector(ex_tag_info.tags.at(DataCollectiionType::DATA_FLOAT));
-	shuffleVector(ex_tag_info.tags.at(DataCollectiionType::DATA_DOUBLE));
-	shuffleVector(ex_tag_info.tags.at(DataCollectiionType::DATA_CHAR));
+	shuffleVector(ex_tag_info.tags.at(DatasetType::DATA_INT));
+	shuffleVector(ex_tag_info.tags.at(DatasetType::DATA_FLOAT));
+	shuffleVector(ex_tag_info.tags.at(DatasetType::DATA_DOUBLE));
+	shuffleVector(ex_tag_info.tags.at(DatasetType::DATA_CHAR));
 
 	if (data_size > data_ex_size)
 	{
-		ex_tag_info.tags.at(DataCollectiionType::DATA_INT).resize(data_ex_size);
-		ex_tag_info.tags.at(DataCollectiionType::DATA_FLOAT).resize(data_ex_size);
-		ex_tag_info.tags.at(DataCollectiionType::DATA_DOUBLE).resize(data_ex_size);
-		ex_tag_info.tags.at(DataCollectiionType::DATA_CHAR).resize(data_ex_size);
+		ex_tag_info.tags.at(DatasetType::DATA_INT).resize(data_ex_size);
+		ex_tag_info.tags.at(DatasetType::DATA_FLOAT).resize(data_ex_size);
+		ex_tag_info.tags.at(DatasetType::DATA_DOUBLE).resize(data_ex_size);
+		ex_tag_info.tags.at(DatasetType::DATA_CHAR).resize(data_ex_size);
 	}
 
 	auto data_ex = getDdsDataEx(ex_vectors, tag_info);
@@ -223,29 +223,25 @@ DdsDataExUnion getEqualDdsDataEx(size_t data_ex_size, size_t data_size, size_t c
 	result_dto.time_service = dto_ex.time_service;
 	for (int i = 0; i < data_ex_size; ++i)
 	{
-		auto index = tag_info.tag_to_index.at(
-			DataCollectiionType::DATA_INT)[dto_ex.data_int.id_tag[i]];
+		auto index = tag_info.tag_to_index.at(DatasetType::DATA_INT)[dto_ex.data_int.id_tag[i]];
 		result_dto.data_int.time_source[index] = dto_ex.data_int.time_source[i];
 		result_dto.data_int.id_tag[index] = dto_ex.data_int.id_tag[i];
 		result_dto.data_int.value[index] = dto_ex.data_int.value[i];
 		result_dto.data_int.quality[index] = dto_ex.data_int.quality[i];
 
-		index = tag_info.tag_to_index.at(
-			DataCollectiionType::DATA_FLOAT)[dto_ex.data_float.id_tag[i]];
+		index = tag_info.tag_to_index.at(DatasetType::DATA_FLOAT)[dto_ex.data_float.id_tag[i]];
 		result_dto.data_float.time_source[index] = dto_ex.data_float.time_source[i];
 		result_dto.data_float.id_tag[index] = dto_ex.data_float.id_tag[i];
 		result_dto.data_float.value[index] = dto_ex.data_float.value[i];
 		result_dto.data_float.quality[index] = dto_ex.data_float.quality[i];
 
-		index = tag_info.tag_to_index.at(
-			DataCollectiionType::DATA_DOUBLE)[dto_ex.data_double.id_tag[i]];
+		index = tag_info.tag_to_index.at(DatasetType::DATA_DOUBLE)[dto_ex.data_double.id_tag[i]];
 		result_dto.data_double.time_source[index] = dto_ex.data_double.time_source[i];
 		result_dto.data_double.id_tag[index] = dto_ex.data_double.id_tag[i];
 		result_dto.data_double.value[index] = dto_ex.data_double.value[i];
 		result_dto.data_double.quality[index] = dto_ex.data_double.quality[i];
 
-		index = tag_info.tag_to_index.at(
-			DataCollectiionType::DATA_CHAR)[dto_ex.data_char.id_tag[i]];
+		index = tag_info.tag_to_index.at(DatasetType::DATA_CHAR)[dto_ex.data_char.id_tag[i]];
 		result_dto.data_char.time_source[index] = dto_ex.data_char.time_source[i];
 		result_dto.data_char.id_tag[index] = dto_ex.data_char.id_tag[i];
 		result_dto.data_char.value[index] = dto_ex.data_char.value[i];

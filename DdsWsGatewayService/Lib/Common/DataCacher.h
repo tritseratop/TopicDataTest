@@ -3,6 +3,7 @@
 
 #include "Lib/Common/Mappers.h"
 #include "Utilities/Common/ThreadSafeQueue/ThreadSafeQueue.h"
+#include "Utilities/Dds/Config.h"
 
 #include <deque>
 #include <unordered_map>
@@ -13,7 +14,7 @@ class Cacher
 {
 public:
 	virtual std::optional<std::string> pop() = 0;
-	virtual std::optional<std::string> getLast() = 0;
+	virtual std::optional<std::string> getLast() const = 0;
 };
 
 class DataCacher : public Cacher
@@ -24,16 +25,25 @@ public:
 	void cache(DDSData data);
 	void cache(const DDSDataEx& data);
 
+	void update(DDSData data);
+	void update(const DDSDataEx& data);
+
+	void updateOnlyDifferent(DDSData data);
+	void updateOnlyDifferent(const DDSDataEx& data);
+
+	void unsafe_push(DDSData data);
+	void unsafe_push(const DDSDataEx& data);
+
 	std::optional<std::string> pop() override;
-	std::optional<std::string> getLast() override;
+	std::optional<std::string> getLast() const override;
 
 	std::deque<MediateDataDto> getDataCacheCopy() const;
 
 private:
 	size_t depth_;
-	ThreadSafeDeque<MediateDataDto> data_cache_;
+	std::deque<MediateDataDto> data_cache_;
 
-	mutable std::mutex cache_change_;
+	mutable std::shared_mutex cache_mutex_;
 
 	MediateDtoMapper dto_mapper_;
 	DdsDataExMapper ddsdata_ex_mapper_;
@@ -51,7 +61,7 @@ public:
 	void cache(const DDSAlarmEx& data);
 
 	std::optional<std::string> pop() override;
-	std::optional<std::string> getLast() override;
+	std::optional<std::string> getLast() const override;
 
 	std::deque<MediateAlarmDto> getAlarmCacheCopy() const;
 

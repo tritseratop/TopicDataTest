@@ -1,4 +1,4 @@
-#include "Utilities/Dds/Configure.h"
+#include "Utilities/Dds/Config.h"
 
 namespace scada_ate::dds
 {

@@ -20,7 +20,7 @@ namespace scada_ate::dds::publisher
 class Service
 {
 public:
-	Service(const ParticipantConfigure<Configure>& config);
+	Service(const ParticipantConfig<Config>& config);
 	Service();
 	virtual ~Service();
 
@@ -31,15 +31,15 @@ public:
 	void runPublishers();
 	void testRunPublishers(BeforeTopicSend&);
 	void testRunPublishers(std::vector<BeforeTopicSendData>&);
-	void changeSubsConfig(const ParticipantConfigure<Configure>& config);
+	void changeSubsConfig(const ParticipantConfig<Config>& config);
 	void setData();
 	void setDdsData(DDSData* data);
 	void setDdsDataEx(DDSDataEx* data);
 
-	bool createNewPublisher(const Configure& config);
+	bool createNewPublisher(const Config& config);
 
 private:
-	ParticipantConfigure<Configure> config_;
+	ParticipantConfig<Config> config_;
 
 	Factory factory_;
 	std::vector<AbstractDdsPublisher*> publishers_;

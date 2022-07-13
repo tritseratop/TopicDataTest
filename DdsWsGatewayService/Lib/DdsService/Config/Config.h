@@ -1,13 +1,13 @@
-#ifndef DDS_SUB_CONFIGURE_H_
-#define DDS_SUB_CONFIGURE_H_
+#ifndef DDS_SUB_CONFIG_H_
+#define DDS_SUB_CONFIG_H_
 
-#include "Utilities/Dds/Configure.h"
+#include "Utilities/Dds/Config.h"
 
 #include <cstdint>
 
 namespace scada_ate::dds::subscriber
 {
-struct Configure
+struct Config
 {
 	int16_t id_map = 0;
 	size_t max_vector_size = 0; //TODO отдельно для каждого вектора в топике?
@@ -17,8 +17,8 @@ struct Configure
 
 	int64_t period = 1000;
 
-	friend bool operator==(const Configure& lhs, const Configure& rhs);
+	friend bool operator==(const Config& lhs, const Config& rhs);
 };
 } // namespace scada_ate::dds::subscriber
 
-#endif //!DDS_SUB_CONFIGURE_H_
+#endif //!DDS_SUB_CONFIG_H_

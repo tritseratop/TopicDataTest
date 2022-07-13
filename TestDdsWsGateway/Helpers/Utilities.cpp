@@ -16,7 +16,7 @@ void runWsConnection(TestCallback& test_callback, OnMessageRead& on_message_read
 	{
 		int64_t init_disp = 1'000'000'000'000'000;
 
-		const Configure ws_conf;
+		const Config ws_conf;
 		auto group = std::make_shared<Group>(0);
 		std::unordered_map<int64_t, std::shared_ptr<Group>> groups;
 		groups[group->getId()] = group;
@@ -31,7 +31,7 @@ void runWsConnection(TestCallback& test_callback, OnMessageRead& on_message_read
 		std::thread client_thread(
 			[&wsclient, &on_message_read]() { wsclient.run(on_message_read); });
 
-		group->runTestMessageSending(test_callback);
+		group->runTestCallback(test_callback);
 
 		client_thread.join();
 		server.stop();
@@ -48,7 +48,7 @@ void runWsConnection(TestCallback& test_callback,
 	{
 		int64_t init_disp = 1'000'000'000'000'000;
 
-		const Configure ws_conf;
+		const Config ws_conf;
 		auto group = std::make_shared<Group>(0, cacher);
 		std::unordered_map<int64_t, std::shared_ptr<Group>> groups;
 		groups[group->getId()] = group;
@@ -63,7 +63,7 @@ void runWsConnection(TestCallback& test_callback,
 		std::thread client_thread(
 			[&wsclient, &on_message_read]() { wsclient.run(on_message_read); });
 
-		group->runTestMessageSending(test_callback);
+		group->runTestCallback(test_callback);
 
 		client_thread.join();
 		server.stop();

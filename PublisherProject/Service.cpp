@@ -10,7 +10,7 @@ namespace scada_ate::dds::publisher
 using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
 
-Service::Service(const ParticipantConfigure<Configure>& config)
+Service::Service(const ParticipantConfig<Config>& config)
 	: participant_(nullptr)
 	, config_(config)
 	, publisher_(nullptr)
@@ -256,7 +256,7 @@ void Service::testRunPublishers(std::vector<BeforeTopicSendData>& before_topic_s
 	}
 }
 
-void Service::changeSubsConfig(const ParticipantConfigure<Configure>& config)
+void Service::changeSubsConfig(const ParticipantConfig<Config>& config)
 {
 	if (config_ == config)
 	{
@@ -300,7 +300,7 @@ void Service::setDdsDataEx(DDSDataEx* data)
 	}
 }
 
-bool Service::createNewPublisher(const Configure& config)
+bool Service::createNewPublisher(const Config& config)
 {
 	// TODO: узнать че менять в SUBSCRIBER_QOS_DEFAULT
 	AbstractDdsPublisher* pub = factory_.createPublisher(participant_, config);

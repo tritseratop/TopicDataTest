@@ -1,7 +1,7 @@
 #ifndef ABSTRACT_SUBSCRIBER_H_
 #define ABSTRACT_SUBSCRIBER_H_
 
-#include "Lib/DdsService/Config/Configure.h"
+#include "Lib/DdsService/Config/Config.h"
 
 namespace scada_ate::dds::subscriber
 {

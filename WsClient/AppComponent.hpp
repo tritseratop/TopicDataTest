@@ -1,7 +1,7 @@
 #ifndef AppComponent_hpp
 #define AppComponent_hpp
 
-#include "DdsWsGatewayService/Utilities/Ws/Configure.h"
+#include "DdsWsGatewayService/Utilities/Ws/Config.h"
 
 #include "oatpp/core/async/Executor.hpp"
 #include "oatpp/core/macro/component.hpp"
@@ -12,10 +12,10 @@ namespace scada_ate::ws
 class ClientAppComponent
 {
 private:
-	const Configure config;
+	const Config config;
 
 public:
-	ClientAppComponent(const Configure& config_)
+	ClientAppComponent(const Config& config_)
 		: config(config_)
 	{ }
 

@@ -3,7 +3,7 @@
 
 #include "WsClient/WSListener.hpp"
 
-#include "DdsWsGatewayService/Utilities/Ws/Configure.h"
+#include "DdsWsGatewayService/Utilities/Ws/Config.h"
 
 namespace scada_ate::ws
 {
@@ -11,11 +11,11 @@ class WSClient
 {
 private:
 	std::string login;
-	const Configure config;
+	const Config config;
 	std::deque<int64_t> cache_;
 
 public:
-	WSClient(const Configure& config_)
+	WSClient(const Config& config_)
 		: config(config_)
 	{ }
 	void run(const OnMessageRead& on_message_read);

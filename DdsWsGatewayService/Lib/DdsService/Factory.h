@@ -16,7 +16,7 @@ class Factory
 public:
 	virtual ~Factory() { }
 	AbstractSubscriber* createSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
-										 const Configure& config,
+										 const Config& config,
 										 std::shared_ptr<void> cacher) const;
 };
 
@@ -25,7 +25,7 @@ class ConcreteSubscriber : public AbstractSubscriber
 {
 public:
 	ConcreteSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
-					   const Configure& config,
+					   const Config& config,
 					   std::shared_ptr<Cacher> cacher)
 		: participant_(participant)
 		, subscriber_(nullptr)
@@ -54,7 +54,7 @@ private:
 	eprosima::fastdds::dds::Topic* topic_;
 	eprosima::fastdds::dds::TypeSupport support_type_; // TODO не нужна как поле ?
 
-	Configure config_;
+	Config config_;
 
 	std::shared_ptr<Cacher> cacher_;
 

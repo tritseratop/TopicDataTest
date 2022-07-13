@@ -8,7 +8,7 @@
 #include "Lib/Common/DataCacher.h"
 
 #include "Utilities/Common/PackageAnalyser.h"
-#include "Utilities/Dds/Configure.h"
+#include "Utilities/Dds/Config.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 
@@ -20,7 +20,7 @@ namespace scada_ate::dds::subscriber
 class Service
 {
 public:
-	Service(const ParticipantConfigure<Configure>& config, std::shared_ptr<DataCacher> cacher);
+	Service(const ParticipantConfig<Config>& config, std::shared_ptr<DataCacher> cacher);
 	virtual ~Service();
 
 	bool initSubscribers();
@@ -29,7 +29,7 @@ private:
 	bool initParticipant();
 	eprosima::fastdds::dds::DomainParticipantQos getParticipantQos();
 
-	bool initSubscriber(const Configure& config);
+	bool initSubscriber(const Config& config);
 	void deleteSubscribers();
 
 public:
@@ -37,7 +37,7 @@ public:
 	void stopSubscribers();
 	void notifyingWsService();
 
-	void changeSubscribersConfig(const ParticipantConfigure<Configure>& config);
+	void changeSubscribersConfig(const ParticipantConfig<Config>& config);
 
 	std::vector<AbstractSubscriber*> getSubscribers() const;
 
@@ -48,7 +48,7 @@ private:
 	void setVectorSizesInDataTopic();
 
 private:
-	ParticipantConfigure<Configure> config_;
+	ParticipantConfig<Config> config_;
 
 	eprosima::fastdds::dds::DomainParticipant* participant_;
 

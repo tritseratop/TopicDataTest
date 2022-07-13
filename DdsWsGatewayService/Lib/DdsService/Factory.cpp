@@ -1,13 +1,13 @@
 #include "Lib/DdsService/Factory.h"
 
 #include "Lib/Common/DataCacher.h"
-#include "Utilities/Dds/Configure.h"
+#include "Utilities/Dds/Config.h"
 
 namespace scada_ate::dds::subscriber
 {
 AbstractSubscriber*
 Factory::createSubscriber(eprosima::fastdds::dds::DomainParticipant* participant,
-						  const Configure& config,
+						  const Config& config,
 						  std::shared_ptr<void> cacher) const
 {
 	switch (config.topic_type)

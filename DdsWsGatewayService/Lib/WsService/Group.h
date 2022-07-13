@@ -17,20 +17,30 @@ private:
 	mutable std::mutex clients_mutex_;
 	std::shared_ptr<Cacher> cacher_;
 
+	std::atomic<bool> stop_ = false;
+	int64_t period_ms_ = 100;
+
 public:
 	Group(int64_t id, std::shared_ptr<Cacher> cacher = nullptr);
 
 	void addClient(const std::shared_ptr<ClientListener>& client);
 	void removeClientById(int64_t id);
 
-	void sendCacherDataToAllAsync();
+	void runSendingUpdatedValues();
+	bool sendUpdatedValuesToAllAsync();
 
-	void sendTextMessageToAllAsync(const oatpp::String& message);
+	void runSendingCachedValues();
+	bool sendCachedValuesToAllAsync();
+
+	void stopSending();
+
+	void sendMessageToAllAsync(const oatpp::String& message);
 	void sendCloseToAllAsync();
 
-	void runTestMessageSending(TestCallback& test_callback);
-	void sendTextMessageToAllAsync(const oatpp::String& message,
-								   const BeforeMessageSend& before_msg_send);
+	// Ìועמהû הכÿ עוסעמג
+	void runTestCallback(TestCallback& test_callback);
+	void sendMessageToAllAsync(const oatpp::String& message,
+							   const BeforeMessageSend& before_msg_send);
 
 	bool hasClients() const;
 	int64_t getId() const;

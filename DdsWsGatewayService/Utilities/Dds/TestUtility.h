@@ -4,7 +4,7 @@
 #include "Utilities/Common/Generators.h"
 #include "Utilities/Common/MediateDto.h"
 #include "Utilities/Common/nlohmann/json.hpp"
-#include "Utilities/Dds/Configure.h"
+#include "Utilities/Dds/Config.h"
 #include "Utilities/Dds/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 
 namespace scada_ate::dds

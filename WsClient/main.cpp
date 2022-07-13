@@ -10,7 +10,7 @@ using namespace scada_ate::ws;
 
 int main()
 {
-	Configure configure;
+	Config configure;
 #ifdef _DEBUG
 	configure.host = "127.0.0.1";
 #else

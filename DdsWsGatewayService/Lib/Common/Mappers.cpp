@@ -4,124 +4,183 @@ namespace scada_ate
 {
 using namespace dds;
 
-MediateDataDto DdsDataMapper::toMediateDataDto(DDSData data, const MappingInfo& info)
+MediateDataDto DdsDataMapper::toMediateDataDto(DDSData dataset, const MappingInfo& info)
 {
-	std::vector<std::vector<char>> data_char;
-	data_char.reserve(data.data_char().value().size());
-
 	auto tags = info.tags;
 	for (auto& [type, tag] : tags)
 	{
-		tag.resize(data.data_char().value().size());
+		tag.resize(dataset.data_char().value().size());
 	}
 
-	for (int i = 0; i < data.data_char().value().size(); ++i)
+	std::vector<std::vector<char>> data_char;
+	data_char.reserve(dataset.data_char().value().size());
+
+	for (int i = 0; i < dataset.data_char().value().size(); ++i)
 	{
-		data_char.push_back(std::move(data.data_char().value()[i].value()));
+		data_char.push_back(std::move(dataset.data_char().value()[i].value()));
 	}
 
-	MediateDataDto result{data.time_service(),
+	MediateDataDto result{dataset.time_service(),
 
-						  {std::vector(data.data_int().value().size(), data.time_source()),
-						   std::move(tags.at(DataCollectiionType::DATA_INT)),
-						   std::move(data.data_int().value()),
-						   std::move(data.data_int().quality())},
+						  {std::vector(dataset.data_int().value().size(), dataset.time_source()),
+						   std::move(tags.at(DatasetType::DATA_INT)),
+						   std::move(dataset.data_int().value()),
+						   std::move(dataset.data_int().quality())},
 
-						  {std::vector(data.data_float().value().size(), data.time_source()),
-						   std::move(tags.at(DataCollectiionType::DATA_FLOAT)),
-						   std::move(data.data_float().value()),
-						   std::move(data.data_float().quality())},
+						  {std::vector(dataset.data_float().value().size(), dataset.time_source()),
+						   std::move(tags.at(DatasetType::DATA_FLOAT)),
+						   std::move(dataset.data_float().value()),
+						   std::move(dataset.data_float().quality())},
 
-						  {std::vector(data.data_double().value().size(), data.time_source()),
-						   std::move(tags.at(DataCollectiionType::DATA_DOUBLE)),
-						   std::move(data.data_double().value()),
-						   std::move(data.data_double().quality())},
+						  {std::vector(dataset.data_double().value().size(), dataset.time_source()),
+						   std::move(tags.at(DatasetType::DATA_DOUBLE)),
+						   std::move(dataset.data_double().value()),
+						   std::move(dataset.data_double().quality())},
 
-						  {std::vector(data.data_char().value().size(), data.time_source()),
-						   std::move(tags.at(DataCollectiionType::DATA_CHAR)),
+						  {std::vector(dataset.data_char().value().size(), dataset.time_source()),
+						   std::move(tags.at(DatasetType::DATA_CHAR)),
 						   std::move(data_char),
-						   std::move(data.data_char().quality())}};
+						   std::move(dataset.data_char().quality())}};
 	return result;
 }
 
-MediateDataDto DdsDataExMapper::toMediateDataDto(DDSDataEx cur_data_ex,
-												 const MappingInfo& info,
-												 MediateDataDto prev_dto)
+MediateDataDto DdsDataMapper::toMediateDataDtoOnlyDifferent(const DDSData& current_dataset,
+															const MediateDataDto& prev_dto,
+															const MappingInfo& info)
 {
-	prev_dto.time_service = cur_data_ex.time_service();
-	fillChanged(prev_dto.data_int,
-				std::move(cur_data_ex.data_int()),
-				info.tag_to_index.at(DataCollectiionType::DATA_INT));
-	fillChanged(prev_dto.data_float,
-				std::move(cur_data_ex.data_float()),
-				info.tag_to_index.at(DataCollectiionType::DATA_FLOAT));
-	fillChanged(prev_dto.data_double,
-				std::move(cur_data_ex.data_double()),
-				info.tag_to_index.at(DataCollectiionType::DATA_DOUBLE));
-	fillChanged(prev_dto.data_char,
-				std::move(cur_data_ex.data_char()),
-				info.tag_to_index.at(DataCollectiionType::DATA_CHAR));
+	return MediateDataDto();
+}
+
+MediateDataDto DdsDataExMapper::toMediateDataDto(const DDSDataEx& current_dataset,
+												 const MappingInfo& info,
+												 const MediateDataDto& prev_dto)
+{
+	auto result = prev_dto;
+	result.time_service = current_dataset.time_service();
+	insertDdsDataEx(
+		result.data_int, current_dataset.data_int(), info.tag_to_index.at(DatasetType::DATA_INT));
+	insertDdsDataEx(result.data_float,
+					current_dataset.data_float(),
+					info.tag_to_index.at(DatasetType::DATA_FLOAT));
+	insertDdsDataEx(result.data_double,
+					current_dataset.data_double(),
+					info.tag_to_index.at(DatasetType::DATA_DOUBLE));
+	insertDdsDataEx(result.data_char,
+					current_dataset.data_char(),
+					info.tag_to_index.at(DatasetType::DATA_CHAR));
+
+	return result;
+}
+
+template<class T, class DdsDataSequence>
+void insertDdsDataEx(DataSequence<T>& sequence_to_change,
+					 const std::vector<DdsDataSequence>& current_sequence,
+					 const TagToIndex& tag_to_index)
+{
+	for (auto sample : current_sequence)
+	{
+		uint32_t index = tag_to_index.at(sample.id_tag());
+		if (index >= sequence_to_change.size())
+		{
+			sequence_to_change.resize(index + 1);
+		}
+		insertSample(sequence_to_change, sample, index);
+	}
+}
+
+template<class T, class DdsDataSequence>
+void insertSample(DataSequence<T>& sequence, const DdsDataSequence& sample, uint32_t index)
+{
+	sequence.time_source[index] = sample.time_source();
+	sequence.id_tag[index] = sample.id_tag();
+	sequence.value[index] = sample.value();
+	sequence.quality[index] = sample.quality();
+}
+
+MediateDataDto DdsDataExMapper::toMediateDataDtoOnlyDifferent(const DDSDataEx& current_dataset,
+															  const MappingInfo& info,
+															  MediateDataDto prev_dto)
+{
+	prev_dto.time_service = current_dataset.time_service();
+	selectOnlyDifferent(prev_dto.data_int,
+						std::move(current_dataset.data_int()),
+						info.tag_to_index.at(DatasetType::DATA_INT));
+	selectOnlyDifferent(prev_dto.data_float,
+						std::move(current_dataset.data_float()),
+						info.tag_to_index.at(DatasetType::DATA_FLOAT));
+	selectOnlyDifferent(prev_dto.data_double,
+						std::move(current_dataset.data_double()),
+						info.tag_to_index.at(DatasetType::DATA_DOUBLE));
+	selectOnlyDifferent(prev_dto.data_char,
+						std::move(current_dataset.data_char()),
+						info.tag_to_index.at(DatasetType::DATA_CHAR));
 
 	return prev_dto;
 }
 
-template<class T, class DdsSample>
-void fillChanged(DataSampleSequence<T>& prev_dto_collection,
-				 std::vector<DdsSample> cur_samples,
-				 const TagToIndex& tag_to_index)
+template<class T, class DdsDataSequence>
+void selectOnlyDifferent(DataSequence<T> sequence_to_change,
+						 const std::vector<DdsDataSequence>& current_sequence,
+						 const TagToIndex& tag_to_index)
 {
-	for (auto sample : std::move(cur_samples))
+	DataSequence<T> result;
+	for (const auto& sample : current_sequence)
 	{
-		if (tag_to_index.at(sample.id_tag()) >= prev_dto_collection.size())
+		uint32_t index = tag_to_index.at(sample.id_tag());
+		if (!isEqualValues(sequence_to_change, sample, index))
 		{
-			prev_dto_collection.resize(tag_to_index.at(sample.id_tag()) + 1);
+			pushBackSample(result, sample);
 		}
-		prev_dto_collection.time_source[tag_to_index.at(sample.id_tag())] = sample.time_source();
-		prev_dto_collection.id_tag[tag_to_index.at(sample.id_tag())] = sample.id_tag();
-		prev_dto_collection.value[tag_to_index.at(sample.id_tag())] = sample.value();
-		prev_dto_collection.quality[tag_to_index.at(sample.id_tag())] = sample.quality();
 	}
 }
 
-template<class T>
-void fillChanged(DataSampleSequence<T>& prev_dto_collection,
-				 std::vector<DataExChar> cur_samples,
-				 const TagToIndex& tag_to_index)
+template<class T, class DdsDataSequence>
+bool isEqualValues(const DataSequence<T>& sequence, const DdsDataSequence& sample, uint32_t index)
 {
-	size_t n = cur_samples.size();
-	for (auto sample : std::move(cur_samples))
-	{
-		if (tag_to_index.at(sample.id_tag()) >= prev_dto_collection.size())
-		{
-			prev_dto_collection.resize(tag_to_index.at(sample.id_tag()) + 1);
-		}
-		prev_dto_collection.time_source[tag_to_index.at(sample.id_tag())] = sample.time_source();
-		prev_dto_collection.id_tag[tag_to_index.at(sample.id_tag())] = sample.id_tag();
-		prev_dto_collection.value[tag_to_index.at(sample.id_tag())] = std::move(sample.value());
-		prev_dto_collection.quality[tag_to_index.at(sample.id_tag())] = sample.quality();
-	}
+	return sequence.id_tag[index] == sample.id_tag() && sequence.value[index] == sample.value()
+		   && sequence.quality[index] == sample.quality();
 }
 
-MediateAlarmDto DdsAlarmMapper::toMediateAlarmDto(DDSAlarm data, const MappingInfo& info)
+template<class T, class DdsDataSequence>
+void pushBackSample(DataSequence<T>& sequence, const DdsDataSequence& sample)
 {
-	auto tags = info.tags.at(DataCollectiionType::ALARM_UINT32);
-	tags.resize(data.alarms().size());
+	sequence.time_source.push_back(sample.time_source());
+	sequence.id_tag.push_back(sample.id_tag());
+	sequence.value.push_back(sample.value());
+	sequence.quality.push_back(sample.quality());
+}
 
-	MediateAlarmDto result{data.time_service(),
-						   std::vector(data.alarms().size(), data.time_source()),
+//template<class T>
+//void insertDdsDataEx(DataSequence<T>& sequence_to_change,
+//					 std::vector<DataExChar> current_sequence,
+//					 const TagToIndex& tag_to_index)
+//{
+//	for (auto sample : std::move(current_sequence))
+//	{
+//		insertSample(sequence_to_change, std::move(sample), tag_to_index);
+//	}
+//}
+
+MediateAlarmDto DdsAlarmMapper::toMediateAlarmDto(DDSAlarm dataset, const MappingInfo& info)
+{
+	auto tags = info.tags.at(DatasetType::ALARM_UINT32);
+	tags.resize(dataset.alarms().size());
+
+	MediateAlarmDto result{dataset.time_service(),
+						   std::vector(dataset.alarms().size(), dataset.time_source()),
 						   std::move(tags),
-						   std::move(data.alarms()),
-						   std::move(data.quality())};
+						   std::move(dataset.alarms()),
+						   std::move(dataset.quality())};
 	return result;
 }
 
 MediateAlarmDto DdsAlarmExMapper::toMediateAlarmDto(MediateAlarmDto prev_dto,
-													const DDSAlarmEx& cur_data_ex,
+													const DDSAlarmEx& current_dataset,
 													const MappingInfo& info)
 {
-	prev_dto.time_service = cur_data_ex.time_service();
-	/*fillChanged(
-		prev_dto, cur_data_ex.alarms(), info.tag_to_index.at(DataCollectiionType::ALARM_UINT32));*/
+	prev_dto.time_service = current_dataset.time_service();
+	/*insertDdsDataEx(
+		prev_dto, current_dataset.alarms(), info.tag_to_index.at(DatasetType::ALARM_UINT32));*/
 	return prev_dto;
 }
 
