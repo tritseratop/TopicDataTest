@@ -51,6 +51,63 @@ TEST(DdsToDtoMapping, DdsDataToMediateDto)
 	}
 }
 
+TEST(DdsToDtoMapping, DdsDataToMediateDtoOnPrev)
+{
+	using namespace scada_ate::dds;
+	{
+		size_t offset = 4;
+		VectorsForData vectors(8, 4);
+		for (auto& el : vectors.time_values)
+		{
+			el = vectors.time_values[0];
+		}
+		auto info = getMappingInfo(8);
+		auto dds_data = getEqualDdsData(vectors, info);
+
+		DdsDataMapper ddsdata_mapper;
+		MediateDataDto full = ddsdata_mapper.toMediateDataDto(dds_data.data, dds_data.tags_info);
+
+		auto vectors_pair = divideVectorsForDataToTwo(vectors, offset);
+		auto mapping_pair = divideMappingInfoToTwo(info, offset);
+
+		auto dds_data_first = getEqualDdsData(vectors_pair.first, mapping_pair.first);
+		auto dds_data_second = getEqualDdsData(vectors_pair.second, mapping_pair.second);
+
+		auto dto_first = ddsdata_mapper.toMediateDataDtoOnPrevBase(
+			dds_data_first.data, MediateDataDto(), dds_data_first.tags_info);
+		MediateDataDto dto_second = ddsdata_mapper.toMediateDataDtoOnPrevBase(
+			dds_data_second.data, dto_first, dds_data_second.tags_info);
+
+		EXPECT_EQ(full, dto_second);
+	}
+	{
+		size_t offset = 0;
+		VectorsForData vectors(8, 1);
+		for (auto& el : vectors.time_values)
+		{
+			el = vectors.time_values[0];
+		}
+		auto info = getMappingInfo(8);
+		auto dds_data = getEqualDdsData(vectors, info);
+
+		DdsDataMapper ddsdata_mapper;
+		MediateDataDto full = ddsdata_mapper.toMediateDataDto(dds_data.data, dds_data.tags_info);
+
+		auto vectors_pair = divideVectorsForDataToTwo(vectors, offset);
+		auto mapping_pair = divideMappingInfoToTwo(info, offset);
+
+		auto dds_data_first = getEqualDdsData(vectors_pair.first, mapping_pair.first);
+		auto dds_data_second = getEqualDdsData(vectors_pair.second, mapping_pair.second);
+
+		auto dto_first = ddsdata_mapper.toMediateDataDtoOnPrevBase(
+			dds_data_first.data, MediateDataDto(), dds_data_first.tags_info);
+		MediateDataDto dto_second = ddsdata_mapper.toMediateDataDtoOnPrevBase(
+			dds_data_second.data, dto_first, dds_data_second.tags_info);
+
+		EXPECT_EQ(full, dto_second);
+	}
+}
+
 TEST(DdsToDtoMapping, DdsDataExToMediateDto)
 {
 	using namespace scada_ate::dds;
@@ -292,10 +349,11 @@ void DdsDataTest()
 
 	ParticipantConfig<subscriber::Config> sub_config;
 	MappingInfo info = getMappingInfo(100);
-	subscriber::Config sub_ddsdata_config = {0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100};
+	subscriber::Config sub_ddsdata_config = {
+		0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, info};
 	sub_config.configs = {sub_ddsdata_config};
 
-	auto cacher = std::make_shared<DataCacher>(100, info);
+	auto cacher = std::make_shared<DataCacher>(100);
 	subscriber::Service* mysub = new subscriber::Service(sub_config, cacher);
 
 	std::thread pub_thread([mypub, mysub, &before_topic_send]() {
@@ -373,12 +431,13 @@ void DdsDataTestManyTopics()
 
 	ParticipantConfig<subscriber::Config> sub_config;
 	MappingInfo info = getMappingInfo(100);
-	subscriber::Config sub_ddsdata_config = {0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100};
+	subscriber::Config sub_ddsdata_config = {
+		0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, info};
 	subscriber::Config sub_ddsdata_config2 = {
-		0, 100, "DDSData_Second", "DDSData", TopicType::DDS_DATA, 100};
+		0, 100, "DDSData_Second", "DDSData", TopicType::DDS_DATA, 100, info};
 	sub_config.configs = {sub_ddsdata_config, sub_ddsdata_config2};
 
-	auto cacher = std::make_shared<DataCacher>(200, info);
+	auto cacher = std::make_shared<DataCacher>(200);
 	subscriber::Service* mysub = new subscriber::Service(sub_config, cacher);
 
 	std::thread pub_thread([mypub, mysub, &pub_callbacks]() {
@@ -464,10 +523,10 @@ void DdsDataExTest()
 	ParticipantConfig<subscriber::Config> sub_config;
 
 	subscriber::Config sub_ddsdata_config = {
-		1, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, 100};
+		1, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, 100, info};
 	sub_config.configs = {sub_ddsdata_config};
 
-	auto cacher = std::make_shared<DataCacher>(100, info);
+	auto cacher = std::make_shared<DataCacher>(100);
 	subscriber::Service* mysub = new subscriber::Service(sub_config, cacher);
 
 	std::thread pub_thread([mypub, mysub, &before_topic_send]() {
@@ -503,10 +562,10 @@ void DdsDataExTest()
 //	DdsDataExTest();
 //}
 
-TEST(DdsConnectionTest, DdsDataTest)
-{
-	DdsDataTest();
-}
+//TEST(DdsConnectionTest, DdsDataTest)
+//{
+//	DdsDataTest();
+//}
 
 TEST(DdsConnectionTest, DdsDataTestManyTopics)
 {
@@ -557,10 +616,11 @@ void OneToOneConnection()
 
 	ParticipantConfig<subscriber::Config> sub_config;
 	MappingInfo info = getMappingInfo(100);
-	subscriber::Config sub_ddsdata_config = {0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100};
+	subscriber::Config sub_ddsdata_config = {
+		0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, info};
 	sub_config.configs = {sub_ddsdata_config};
 
-	auto cacher = std::make_shared<DataCacher>(100, info);
+	auto cacher = std::make_shared<DataCacher>(100);
 	subscriber::Service* mysub = new subscriber::Service(sub_config, cacher);
 
 	//******************** WS ********************//
@@ -618,10 +678,10 @@ void OneToOneConnection()
 	}
 }
 
-//TEST(DdsWsService, OneToOneConnection)
-//{
-//	OneToOneConnection();
-//}
+TEST(DdsWsService, OneToOneConnection)
+{
+	OneToOneConnection();
+}
 
 int main(int argc, char* argv[])
 {

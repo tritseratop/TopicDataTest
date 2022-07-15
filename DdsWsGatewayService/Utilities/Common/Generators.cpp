@@ -1,5 +1,7 @@
 #include "Utilities/Common/Generators.h"
 
+#include <iterator>
+
 namespace scada_ate
 {
 VectorsForData::VectorsForData(size_t size, size_t char_size)
@@ -18,7 +20,7 @@ VectorsForData::VectorsForData(size_t size, size_t char_size)
 template<>
 std::vector<char> generateVector(size_t size)
 {
-	static const char alphanum[] = "0123456789"
+	static const char alphanum[] = "123456789"
 								   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 								   "abcdefghijklmnopqrstuvwxyz";
 	std::vector<char> result;

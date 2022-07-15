@@ -20,9 +20,9 @@ void pushBackContainerWithChars(std::back_insert_iterator<T> result_it,
 std::string convertCharVectorToString(const std::vector<char>& chars);
 
 template<class T, class DdsDataSequence>
-void insertDdsDataEx(DataSequence<T>& sequence_to_change,
-					 const std::vector<DdsDataSequence>& current_sequence,
-					 const dds::TagToIndex& tag_to_index);
+void overlapDdsDataEx(DataSequence<T>& sequence_to_change,
+					  const std::vector<DdsDataSequence>& current_sequence,
+					  const dds::TagToIndex& tag_to_index);
 
 template<class T, class DdsDataSequence>
 void selectOnlyDifferent(DataSequence<T> sequence_to_change,
@@ -38,6 +38,13 @@ public:
 	DdsDataMapper() { }
 
 	MediateDataDto toMediateDataDto(DDSData dataset, const dds::MappingInfo& info);
+
+	MediateDataDto toMediateDataDtoOnPrevBase(DDSData current_dataset,
+											  const MediateDataDto& prev_dto,
+											  const dds::MappingInfo& info);
+	void overlapMediateDataDto(DDSData current_dataset,
+							   MediateDataDto& prev_dto,
+							   const dds::MappingInfo& info);
 
 	MediateDataDto toMediateDataDtoOnlyDifferent(const DDSData& current_dataset,
 												 const MediateDataDto& prev_dto,

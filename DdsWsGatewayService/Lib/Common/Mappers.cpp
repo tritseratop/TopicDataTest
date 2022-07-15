@@ -7,6 +7,7 @@ using namespace dds;
 MediateDataDto DdsDataMapper::toMediateDataDto(DDSData dataset, const MappingInfo& info)
 {
 	auto tags = info.tags;
+	//TODO зачем?
 	for (auto& [type, tag] : tags)
 	{
 		tag.resize(dataset.data_char().value().size());
@@ -44,6 +45,73 @@ MediateDataDto DdsDataMapper::toMediateDataDto(DDSData dataset, const MappingInf
 	return result;
 }
 
+template<typename T>
+void moveDataSequence(DataSequence<T>& dest, DataSequence<T>&& source, size_t offset)
+{
+	std::move(
+		source.time_source.begin(), source.time_source.end(), dest.time_source.begin() + offset);
+	std::move(source.id_tag.begin(), source.id_tag.end(), dest.id_tag.begin() + offset);
+	std::move(source.value.begin(), source.value.end(), dest.value.begin() + offset);
+	std::move(source.quality.begin(), source.quality.end(), dest.quality.begin() + offset);
+}
+
+template<typename T>
+void moveBackDataSequence(DataSequence<T>& dest, DataSequence<T>&& source)
+{
+	std::move(
+		source.time_source.begin(), source.time_source.end(), std::back_inserter(dest.time_source));
+	std::move(source.id_tag.begin(), source.id_tag.end(), std::back_inserter(dest.id_tag));
+	std::move(source.value.begin(), source.value.end(), std::back_inserter(dest.value));
+	std::move(source.quality.begin(), source.quality.end(), std::back_inserter(dest.quality));
+}
+
+template<typename T>
+void overlapDataSequence(DataSequence<T>& dest, DataSequence<T>&& source, size_t offset)
+{
+	if (dest.size() == offset)
+	{
+		moveBackDataSequence(dest, std::move(source));
+	}
+	else
+	{
+		if (dest.size() < (source.size() + offset))
+		{
+			dest.resize(source.size() + offset);
+		}
+		moveDataSequence(dest, std::move(source), offset);
+	}
+}
+
+MediateDataDto DdsDataMapper::toMediateDataDtoOnPrevBase(DDSData current_dataset,
+														 const MediateDataDto& prev_dto,
+														 const dds::MappingInfo& info)
+{
+	auto current_dto = toMediateDataDto(std::move(current_dataset), info);
+	auto result = prev_dto;
+
+	result.time_service = current_dto.time_service;
+
+	overlapDataSequence(result.data_int, std::move(current_dto.data_int), info.offset);
+	overlapDataSequence(result.data_float, std::move(current_dto.data_float), info.offset);
+	overlapDataSequence(result.data_double, std::move(current_dto.data_double), info.offset);
+	overlapDataSequence(result.data_char, std::move(current_dto.data_char), info.offset);
+
+	return result;
+}
+
+void DdsDataMapper::overlapMediateDataDto(DDSData current_dataset,
+										  MediateDataDto& prev_dto,
+										  const dds::MappingInfo& info)
+{
+	auto current_dto = toMediateDataDto(std::move(current_dataset), info);
+	prev_dto.time_service = current_dto.time_service;
+
+	overlapDataSequence(prev_dto.data_int, std::move(current_dto.data_int), info.offset);
+	overlapDataSequence(prev_dto.data_float, std::move(current_dto.data_float), info.offset);
+	overlapDataSequence(prev_dto.data_double, std::move(current_dto.data_double), info.offset);
+	overlapDataSequence(prev_dto.data_char, std::move(current_dto.data_char), info.offset);
+}
+
 MediateDataDto DdsDataMapper::toMediateDataDtoOnlyDifferent(const DDSData& current_dataset,
 															const MediateDataDto& prev_dto,
 															const MappingInfo& info)
@@ -57,27 +125,27 @@ MediateDataDto DdsDataExMapper::toMediateDataDto(const DDSDataEx& current_datase
 {
 	auto result = prev_dto;
 	result.time_service = current_dataset.time_service();
-	insertDdsDataEx(
+	overlapDdsDataEx(
 		result.data_int, current_dataset.data_int(), info.tag_to_index.at(DatasetType::DATA_INT));
-	insertDdsDataEx(result.data_float,
-					current_dataset.data_float(),
-					info.tag_to_index.at(DatasetType::DATA_FLOAT));
-	insertDdsDataEx(result.data_double,
-					current_dataset.data_double(),
-					info.tag_to_index.at(DatasetType::DATA_DOUBLE));
-	insertDdsDataEx(result.data_char,
-					current_dataset.data_char(),
-					info.tag_to_index.at(DatasetType::DATA_CHAR));
+	overlapDdsDataEx(result.data_float,
+					 current_dataset.data_float(),
+					 info.tag_to_index.at(DatasetType::DATA_FLOAT));
+	overlapDdsDataEx(result.data_double,
+					 current_dataset.data_double(),
+					 info.tag_to_index.at(DatasetType::DATA_DOUBLE));
+	overlapDdsDataEx(result.data_char,
+					 current_dataset.data_char(),
+					 info.tag_to_index.at(DatasetType::DATA_CHAR));
 
 	return result;
 }
 
 template<class T, class DdsDataSequence>
-void insertDdsDataEx(DataSequence<T>& sequence_to_change,
-					 const std::vector<DdsDataSequence>& current_sequence,
-					 const TagToIndex& tag_to_index)
+void overlapDdsDataEx(DataSequence<T>& sequence_to_change,
+					  const std::vector<DdsDataSequence>& current_sequence,
+					  const TagToIndex& tag_to_index)
 {
-	for (auto sample : current_sequence)
+	for (const auto& sample : current_sequence)
 	{
 		uint32_t index = tag_to_index.at(sample.id_tag());
 		if (index >= sequence_to_change.size())
@@ -151,7 +219,7 @@ void pushBackSample(DataSequence<T>& sequence, const DdsDataSequence& sample)
 }
 
 //template<class T>
-//void insertDdsDataEx(DataSequence<T>& sequence_to_change,
+//void overlapDdsDataEx(DataSequence<T>& sequence_to_change,
 //					 std::vector<DataExChar> current_sequence,
 //					 const TagToIndex& tag_to_index)
 //{
@@ -179,7 +247,7 @@ MediateAlarmDto DdsAlarmExMapper::toMediateAlarmDto(MediateAlarmDto prev_dto,
 													const MappingInfo& info)
 {
 	prev_dto.time_service = current_dataset.time_service();
-	/*insertDdsDataEx(
+	/*overlapDdsDataEx(
 		prev_dto, current_dataset.alarms(), info.tag_to_index.at(DatasetType::ALARM_UINT32));*/
 	return prev_dto;
 }

@@ -6,69 +6,48 @@ namespace scada_ate
 {
 using namespace dds;
 
-DataCacher::DataCacher(size_t depth, MappingInfo mapping_info)
+DataCacher::DataCacher(size_t depth)
 	: depth_(depth)
-	, mapping_info_(std::move(mapping_info))
 { }
 
-void DataCacher::cache(DDSData data)
+void DataCacher::cache(DDSData data, const dds::MappingInfo& mapping)
 {
 	std::unique_lock<std::shared_mutex> w_lock(cache_mutex_);
-	unsafe_push(data);
+	unsafe_push(std::move(ddsdata_mapper_.toMediateDataDto(std::move(data), mapping)));
 }
 
-void DataCacher::cache(const DDSDataEx& data)
+void DataCacher::cache(const DDSDataEx& data, const dds::MappingInfo& mapping)
 {
 	std::unique_lock<std::shared_mutex> w_lock(cache_mutex_);
-	unsafe_push(data);
+	MediateDataDto dto = ddsdata_ex_mapper_.toMediateDataDto(
+		std::move(data), mapping, data_cache_.empty() ? MediateDataDto() : data_cache_.back());
+	unsafe_push(std::move(dto));
 }
 
-void DataCacher::update(DDSData data)
+void DataCacher::update(DDSData data, const dds::MappingInfo& mapping)
 {
 	std::unique_lock<std::shared_mutex> w_lock(cache_mutex_);
 	if (!data_cache_.empty() && data.time_service() < data_cache_.front().time_service)
 	{
 		return;
 	}
-	cache(std::move(data));
+	auto dto = ddsdata_mapper_.toMediateDataDtoOnPrevBase(
+		std::move(data), data_cache_.empty() ? MediateDataDto() : data_cache_.back(), mapping);
+	unsafe_push(std::move(dto));
 }
 
-void DataCacher::update(const DDSDataEx& data)
+void DataCacher::update(const DDSDataEx& data, const dds::MappingInfo& mapping)
 {
-	std::unique_lock<std::shared_mutex> w_lock(cache_mutex_);
-	if (!data_cache_.empty() && data.time_service() < data_cache_.front().time_service)
-	{
-		return;
-	}
-	unsafe_push(data);
+	cache(data, mapping);
 }
 
 void DataCacher::updateOnlyDifferent(DDSData data) { }
 
 void DataCacher::updateOnlyDifferent(const DDSDataEx& data) { }
 
-void DataCacher::unsafe_push(DDSData data)
+void DataCacher::unsafe_push(MediateDataDto&& dto)
 {
-	data_cache_.push_back(ddsdata_mapper_.toMediateDataDto(std::move(data), mapping_info_));
-	if (data_cache_.size() > depth_)
-	{
-		data_cache_.pop_front();
-	}
-}
-
-void DataCacher::unsafe_push(const DDSDataEx& data)
-{
-	if (!data_cache_.empty())
-	{
-		data_cache_.push_back(
-			ddsdata_ex_mapper_.toMediateDataDto(data, mapping_info_, data_cache_.back()));
-	}
-	else
-	{
-		//TODO MediateDataDto default constructor check
-		data_cache_.push_back(
-			ddsdata_ex_mapper_.toMediateDataDto(data, mapping_info_, MediateDataDto()));
-	}
+	data_cache_.push_back(std::move(dto));
 	if (data_cache_.size() > depth_)
 	{
 		data_cache_.pop_front();
@@ -104,12 +83,11 @@ std::deque<MediateDataDto> DataCacher::getDataCacheCopy() const
 
 AlarmCacher::AlarmCacher(size_t depth, MappingInfo mapping_info)
 	: depth_(depth)
-	, mapping_info_(std::move(mapping_info))
 { }
 
-void AlarmCacher::cache(DDSAlarm data) { }
+void AlarmCacher::cache(DDSAlarm data, const dds::MappingInfo& mapping) { }
 
-void AlarmCacher::cache(const DDSAlarmEx& data) { }
+void AlarmCacher::cache(const DDSAlarmEx& data, const dds::MappingInfo& mapping) { }
 
 std::optional<std::string> AlarmCacher::pop()
 {

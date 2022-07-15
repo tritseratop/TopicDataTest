@@ -41,6 +41,11 @@ struct DdsDataExUnion
 
 DdsDataExUnion getEqualDdsDataEx(size_t data_ex_size, size_t data_size, size_t char_size = 1);
 
+std::pair<VectorsForData, VectorsForData> divideVectorsForDataToTwo(const VectorsForData& vectors,
+																	size_t offset);
+
+std::pair<MappingInfo, MappingInfo> divideMappingInfoToTwo(const MappingInfo& info, size_t offset);
+
 struct OneTestConditions
 {
 	size_t all_vectors_sizes = 0;

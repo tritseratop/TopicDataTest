@@ -116,7 +116,7 @@ void ConcreteSubscriber<T, TPubSubType, Cacher>::cacheData(T data_)
 {
 	if (cacher_ != nullptr)
 	{
-		cacher_->cache(std::move(data_));
+		cacher_->cache(std::move(data_), config_.mapping);
 	}
 }
 

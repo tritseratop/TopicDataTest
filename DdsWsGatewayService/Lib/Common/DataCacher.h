@@ -20,19 +20,19 @@ public:
 class DataCacher : public Cacher
 {
 public:
-	DataCacher(size_t depth, dds::MappingInfo mapping_info);
+	DataCacher(size_t depth);
 
-	void cache(DDSData data);
-	void cache(const DDSDataEx& data);
+	void cache(DDSData data, const dds::MappingInfo& mapping);
+	void cache(const DDSDataEx& data, const dds::MappingInfo& mapping);
 
-	void update(DDSData data);
-	void update(const DDSDataEx& data);
+	void update(DDSData data, const dds::MappingInfo& mapping_);
+	void update(const DDSDataEx& data, const dds::MappingInfo& mapping);
 
+	//
 	void updateOnlyDifferent(DDSData data);
 	void updateOnlyDifferent(const DDSDataEx& data);
 
-	void unsafe_push(DDSData data);
-	void unsafe_push(const DDSDataEx& data);
+	void unsafe_push(MediateDataDto&& dto);
 
 	std::optional<std::string> pop() override;
 	std::optional<std::string> getLast() const override;
@@ -48,8 +48,6 @@ private:
 	MediateDtoMapper dto_mapper_;
 	DdsDataExMapper ddsdata_ex_mapper_;
 	DdsDataMapper ddsdata_mapper_;
-
-	const dds::MappingInfo mapping_info_;
 };
 
 class AlarmCacher : public Cacher
@@ -57,8 +55,8 @@ class AlarmCacher : public Cacher
 public:
 	AlarmCacher(size_t depth, dds::MappingInfo mapping_info_);
 
-	void cache(DDSAlarm data);
-	void cache(const DDSAlarmEx& data);
+	void cache(DDSAlarm data, const dds::MappingInfo& mapping);
+	void cache(const DDSAlarmEx& data, const dds::MappingInfo& mapping);
 
 	std::optional<std::string> pop() override;
 	std::optional<std::string> getLast() const override;
@@ -71,8 +69,6 @@ private:
 
 	DdsAlarmMapper dds_alarm_mapper_;
 	DdsAlarmExMapper dds_alarm_ex_mapper_;
-
-	const dds::MappingInfo mapping_info_;
 };
 } // namespace scada_ate
 

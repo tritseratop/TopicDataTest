@@ -40,6 +40,7 @@ struct MappingInfo
 {
 	std::unordered_map<DatasetType, Tags> tags;
 	std::unordered_map<DatasetType, TagToIndex> tag_to_index;
+	size_t offset;
 	std::string topic_name;
 	std::string info;
 };

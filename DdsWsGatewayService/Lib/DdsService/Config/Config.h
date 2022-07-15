@@ -17,6 +17,8 @@ struct Config
 
 	int64_t period = 1000;
 
+	MappingInfo mapping;
+
 	friend bool operator==(const Config& lhs, const Config& rhs);
 };
 } // namespace scada_ate::dds::subscriber

@@ -7,6 +7,8 @@
 
 namespace scada_ate
 {
+const char NO_VALUE_QUALITY = '0';
+
 template<class T>
 bool operator==(const std::vector<T>& lhs, const std::vector<T>& rhs)
 {
@@ -37,7 +39,7 @@ struct DataSequence
 		time_source.resize(size);
 		id_tag.resize(size);
 		value.resize(size);
-		quality.resize(size);
+		quality.resize(size, NO_VALUE_QUALITY);
 	}
 
 	friend bool operator==(const DataSequence& lhs, const DataSequence& rhs)
@@ -68,8 +70,7 @@ struct MediateDataDto
 
 	friend bool operator<(const MediateDataDto& lhs, const MediateDataDto& rhs)
 	{
-		return std::tie(lhs.topic_name, lhs.time_service)
-			   < std::tie(rhs.topic_name, rhs.time_service);
+		return lhs.time_service < rhs.time_service;
 	}
 };
 
@@ -99,7 +100,7 @@ struct MediateAlarmDto
 		time_source.resize(size);
 		id_tag.resize(size);
 		value.resize(size);
-		quality.resize(size);
+		quality.resize(size, NO_VALUE_QUALITY);
 	}
 
 	friend bool operator==(const MediateAlarmDto& lhs, const MediateAlarmDto& rhs)

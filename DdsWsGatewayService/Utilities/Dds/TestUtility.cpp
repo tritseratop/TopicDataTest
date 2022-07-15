@@ -251,6 +251,114 @@ DdsDataExUnion getEqualDdsDataEx(size_t data_ex_size, size_t data_size, size_t c
 	return {data, data_ex, dto, result_dto, tag_info};
 }
 
+std::pair<VectorsForData, VectorsForData> divideVectorsForDataToTwo(const VectorsForData& vectors,
+																	size_t offset)
+{
+	VectorsForData first(0);
+	first.time_service = vectors.time_service;
+
+	std::copy(vectors.time_values.begin(),
+			  vectors.time_values.begin() + offset,
+			  std::back_inserter(first.time_values));
+
+	std::copy(vectors.int_values.begin(),
+			  vectors.int_values.begin() + offset,
+			  std::back_inserter(first.int_values));
+	std::copy(vectors.int_qualities.begin(),
+			  vectors.int_qualities.begin() + offset,
+			  std::back_inserter(first.int_qualities));
+
+	std::copy(vectors.float_values.begin(),
+			  vectors.float_values.begin() + offset,
+			  std::back_inserter(first.float_values));
+	std::copy(vectors.float_qualities.begin(),
+			  vectors.float_qualities.begin() + offset,
+			  std::back_inserter(first.float_qualities));
+
+	std::copy(vectors.double_values.begin(),
+			  vectors.double_values.begin() + offset,
+			  std::back_inserter(first.double_values));
+	std::copy(vectors.double_qualities.begin(),
+			  vectors.double_qualities.begin() + offset,
+			  std::back_inserter(first.double_qualities));
+
+	first.char_value = vectors.char_value;
+	std::copy(vectors.char_qualities.begin(),
+			  vectors.char_qualities.begin() + offset,
+			  std::back_inserter(first.char_qualities));
+
+	VectorsForData second(0);
+	second.time_service = vectors.time_service;
+
+	std::copy(vectors.time_values.begin() + offset,
+			  vectors.time_values.end(),
+			  std::back_inserter(second.time_values));
+
+	std::copy(vectors.int_values.begin() + offset,
+			  vectors.int_values.end(),
+			  std::back_inserter(second.int_values));
+	std::copy(vectors.int_qualities.begin() + offset,
+			  vectors.int_qualities.end(),
+			  std::back_inserter(second.int_qualities));
+
+	std::copy(vectors.float_values.begin() + offset,
+			  vectors.float_values.end(),
+			  std::back_inserter(second.float_values));
+	std::copy(vectors.float_qualities.begin() + offset,
+			  vectors.float_qualities.end(),
+			  std::back_inserter(second.float_qualities));
+
+	std::copy(vectors.double_values.begin() + offset,
+			  vectors.double_values.end(),
+			  std::back_inserter(second.double_values));
+	std::copy(vectors.double_qualities.begin() + offset,
+			  vectors.double_qualities.end(),
+			  std::back_inserter(second.double_qualities));
+
+	second.char_value = vectors.char_value;
+	std::copy(vectors.char_qualities.begin() + offset,
+			  vectors.char_qualities.end(),
+			  std::back_inserter(second.char_qualities));
+
+	return {first, second};
+}
+
+std::pair<MappingInfo, MappingInfo> divideMappingInfoToTwo(const MappingInfo& info, size_t offset)
+{
+	MappingInfo first = info;
+	MappingInfo second;
+
+	first.offset = 0;
+	second.offset = offset;
+
+	for (auto& [type, tags] : first.tags)
+	{
+		tags.resize(offset);
+	}
+	for (auto& [type, tags] : info.tags)
+	{
+		std::copy(tags.begin() + offset, tags.end(), std::back_inserter(second.tags[type]));
+	}
+
+	second.tag_to_index = info.tag_to_index;
+	for (auto& [type, first_tag_to_index] : first.tag_to_index)
+	{
+		for (const auto& second_tag : second.tags[type])
+		{
+			first_tag_to_index.erase(second_tag);
+		}
+	}
+	for (auto& [type, second_tag_to_index] : second.tag_to_index)
+	{
+		for (const auto& first_tag : first.tags[type])
+		{
+			second_tag_to_index.erase(first_tag);
+		}
+	}
+
+	return {first, second};
+}
+
 bool OneTestConditions::operator==(const OneTestConditions& rhs) const
 {
 	return rhs.all_vectors_sizes == all_vectors_sizes && rhs.char_vector_sizes == char_vector_sizes
