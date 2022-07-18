@@ -11,15 +11,15 @@ namespace scada_ate::dds
 {
 MappingInfo getMappingInfo(size_t size = 4);
 
-struct DdsDataUnion
+struct DataUnion
 {
 	DDSData data;
 	MediateDataDto dto;
 	MappingInfo tags_info;
 };
 
-DdsDataUnion getEqualDdsData(size_t size, size_t char_size = 1);
-DdsDataUnion getEqualDdsData(const VectorsForData& vectors, const MappingInfo& tag_info);
+DataUnion getDataUnion(size_t size, size_t char_size = 1);
+DataUnion getDataUnion(const VectorsForData& vectors, const MappingInfo& tag_info);
 
 MediateDataDto getMediateDataDto(size_t size, size_t char_size = 1);
 MediateDataDto getMediateDataDto(const VectorsForData& vectors, const MappingInfo& tag_info);
@@ -30,7 +30,7 @@ DDSData getDdsData(const VectorsForData& vectors);
 DDSDataEx getDdsDataEx(size_t size, size_t char_size = 1);
 DDSDataEx getDdsDataEx(const VectorsForData& vectors, const MappingInfo& tag_info);
 
-struct DdsDataExUnion
+struct DataExUnion
 {
 	DDSData data;
 	DDSDataEx data_ex;
@@ -39,11 +39,10 @@ struct DdsDataExUnion
 	MappingInfo tags_info;
 };
 
-DdsDataExUnion getEqualDdsDataEx(size_t data_ex_size, size_t data_size, size_t char_size = 1);
+DataExUnion getDataExUnion(size_t data_ex_size, size_t data_size, size_t char_size = 1);
 
 std::pair<VectorsForData, VectorsForData> divideVectorsForDataToTwo(const VectorsForData& vectors,
 																	size_t offset);
-
 std::pair<MappingInfo, MappingInfo> divideMappingInfoToTwo(const MappingInfo& info, size_t offset);
 
 struct OneTestConditions

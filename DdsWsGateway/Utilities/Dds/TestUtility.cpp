@@ -111,15 +111,15 @@ DDSDataEx getDdsDataEx(const VectorsForData& vectors, const MappingInfo& tag_inf
 	return data;
 }
 
-DdsDataUnion getEqualDdsData(size_t size, size_t char_size)
+DataUnion getDataUnion(size_t size, size_t char_size)
 {
 	auto vectors = VectorsForData(size, char_size);
 	auto tag_info = getMappingInfo(size);
 
-	return getEqualDdsData(vectors, tag_info);
+	return getDataUnion(vectors, tag_info);
 }
 
-DdsDataUnion getEqualDdsData(const VectorsForData& vectors, const MappingInfo& tag_info)
+DataUnion getDataUnion(const VectorsForData& vectors, const MappingInfo& tag_info)
 {
 	auto vectors_ = vectors;
 	for (auto& el : vectors_.time_values)
@@ -184,7 +184,7 @@ void shuffleVector(std::vector<T>& v)
 	std::shuffle(v.begin(), v.end(), g);
 }
 
-DdsDataExUnion getEqualDdsDataEx(size_t data_ex_size, size_t data_size, size_t char_size)
+DataExUnion getDataExUnion(size_t data_ex_size, size_t data_size, size_t char_size)
 {
 	auto vectors = VectorsForData(data_size, char_size);
 	auto ex_vectors = VectorsForData(data_ex_size, char_size);

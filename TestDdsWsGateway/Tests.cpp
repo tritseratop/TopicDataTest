@@ -29,21 +29,21 @@ TEST(DdsToDtoMapping, DdsDataToMediateDto)
 {
 	using namespace scada_ate::dds;
 	{
-		auto dds_data = getEqualDdsData(4, 1);
+		auto dds_data = getDataUnion(4, 1);
 
 		DdsDataMapper ddsdata_mapper;
 		MediateDataDto d = ddsdata_mapper.toMediateDataDto(dds_data.data, dds_data.tags_info);
 		EXPECT_EQ(dds_data.dto, d);
 	}
 	{
-		auto dds_data = getEqualDdsData(5, 8);
+		auto dds_data = getDataUnion(5, 8);
 
 		DdsDataMapper ddsdata_mapper;
 		MediateDataDto d = ddsdata_mapper.toMediateDataDto(dds_data.data, dds_data.tags_info);
 		EXPECT_EQ(dds_data.dto, d);
 	}
 	{
-		auto dds_data = getEqualDdsData(0, 8);
+		auto dds_data = getDataUnion(0, 8);
 
 		DdsDataMapper ddsdata_mapper;
 		MediateDataDto d = ddsdata_mapper.toMediateDataDto(dds_data.data, dds_data.tags_info);
@@ -62,7 +62,7 @@ TEST(DdsToDtoMapping, DdsDataToMediateDtoOnPrev)
 			el = vectors.time_values[0];
 		}
 		auto info = getMappingInfo(8);
-		auto dds_data = getEqualDdsData(vectors, info);
+		auto dds_data = getDataUnion(vectors, info);
 
 		DdsDataMapper ddsdata_mapper;
 		MediateDataDto full = ddsdata_mapper.toMediateDataDto(dds_data.data, dds_data.tags_info);
@@ -70,8 +70,8 @@ TEST(DdsToDtoMapping, DdsDataToMediateDtoOnPrev)
 		auto vectors_pair = divideVectorsForDataToTwo(vectors, offset);
 		auto mapping_pair = divideMappingInfoToTwo(info, offset);
 
-		auto dds_data_first = getEqualDdsData(vectors_pair.first, mapping_pair.first);
-		auto dds_data_second = getEqualDdsData(vectors_pair.second, mapping_pair.second);
+		auto dds_data_first = getDataUnion(vectors_pair.first, mapping_pair.first);
+		auto dds_data_second = getDataUnion(vectors_pair.second, mapping_pair.second);
 
 		auto dto_first = ddsdata_mapper.toMediateDataDtoOnPrevBase(
 			dds_data_first.data, MediateDataDto(), dds_data_first.tags_info);
@@ -88,7 +88,7 @@ TEST(DdsToDtoMapping, DdsDataToMediateDtoOnPrev)
 			el = vectors.time_values[0];
 		}
 		auto info = getMappingInfo(8);
-		auto dds_data = getEqualDdsData(vectors, info);
+		auto dds_data = getDataUnion(vectors, info);
 
 		DdsDataMapper ddsdata_mapper;
 		MediateDataDto full = ddsdata_mapper.toMediateDataDto(dds_data.data, dds_data.tags_info);
@@ -96,8 +96,8 @@ TEST(DdsToDtoMapping, DdsDataToMediateDtoOnPrev)
 		auto vectors_pair = divideVectorsForDataToTwo(vectors, offset);
 		auto mapping_pair = divideMappingInfoToTwo(info, offset);
 
-		auto dds_data_first = getEqualDdsData(vectors_pair.first, mapping_pair.first);
-		auto dds_data_second = getEqualDdsData(vectors_pair.second, mapping_pair.second);
+		auto dds_data_first = getDataUnion(vectors_pair.first, mapping_pair.first);
+		auto dds_data_second = getDataUnion(vectors_pair.second, mapping_pair.second);
 
 		auto dto_first = ddsdata_mapper.toMediateDataDtoOnPrevBase(
 			dds_data_first.data, MediateDataDto(), dds_data_first.tags_info);
@@ -115,31 +115,31 @@ TEST(DdsToDtoMapping, DdsDataExToMediateDto)
 
 	DdsDataExMapper ddsdataex_mapper;
 	{
-		DdsDataExUnion data_ex_union = getEqualDdsDataEx(3, 5);
+		DataExUnion data_ex_union = getDataExUnion(3, 5);
 		MediateDataDto dto = ddsdataex_mapper.toMediateDataDto(
 			data_ex_union.data_ex, data_ex_union.tags_info, data_ex_union.dto_to_change);
 		EXPECT_EQ(dto, data_ex_union.result_dto);
 	}
 	{
-		DdsDataExUnion data_ex_union = getEqualDdsDataEx(3, 0);
+		DataExUnion data_ex_union = getDataExUnion(3, 0);
 		MediateDataDto dto = ddsdataex_mapper.toMediateDataDto(
 			data_ex_union.data_ex, data_ex_union.tags_info, data_ex_union.dto_to_change);
 		EXPECT_EQ(dto, data_ex_union.result_dto);
 	}
 	{
-		DdsDataExUnion data_ex_union = getEqualDdsDataEx(500, 1000);
+		DataExUnion data_ex_union = getDataExUnion(500, 1000);
 		MediateDataDto dto = ddsdataex_mapper.toMediateDataDto(
 			data_ex_union.data_ex, data_ex_union.tags_info, data_ex_union.dto_to_change);
 		EXPECT_EQ(dto, data_ex_union.result_dto);
 	}
 	{
-		DdsDataExUnion data_ex_union = getEqualDdsDataEx(0, 0);
+		DataExUnion data_ex_union = getDataExUnion(0, 0);
 		MediateDataDto dto = ddsdataex_mapper.toMediateDataDto(
 			data_ex_union.data_ex, data_ex_union.tags_info, data_ex_union.dto_to_change);
 		EXPECT_EQ(dto, data_ex_union.result_dto);
 	}
 	{
-		DdsDataExUnion data_ex_union = getEqualDdsDataEx(0, 3);
+		DataExUnion data_ex_union = getDataExUnion(0, 3);
 		MediateDataDto dto = ddsdataex_mapper.toMediateDataDto(
 			data_ex_union.data_ex, data_ex_union.tags_info, data_ex_union.dto_to_change);
 		EXPECT_EQ(dto, data_ex_union.result_dto);
@@ -308,21 +308,19 @@ TEST(WsConnectionTest, RunWithoutCoroutine)
 void DdsDataTest()
 {
 	using namespace scada_ate::dds;
+
 	ParticipantConfig<publisher::Config> pub_config;
 	publisher::Config ddsdata_config = {
 		0, 10, 10, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 10, false};
 	pub_config.configs = {ddsdata_config};
-
 	publisher::Service* mypub = new publisher::Service(pub_config);
 
 	std::vector<DDSData> dds_datas;
 	dds_datas.reserve(100);
-
 	for (size_t i = 0; i < 100; ++i)
 	{
 		dds_datas.push_back(getDdsData(5, 3));
 	}
-
 	auto dds_data_tmp = dds_datas;
 	auto data = dds_data_tmp.back();
 
@@ -336,13 +334,6 @@ void DdsDataTest()
 			return false;
 		}
 		return true;
-	};
-
-	BeforeTopicSendData before_topic_send_data = [&dds_data_tmp](void* data) {
-		//data_.time_service(TimeConverter::GetTime_LLmcs());
-		auto tmp = dds_data_tmp.back();
-		(*static_cast<DDSData*>(data)) = tmp;
-		dds_data_tmp.pop_back();
 	};
 
 	mypub->initPublishers();
