@@ -3,9 +3,9 @@
 
 #include "PublisherProject/Config.h"
 
-#include "DdsWsGatewayService/Utilities/Common/TimeConverter/TimeConverter.hpp"
-#include "DdsWsGatewayService/Utilities/Dds/Callbacks.h"
-#include "DdsWsGatewayService/Utilities/Dds/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "DdsWsGateway/Utilities/Common/TimeConverter/TimeConverter.hpp"
+#include "DdsWsGateway/Utilities/Dds/Callbacks.h"
+#include "DdsWsGateway/Utilities/Dds/TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/publisher/DataWriter.hpp>

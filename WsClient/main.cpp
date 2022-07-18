@@ -1,7 +1,7 @@
 #include "WsClient/WSClient.hpp"
 
-#include "DdsWsGatewayService/Utilities/Common/PackageAnalyser.h"
-#include "DdsWsGatewayService/Utilities/Ws/TestUtility.h"
+#include "DdsWsGateway/Utilities/Common/PackageAnalyser.h"
+#include "DdsWsGateway/Utilities/Ws/TestUtility.h"
 
 #include <iostream>
 

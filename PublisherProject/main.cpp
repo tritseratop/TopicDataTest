@@ -1,6 +1,6 @@
 #include "PublisherProject/Service.h"
 
-#include "DdsWsGatewayService/Utilities/Dds/TestUtility.h"
+#include "DdsWsGateway/Utilities/Dds/TestUtility.h"
 
 #include <fstream>
 

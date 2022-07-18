@@ -2,8 +2,8 @@
 
 #include "WsClient/WSClient.hpp"
 
-#include "DdsWsGatewayService/Lib/Common/DataCacher.h"
-#include "DdsWsGatewayService/Lib/WsService/Server.h"
+#include "DdsWsGateway/Lib/Common/DataCacher.h"
+#include "DdsWsGateway/Lib/WsService/Server.h"
 #include "Lib/WsService/AppComponent.h"
 
 namespace scada_ate

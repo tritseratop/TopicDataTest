@@ -3,7 +3,7 @@
 
 #include "WsClient/WSListener.hpp"
 
-#include "DdsWsGatewayService/Utilities/Ws/Config.h"
+#include "DdsWsGateway/Utilities/Ws/Config.h"
 
 namespace scada_ate::ws
 {

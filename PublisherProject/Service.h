@@ -3,8 +3,8 @@
 
 #include "PublisherProject/Factory.h"
 
-#include "DdsWsGatewayService/Utilities/Dds/Callbacks.h"
-#include "DdsWsGatewayService/Utilities/Dds/ConfigTopic/ConfigTopicPubSubTypes.h"
+#include "DdsWsGateway/Utilities/Dds/Callbacks.h"
+#include "DdsWsGateway/Utilities/Dds/ConfigTopic/ConfigTopicPubSubTypes.h"
 
 #include <fastdds/dds/domain/DomainParticipant.hpp>
 #include <fastdds/dds/publisher/DataWriter.hpp>

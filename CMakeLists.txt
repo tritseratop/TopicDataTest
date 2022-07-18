@@ -8,7 +8,7 @@ project ("TopicDataTest")
 set(CMAKE_CXX_STANDARD 17)
 
 # Include sub-projects.
-add_subdirectory("DdsWsGatewayService")
+add_subdirectory("DdsWsGateway")
 
 message(STATUS "Configuring PublisherProject...")
 if(NOT fastcdr_FOUND)

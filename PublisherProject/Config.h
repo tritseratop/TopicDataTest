@@ -1,7 +1,7 @@
 #ifndef DDS_PUB_CONFIG_H_
 #define DDS_PUB_CONFIG_H_
 
-#include "DdsWsGatewayService/Utilities/Dds/Config.h"
+#include "DdsWsGateway/Utilities/Dds/Config.h"
 
 #include <cstdint>
 #include <string>

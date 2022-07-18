@@ -1,6 +1,6 @@
 #include "PublisherProject/Factory.h"
 
-#include "DdsWsGatewayService/Utilities/Dds/TestUtility.h"
+#include "DdsWsGateway/Utilities/Dds/TestUtility.h"
 
 namespace scada_ate::dds::publisher
 {

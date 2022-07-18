@@ -1,8 +1,8 @@
 #ifndef WSListener_hpp
 #define WSListener_hpp
 
-#include "DdsWsGatewayService/Utilities/Common/PackageAnalyser.h"
-#include "DdsWsGatewayService/Utilities/Ws/Callbacks.h"
+#include "DdsWsGateway/Utilities/Common/PackageAnalyser.h"
+#include "DdsWsGateway/Utilities/Ws/Callbacks.h"
 
 #include "oatpp-websocket/AsyncWebSocket.hpp"
 #include "oatpp-websocket/ConnectionHandler.hpp"

@@ -2,13 +2,13 @@
 
 #include "PublisherProject/Service.h"
 
-#include "DdsWsGatewayService/Lib/Common/Notifier.h"
-#include "DdsWsGatewayService/Lib/DdsService/Service.h"
-#include "DdsWsGatewayService/Lib/WsService/Group.h"
-#include "DdsWsGatewayService/Utilities/Common/PackageAnalyser.h"
-#include "DdsWsGatewayService/Utilities/Common/nlohmann/json.hpp"
-#include "DdsWsGatewayService/Utilities/Dds/TestUtility.h"
-#include "DdsWsGatewayService/Utilities/Ws/TestUtility.h"
+#include "DdsWsGateway/Lib/Common/Notifier.h"
+#include "DdsWsGateway/Lib/DdsService/Service.h"
+#include "DdsWsGateway/Lib/WsService/Group.h"
+#include "DdsWsGateway/Utilities/Common/PackageAnalyser.h"
+#include "DdsWsGateway/Utilities/Common/nlohmann/json.hpp"
+#include "DdsWsGateway/Utilities/Dds/TestUtility.h"
+#include "DdsWsGateway/Utilities/Ws/TestUtility.h"
 
 #include "oatpp/parser/json/Beautifier.hpp"
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"

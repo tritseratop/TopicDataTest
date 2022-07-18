@@ -1,7 +1,7 @@
 #ifndef AppComponent_hpp
 #define AppComponent_hpp
 
-#include "DdsWsGatewayService/Utilities/Ws/Config.h"
+#include "DdsWsGateway/Utilities/Ws/Config.h"
 
 #include "oatpp/core/async/Executor.hpp"
 #include "oatpp/core/macro/component.hpp"

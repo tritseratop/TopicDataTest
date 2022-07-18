@@ -1,7 +1,7 @@
 #ifndef UTILITIES_H_
 #define UTILITIES_H_
 
-#include "DdsWsGatewayService/Utilities/Ws/Callbacks.h"
+#include "DdsWsGateway/Utilities/Ws/Callbacks.h"
 
 namespace scada_ate
 {
