@@ -7,9 +7,7 @@
 
 namespace scada_ate::dds
 {
-using BeforeTopicSend = std::function<bool(eprosima::fastdds::dds::DataWriter*)>;
-
-using BeforeTopicSendData = std::function<void(void*)>;
+using BeforeTopicSend = std::function<void(void*)>;
 
 using OnTopicReceived = std::function<void(std::shared_ptr<void>)>;
 } // namespace scada_ate::dds

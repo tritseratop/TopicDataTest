@@ -30,7 +30,6 @@ public:
 	virtual void run() = 0;
 
 	virtual void testRun(BeforeTopicSend&) = 0;
-	virtual void testRun(BeforeTopicSendData&) = 0;
 
 	virtual void setData() = 0;
 	virtual void setData(void* data) = 0;
@@ -145,19 +144,6 @@ public:
 		uint32_t samples_sent = 0;
 		while (!stop_ && samples_sent < config_.samples)
 		{
-			if (testPublish(before_topic_send, &listener_))
-			{
-				samples_sent++;
-			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(config_.sleep));
-		}
-	}
-
-	void testRun(BeforeTopicSendData& before_topic_send) override
-	{
-		uint32_t samples_sent = 0;
-		while (!stop_ && samples_sent < config_.samples)
-		{
 			if (testPublish(before_topic_send, writer_, &listener_))
 			{
 				samples_sent++;
@@ -247,17 +233,7 @@ private:
 		return false;
 	}
 
-	bool testPublish(BeforeTopicSend& before_topic_send, const DDSDataListener* listener)
-	{
-		//std::lock_guard<std::mutex> guard(std::mutex());
-		if (listener != nullptr && listener->first_connected_)
-		{
-			return before_topic_send(writer_);
-		}
-		return false;
-	}
-
-	bool testPublish(BeforeTopicSendData& before_topic_send,
+	bool testPublish(BeforeTopicSend& before_topic_send,
 					 eprosima::fastdds::dds::DataWriter* writer,
 					 const DDSDataListener* listener)
 	{

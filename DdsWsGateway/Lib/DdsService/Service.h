@@ -20,16 +20,16 @@ namespace scada_ate::dds::subscriber
 class Service
 {
 public:
-	Service(const ParticipantConfig<Config>& config, std::shared_ptr<DataCacher> cacher);
+	Service(const ParticipantConfig<Config>& config);
 	virtual ~Service();
 
-	bool initSubscribers();
+	bool initSubscribers(std::unordered_map<CacheId, std::shared_ptr<void>> cachers);
 
 private:
 	bool initParticipant();
 	eprosima::fastdds::dds::DomainParticipantQos getParticipantQos();
 
-	bool initSubscriber(const Config& config);
+	bool initSubscriber(const Config& config, std::shared_ptr<void> cacher);
 	void deleteSubscribers();
 
 public:
@@ -55,7 +55,6 @@ private:
 	Factory factory_;
 	std::vector<AbstractSubscriber*> subscribers_;
 
-	std::shared_ptr<DataCacher> cacher_;
 	ConfigSubscriber* config_subscriber_;
 
 	PackageAnalyser* analyser_;

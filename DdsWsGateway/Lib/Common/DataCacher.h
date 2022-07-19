@@ -53,7 +53,7 @@ private:
 class AlarmCacher : public Cacher
 {
 public:
-	AlarmCacher(size_t depth, dds::MappingInfo mapping_info_);
+	AlarmCacher(size_t depth);
 
 	void cache(DDSAlarm data, const dds::MappingInfo& mapping);
 	void cache(const DDSAlarmEx& data, const dds::MappingInfo& mapping);

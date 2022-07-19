@@ -7,6 +7,7 @@
 
 namespace scada_ate::dds::subscriber
 {
+using CacheId = uint32_t;
 struct Config
 {
 	int16_t id_map = 0;
@@ -18,6 +19,8 @@ struct Config
 	int64_t period = 1000;
 
 	MappingInfo mapping;
+	CacheId cache_id;
+	size_t cache_depth;
 
 	friend bool operator==(const Config& lhs, const Config& rhs);
 };

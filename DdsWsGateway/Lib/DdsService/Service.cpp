@@ -16,10 +16,9 @@ using namespace eprosima::fastdds;
 using namespace eprosima::fastdds::dds;
 using eprosima::fastrtps::types::ReturnCode_t;
 
-Service::Service(const ParticipantConfig<Config>& config, std::shared_ptr<DataCacher> cacher)
+Service::Service(const ParticipantConfig<Config>& config)
 	: config_(config)
 	, participant_(nullptr)
-	, cacher_(cacher)
 	, config_subscriber_(nullptr)
 	, stop_(false)
 {
@@ -45,7 +44,7 @@ Service::~Service()
 	}
 }
 
-bool Service::initSubscribers()
+bool Service::initSubscribers(std::unordered_map<CacheId, std::shared_ptr<void>> cachers)
 {
 	setVectorSizesInDataTopic();
 	initParticipant();
@@ -54,7 +53,7 @@ bool Service::initSubscribers()
 	{
 		for (const auto& config : config_.configs)
 		{
-			initSubscriber(config);
+			initSubscriber(config, cachers.at(config.cache_id));
 		}
 	}
 	else
@@ -139,10 +138,10 @@ DomainParticipantQos Service::getParticipantQos()
 	return qos;
 }
 
-bool Service::initSubscriber(const Config& config)
+bool Service::initSubscriber(const Config& config, std::shared_ptr<void> cacher)
 {
 	// TODO: узнать че менять в SUBSCRIBER_QOS_DEFAULT
-	AbstractSubscriber* sub = factory_.createSubscriber(participant_, config, cacher_);
+	AbstractSubscriber* sub = factory_.createSubscriber(participant_, config, cacher);
 	if (sub == nullptr)
 	{
 		return false;
@@ -205,7 +204,7 @@ void Service::changeSubscribersConfig(const ParticipantConfig<Config>& config)
 		// TODO сравнение параметров
 		config_ = config;
 		deleteSubscribers();
-		initSubscribers();
+		//initSubscribers();
 	}
 }
 

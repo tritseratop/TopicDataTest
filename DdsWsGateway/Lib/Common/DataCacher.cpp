@@ -81,7 +81,7 @@ std::deque<MediateDataDto> DataCacher::getDataCacheCopy() const
 	return data_cache_;
 }
 
-AlarmCacher::AlarmCacher(size_t depth, MappingInfo mapping_info)
+AlarmCacher::AlarmCacher(size_t depth)
 	: depth_(depth)
 { }
 

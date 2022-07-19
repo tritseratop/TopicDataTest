@@ -242,7 +242,7 @@ void Service::testRunPublishers(BeforeTopicSend& before_topic_send)
 	}
 }
 
-void Service::testRunPublishers(std::vector<BeforeTopicSendData>& before_topic_send)
+void Service::testRunPublishers(std::vector<BeforeTopicSend>& before_topic_send)
 {
 	std::vector<std::thread> threads;
 	for (size_t i = 0; i < publishers_.size(); ++i)

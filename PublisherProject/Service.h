@@ -30,7 +30,7 @@ public:
 	bool initPublishers();
 	void runPublishers();
 	void testRunPublishers(BeforeTopicSend&);
-	void testRunPublishers(std::vector<BeforeTopicSendData>&);
+	void testRunPublishers(std::vector<BeforeTopicSend>&);
 	void changeSubsConfig(const ParticipantConfig<Config>& config);
 	void setData();
 	void setDdsData(DDSData* data);

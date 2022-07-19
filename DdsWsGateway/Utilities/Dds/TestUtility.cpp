@@ -111,6 +111,85 @@ DDSDataEx getDdsDataEx(const VectorsForData& vectors, const MappingInfo& tag_inf
 	return data;
 }
 
+template<class T>
+std::vector<T> getDdsSets(size_t vector_size, std::function<T()> getter)
+{
+	std::vector<T> result;
+	result.reserve(vector_size);
+	for (size_t i = 0; i < vector_size; ++i)
+	{
+		result.push_back(getter());
+		result.back().time_service(i);
+	}
+	return result;
+}
+
+template<class T>
+std::vector<std::vector<T>> getVectorOfDdsSets(size_t vector_size,
+											   size_t sets_size,
+											   std::function<T()> getter)
+{
+	std::vector<std::vector<T>> result(vector_size);
+	int64_t digit = 0;
+	for (auto& data_samples : result)
+	{
+		++digit;
+		for (size_t i = 0; i < sets_size; ++i)
+		{
+			data_samples.push_back(getter());
+			data_samples.back().time_service(digit * sets_size * 10 + i);
+		}
+	}
+	return result;
+}
+
+DdsDataSets getDdsDataSets(size_t vector_size, size_t sequences_size, size_t char_size)
+{
+	std::vector<DDSData> result = getDdsSets<DDSData>(vector_size, [sequences_size, char_size]() {
+		return getDdsData(sequences_size, char_size);
+	});
+	return result;
+}
+
+std::vector<DdsDataSets> getVectorOfDdsDataSets(size_t vector_size,
+												size_t sets_size,
+												size_t sequences_size,
+												size_t char_size)
+{
+	std::vector<DdsDataSets> result = getVectorOfDdsSets<DDSData>(
+		vector_size, sets_size, [sequences_size, char_size]() {
+			return getDdsData(sequences_size, char_size);
+		});
+	return result;
+}
+
+DdsDataExSets getDdsDataExSets(size_t vector_size,
+							   size_t sequences_size,
+							   size_t char_size,
+							   const MappingInfo& info)
+{
+	std::vector<DDSDataEx> result = getDdsSets<DDSDataEx>(
+		vector_size, [sequences_size, char_size, &info]() {
+			auto vectors = VectorsForData(sequences_size, char_size);
+			return getDdsDataEx(vectors, info);
+		});
+	return result;
+}
+
+std::vector<DdsDataExSets> getVectorOfDdsDataExSets(size_t vector_size,
+													size_t sets_size,
+													size_t sequences_size,
+													size_t char_size,
+													const MappingInfo& info)
+{
+	std::vector<DdsDataExSets> result = getVectorOfDdsSets<DDSDataEx>(
+		vector_size, sets_size, [sequences_size, char_size, &info]() {
+			auto vectors = VectorsForData(sequences_size, char_size);
+			return getDdsDataEx(vectors, info);
+		});
+	return result;
+}
+
 DataUnion getDataUnion(size_t size, size_t char_size)
 {
 	auto vectors = VectorsForData(size, char_size);
@@ -357,6 +436,26 @@ std::pair<MappingInfo, MappingInfo> divideMappingInfoToTwo(const MappingInfo& in
 	}
 
 	return {first, second};
+}
+
+template<>
+void sortByTimeService(std::vector<MediateDataDto>& vector_of_datasets)
+{
+	std::sort(vector_of_datasets.begin(),
+			  vector_of_datasets.end(),
+			  [](const MediateDataDto& a, const MediateDataDto& b) {
+				  return a.time_service < b.time_service;
+			  });
+}
+
+template<>
+void sortByTimeService(std::vector<MediateAlarmDto>& vector_of_datasets)
+{
+	std::sort(vector_of_datasets.begin(),
+			  vector_of_datasets.end(),
+			  [](const MediateAlarmDto& a, const MediateAlarmDto& b) {
+				  return a.time_service < b.time_service;
+			  });
 }
 
 bool OneTestConditions::operator==(const OneTestConditions& rhs) const
